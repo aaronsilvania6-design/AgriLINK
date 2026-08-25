@@ -16,27 +16,43 @@
     }
 
     body {
-      font-family: Arial, Helvetica, sans-serif;
-      background: #f7f7f7;
+      font-family: Arial, sans-serif;
+      background: #f6f6f6;
       color: #222;
-      min-height: 100vh;
     }
 
-    .app {
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* AUTH */
+
+    .auth-container {
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 25px;
+      padding: 20px;
     }
 
-    .card {
+    .auth-card {
       width: 100%;
       max-width: 430px;
       background: white;
-      border-radius: 24px;
       padding: 30px;
-      box-shadow: 0 15px 45px rgba(0,0,0,.10);
+      border-radius: 22px;
+      box-shadow: 0 15px 40px rgba(0,0,0,.1);
     }
 
     .logo {
@@ -44,99 +60,107 @@
       height: 65px;
       border-radius: 18px;
       background: #c62828;
-      color: white;
       display: flex;
       align-items: center;
       justify-content: center;
+      color: white;
       font-size: 32px;
-      margin: 0 auto 15px;
+      margin: auto;
     }
 
-    h1 {
+    .brand {
       text-align: center;
       color: #c62828;
-      margin-bottom: 5px;
+      margin-top: 12px;
     }
 
     .subtitle {
       text-align: center;
       color: #777;
-      font-size: 14px;
-      margin-bottom: 25px;
+      margin: 6px 0 25px;
     }
 
     .tabs {
       display: flex;
       background: #f1f1f1;
-      border-radius: 12px;
       padding: 4px;
-      margin-bottom: 22px;
+      border-radius: 12px;
+      margin-bottom: 20px;
     }
 
     .tab {
       flex: 1;
       border: none;
-      background: transparent;
-      padding: 12px;
+      padding: 11px;
       border-radius: 9px;
-      cursor: pointer;
+      background: transparent;
       font-weight: bold;
     }
 
     .tab.active {
       background: white;
       color: #c62828;
-      box-shadow: 0 2px 8px rgba(0,0,0,.08);
     }
 
     label {
       display: block;
+      margin: 14px 0 6px;
       font-size: 13px;
       font-weight: bold;
-      margin: 14px 0 7px;
     }
 
-    input, select {
+    input,
+    textarea,
+    select {
       width: 100%;
-      padding: 13px;
       border: 1px solid #ddd;
       border-radius: 10px;
-      font-size: 15px;
+      padding: 13px;
       outline: none;
     }
 
-    input:focus, select:focus {
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
       border-color: #c62828;
     }
 
-    .button {
+    .primary-btn {
       width: 100%;
       border: none;
-      padding: 14px;
-      margin-top: 22px;
-      border-radius: 11px;
       background: #c62828;
       color: white;
-      font-size: 16px;
+      padding: 14px;
+      border-radius: 11px;
       font-weight: bold;
-      cursor: pointer;
+      margin-top: 20px;
     }
 
-    .button:hover {
-      background: #a91f1f;
+    .secondary-btn {
+      border: none;
+      background: #eee;
+      padding: 11px 15px;
+      border-radius: 10px;
+    }
+
+    .danger-btn {
+      border: none;
+      background: #222;
+      color: white;
+      padding: 11px 15px;
+      border-radius: 10px;
     }
 
     .message {
-      margin-top: 15px;
       padding: 12px;
       border-radius: 10px;
-      display: none;
+      margin-top: 15px;
       font-size: 14px;
-    }
-
-    .error {
-      background: #ffebee;
-      color: #b71c1c;
     }
 
     .success {
@@ -144,52 +168,237 @@
       color: #1b5e20;
     }
 
-    .hidden {
-      display: none;
+    .error {
+      background: #ffebee;
+      color: #b71c1c;
     }
 
-    .dashboard {
+    /* APP */
+
+    .app {
+      min-height: 100vh;
+    }
+
+    .navbar {
+      background: white;
+      border-bottom: 1px solid #eee;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-weight: bold;
+      color: #c62828;
+      font-size: 18px;
+    }
+
+    .nav-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: #c62828;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      padding: 25px 20px;
+    }
+
+    .welcome {
+      background: #c62828;
+      color: white;
+      padding: 25px;
+      border-radius: 20px;
+      margin-bottom: 25px;
+    }
+
+    .welcome h1 {
+      margin-bottom: 7px;
+    }
+
+    .role-badge {
+      display: inline-block;
+      margin-top: 10px;
+      background: rgba(255,255,255,.18);
+      padding: 7px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .product-card {
+      background: white;
+      border-radius: 17px;
+      overflow: hidden;
+      border: 1px solid #eee;
+    }
+
+    .product-image {
+      height: 150px;
+      background: #eee;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 45px;
+    }
+
+    .product-content {
+      padding: 16px;
+    }
+
+    .product-content h3 {
+      margin-bottom: 8px;
+    }
+
+    .price {
+      color: #c62828;
+      font-size: 19px;
+      font-weight: bold;
+    }
+
+    .product-location {
+      color: #777;
+      font-size: 13px;
+      margin-top: 7px;
+    }
+
+    .empty {
+      background: white;
+      border: 1px dashed #ccc;
+      padding: 40px 20px;
+      border-radius: 16px;
       text-align: center;
+      color: #777;
     }
 
-    .dashboard h2 {
+    /* MODAL */
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      z-index: 100;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 500px;
+      background: white;
+      border-radius: 20px;
+      padding: 25px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 10px;
     }
 
-    .dashboard p {
-      color: #666;
-      margin-bottom: 20px;
+    .close {
+      border: none;
+      background: #eee;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      font-size: 18px;
     }
 
-    .logout {
-      background: #222;
+    @media (max-width: 600px) {
+
+      .navbar {
+        padding: 12px;
+      }
+
+      .container {
+        padding: 18px 12px;
+      }
+
+      .nav-actions span {
+        display: none;
+      }
+
+      .products {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .product-image {
+        height: 120px;
+      }
+
     }
   </style>
 </head>
 
 <body>
 
-<div class="app">
+<!-- AUTH -->
 
-  <!-- AUTH -->
-  <div class="card" id="authCard">
+<div id="authScreen" class="auth-container">
+
+  <div class="auth-card">
 
     <div class="logo">🌾</div>
 
-    <h1>AgriLink AI</h1>
+    <h1 class="brand">AgriLink AI</h1>
 
     <p class="subtitle">
       Connect. Trade. Grow.
     </p>
 
     <div class="tabs">
-      <button class="tab active" id="loginTab" onclick="showLogin()">
+
+      <button
+        id="loginTab"
+        class="tab active"
+        onclick="showLogin()">
         Login
       </button>
 
-      <button class="tab" id="signupTab" onclick="showSignup()">
+      <button
+        id="signupTab"
+        class="tab"
+        onclick="showSignup()">
         Sign Up
       </button>
+
     </div>
 
     <!-- LOGIN -->
@@ -199,22 +408,20 @@
       <label>Email</label>
 
       <input
-        type="email"
         id="loginEmail"
-        placeholder="you@example.com"
+        type="email"
         required
-      >
+        placeholder="you@example.com">
 
       <label>Password</label>
 
       <input
-        type="password"
         id="loginPassword"
-        placeholder="Your password"
+        type="password"
         required
-      >
+        placeholder="Your password">
 
-      <button class="button" type="submit">
+      <button class="primary-btn">
         Login
       </button>
 
@@ -227,30 +434,26 @@
       <label>Full Name</label>
 
       <input
-        type="text"
         id="signupName"
-        placeholder="Juan Dela Cruz"
         required
-      >
+        placeholder="Juan Dela Cruz">
 
       <label>Email</label>
 
       <input
-        type="email"
         id="signupEmail"
-        placeholder="you@example.com"
+        type="email"
         required
-      >
+        placeholder="you@example.com">
 
       <label>Password</label>
 
       <input
-        type="password"
         id="signupPassword"
-        placeholder="Minimum 8 characters"
+        type="password"
         minlength="8"
         required
-      >
+        placeholder="Minimum 8 characters">
 
       <label>Account Type</label>
 
@@ -270,30 +473,181 @@
 
       </select>
 
-      <button class="button" type="submit">
+      <button class="primary-btn">
         Create Account
       </button>
 
     </form>
 
-    <div id="message" class="message"></div>
+    <div id="authMessage"></div>
 
   </div>
 
+</div>
 
-  <!-- DASHBOARD -->
 
-  <div class="card dashboard hidden" id="dashboard">
+<!-- APPLICATION -->
 
-    <div class="logo">🌾</div>
+<div id="app" class="app hidden">
 
-    <h2>Welcome to AgriLink AI</h2>
+  <nav class="navbar">
 
-    <p id="userInfo"></p>
+    <div class="nav-brand">
 
-    <button class="button logout" onclick="logout()">
-      Logout
-    </button>
+      <div class="nav-logo">🌾</div>
+
+      AgriLink AI
+
+    </div>
+
+    <div class="nav-actions">
+
+      <button
+        class="secondary-btn"
+        onclick="openAddProduct()"
+        id="addProductButton">
+        + Add Product
+      </button>
+
+      <button
+        class="danger-btn"
+        onclick="logout()">
+        Logout
+      </button>
+
+    </div>
+
+  </nav>
+
+
+  <main class="container">
+
+    <section class="welcome">
+
+      <h1>
+        Welcome, <span id="userName">User</span>!
+      </h1>
+
+      <p>
+        Welcome to your agricultural marketplace.
+      </p>
+
+      <div
+        id="roleBadge"
+        class="role-badge">
+      </div>
+
+    </section>
+
+
+    <section>
+
+      <div class="section-title">
+
+        <h2>Marketplace</h2>
+
+        <button
+          class="secondary-btn"
+          onclick="loadProducts()">
+          Refresh
+        </button>
+
+      </div>
+
+
+      <div
+        id="products"
+        class="products">
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+
+<!-- ADD PRODUCT MODAL -->
+
+<div
+  id="productModal"
+  class="modal hidden">
+
+  <div class="modal-card">
+
+    <div class="modal-header">
+
+      <h2>Add Product</h2>
+
+      <button
+        class="close"
+        onclick="closeAddProduct()">
+        ×
+      </button>
+
+    </div>
+
+    <form id="productForm">
+
+      <label>Product Name</label>
+
+      <input
+        id="productName"
+        required
+        placeholder="Fresh Tomatoes">
+
+      <label>Description</label>
+
+      <textarea
+        id="productDescription"
+        placeholder="Describe your product">
+      </textarea>
+
+      <label>Price</label>
+
+      <input
+        id="productPrice"
+        type="number"
+        min="0"
+        step="0.01"
+        required
+        placeholder="80">
+
+      <label>Quantity</label>
+
+      <input
+        id="productQuantity"
+        type="number"
+        min="0"
+        step="0.01"
+        required
+        placeholder="50">
+
+      <label>Unit</label>
+
+      <select id="productUnit">
+
+        <option value="kg">kg</option>
+        <option value="piece">piece</option>
+        <option value="sack">sack</option>
+        <option value="box">box</option>
+        <option value="dozen">dozen</option>
+
+      </select>
+
+      <label>Location</label>
+
+      <input
+        id="productLocation"
+        placeholder="Municipality / Province">
+
+      <button class="primary-btn">
+        Publish Product
+      </button>
+
+      <div id="productMessage"></div>
+
+    </form>
 
   </div>
 
@@ -302,237 +656,582 @@
 
 <script>
 
-  /*
-    IMPORTANT:
-    Replace these two values with your own
-    Supabase Project URL and Publishable Key.
-  */
+const SUPABASE_URL =
+  "PASTE_YOUR_PROJECT_URL_HERE";
 
-  const SUPABASE_URL = "https://ivbqudztsmsylnodydce.supabase.co";
-
-  const SUPABASE_KEY = "sb_publishable_J6ofqkb71svrAJr1-mvFIA_hy3RKHrM";
+const SUPABASE_KEY =
+  "PASTE_YOUR_PUBLISHABLE_KEY_HERE";
 
 
-  const supabaseClient =
-    window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_KEY
-    );
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 
 
-  const loginForm =
-    document.getElementById("loginForm");
-
-  const signupForm =
-    document.getElementById("signupForm");
-
-  const message =
-    document.getElementById("message");
+let currentUser = null;
+let currentProfile = null;
 
 
-  function showMessage(text, type) {
+/* AUTH TABS */
 
-    message.textContent = text;
+function showLogin() {
 
-    message.className =
-      "message " + type;
+  document
+    .getElementById("loginForm")
+    .classList.remove("hidden");
 
-    message.style.display = "block";
-  }
+  document
+    .getElementById("signupForm")
+    .classList.add("hidden");
 
+  document
+    .getElementById("loginTab")
+    .classList.add("active");
 
-  function showLogin() {
+  document
+    .getElementById("signupTab")
+    .classList.remove("active");
 
-    loginForm.classList.remove("hidden");
-
-    signupForm.classList.add("hidden");
-
-    document
-      .getElementById("loginTab")
-      .classList.add("active");
-
-    document
-      .getElementById("signupTab")
-      .classList.remove("active");
-
-    message.style.display = "none";
-  }
+}
 
 
-  function showSignup() {
+function showSignup() {
 
-    loginForm.classList.add("hidden");
+  document
+    .getElementById("loginForm")
+    .classList.add("hidden");
 
-    signupForm.classList.remove("hidden");
+  document
+    .getElementById("signupForm")
+    .classList.remove("hidden");
 
-    document
-      .getElementById("signupTab")
-      .classList.add("active");
+  document
+    .getElementById("signupTab")
+    .classList.add("active");
 
-    document
-      .getElementById("loginTab")
-      .classList.remove("active");
+  document
+    .getElementById("loginTab")
+    .classList.remove("active");
 
-    message.style.display = "none";
-  }
-
-
-  loginForm.addEventListener(
-    "submit",
-    async function(event) {
-
-      event.preventDefault();
-
-      const email =
-        document.getElementById("loginEmail").value.trim();
-
-      const password =
-        document.getElementById("loginPassword").value;
+}
 
 
-      const {
-        data,
-        error
-      } = await supabaseClient.auth.signInWithPassword({
+/* MESSAGE */
+
+function showAuthMessage(text, type) {
+
+  const box =
+    document.getElementById("authMessage");
+
+  box.className =
+    "message " + type;
+
+  box.textContent = text;
+
+}
+
+
+/* LOGIN */
+
+document
+  .getElementById("loginForm")
+  .addEventListener("submit", async (event) => {
+
+    event.preventDefault();
+
+    const email =
+      document
+        .getElementById("loginEmail")
+        .value
+        .trim();
+
+    const password =
+      document
+        .getElementById("loginPassword")
+        .value;
+
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.auth.signInWithPassword({
         email,
         password
       });
 
 
-      if (error) {
+    if (error) {
 
-        showMessage(
-          error.message,
-          "error"
-        );
+      showAuthMessage(
+        error.message,
+        "error"
+      );
 
-        return;
-      }
-
-
-      showDashboard(data.user);
-
+      return;
     }
-  );
 
 
-  signupForm.addEventListener(
-    "submit",
-    async function(event) {
+    await initializeApp(data.user);
 
-      event.preventDefault();
+  });
 
 
-      const name =
-        document.getElementById("signupName").value.trim();
+/* SIGNUP */
 
-      const email =
-        document.getElementById("signupEmail").value.trim();
+document
+  .getElementById("signupForm")
+  .addEventListener("submit", async (event) => {
 
-      const password =
-        document.getElementById("signupPassword").value;
+    event.preventDefault();
 
-      const role =
-        document.getElementById("signupRole").value;
+    const fullName =
+      document
+        .getElementById("signupName")
+        .value
+        .trim();
+
+    const email =
+      document
+        .getElementById("signupEmail")
+        .value
+        .trim();
+
+    const password =
+      document
+        .getElementById("signupPassword")
+        .value;
+
+    const role =
+      document
+        .getElementById("signupRole")
+        .value;
 
 
-      const {
-        data,
-        error
-      } = await supabaseClient.auth.signUp({
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.auth.signUp({
 
-        email: email,
-
-        password: password,
+        email,
+        password,
 
         options: {
           data: {
-            full_name: name,
-            role: role
+            full_name: fullName,
+            role
           }
         }
 
       });
 
 
-      if (error) {
+    if (error) {
 
-        showMessage(
-          error.message,
-          "error"
-        );
-
-        return;
-      }
-
-
-      showMessage(
-        "Account created successfully!",
-        "success"
+      showAuthMessage(
+        error.message,
+        "error"
       );
 
-
-      signupForm.reset();
-
+      return;
     }
-  );
 
 
-  async function showDashboard(user) {
-
-    document
-      .getElementById("authCard")
-      .classList.add("hidden");
-
-    document
-      .getElementById("dashboard")
-      .classList.remove("hidden");
+    showAuthMessage(
+      "Account created successfully. You can now log in.",
+      "success"
+    );
 
 
     document
-      .getElementById("userInfo")
-      .textContent =
-        "Logged in as " + user.email;
+      .getElementById("signupForm")
+      .reset();
+
+  });
+
+
+/* INITIALIZE APP */
+
+async function initializeApp(user) {
+
+  currentUser = user;
+
+
+  const {
+    data: profile,
+    error
+  } =
+    await supabaseClient
+      .from("users")
+      .select("*")
+      .eq("auth_user_id", user.id)
+      .single();
+
+
+  if (error) {
+
+    console.error(error);
+
+    alert(
+      "Your account exists, but your AgriLink profile could not be loaded."
+    );
+
+    return;
+  }
+
+
+  currentProfile = profile;
+
+
+  document
+    .getElementById("authScreen")
+    .classList.add("hidden");
+
+  document
+    .getElementById("app")
+    .classList.remove("hidden");
+
+
+  document
+    .getElementById("userName")
+    .textContent =
+      profile.full_name;
+
+
+  document
+    .getElementById("roleBadge")
+    .textContent =
+      profile.role;
+
+
+  const addButton =
+    document.getElementById("addProductButton");
+
+
+  if (profile.role !== "FARMER") {
+
+    addButton.classList.add("hidden");
+
+  } else {
+
+    addButton.classList.remove("hidden");
 
   }
 
 
-  async function logout() {
+  await loadProducts();
 
-    await supabaseClient.auth.signOut();
+}
 
-    document
-      .getElementById("dashboard")
-      .classList.add("hidden");
 
-    document
-      .getElementById("authCard")
-      .classList.remove("hidden");
+/* PRODUCTS */
 
-    showLogin();
+async function loadProducts() {
 
+  const container =
+    document.getElementById("products");
+
+
+  container.innerHTML =
+    `<div class="empty">
+      Loading products...
+    </div>`;
+
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("products")
+      .select(`
+        id,
+        name,
+        description,
+        price,
+        quantity,
+        unit,
+        location,
+        image_url,
+        status
+      `)
+      .eq("status", "ACTIVE")
+      .order("created_at", {
+        ascending: false
+      });
+
+
+  if (error) {
+
+    console.error(error);
+
+    container.innerHTML =
+      `<div class="empty">
+        Unable to load products.
+      </div>`;
+
+    return;
   }
 
 
-  async function checkSession() {
+  if (!data || data.length === 0) {
+
+    container.innerHTML =
+      `<div class="empty">
+        <h3>No products yet</h3>
+        <p>
+          Be the first farmer to publish a product.
+        </p>
+      </div>`;
+
+    return;
+  }
+
+
+  container.innerHTML =
+    data
+      .map(product => `
+
+        <div class="product-card">
+
+          <div class="product-image">
+            🌱
+          </div>
+
+          <div class="product-content">
+
+            <h3>
+              ${escapeHtml(product.name)}
+            </h3>
+
+            <div class="price">
+              ₱${Number(product.price).toLocaleString()}
+              /${escapeHtml(product.unit)}
+            </div>
+
+            <p>
+              ${escapeHtml(
+                product.description || "No description"
+              )}
+            </p>
+
+            <div class="product-location">
+              📍
+              ${escapeHtml(
+                product.location || "Location not specified"
+              )}
+            </div>
+
+          </div>
+
+        </div>
+
+      `)
+      .join("");
+
+}
+
+
+/* ADD PRODUCT */
+
+function openAddProduct() {
+
+  document
+    .getElementById("productModal")
+    .classList.remove("hidden");
+
+}
+
+
+function closeAddProduct() {
+
+  document
+    .getElementById("productModal")
+    .classList.add("hidden");
+
+}
+
+
+document
+  .getElementById("productForm")
+  .addEventListener("submit", async (event) => {
+
+    event.preventDefault();
+
+
+    if (
+      !currentUser ||
+      !currentProfile ||
+      currentProfile.role !== "FARMER"
+    ) {
+
+      alert(
+        "Only farmer accounts can publish products."
+      );
+
+      return;
+    }
+
+
+    const product = {
+
+      seller_id: currentProfile.id,
+
+      name:
+        document
+          .getElementById("productName")
+          .value
+          .trim(),
+
+      description:
+        document
+          .getElementById("productDescription")
+          .value
+          .trim(),
+
+      price:
+        Number(
+          document
+            .getElementById("productPrice")
+            .value
+        ),
+
+      quantity:
+        Number(
+          document
+            .getElementById("productQuantity")
+            .value
+        ),
+
+      unit:
+        document
+          .getElementById("productUnit")
+          .value,
+
+      location:
+        document
+          .getElementById("productLocation")
+          .value
+          .trim(),
+
+      status: "ACTIVE"
+
+    };
+
 
     const {
-      data
-    } = await supabaseClient.auth.getSession();
+      error
+    } =
+      await supabaseClient
+        .from("products")
+        .insert(product);
 
 
-    if (data.session) {
+    if (error) {
 
-      showDashboard(
-        data.session.user
-      );
+      console.error(error);
 
+      document
+        .getElementById("productMessage")
+        .innerHTML =
+          `<div class="message error">
+            ${escapeHtml(error.message)}
+          </div>`;
+
+      return;
     }
+
+
+    document
+      .getElementById("productMessage")
+      .innerHTML =
+        `<div class="message success">
+          Product published successfully!
+        </div>`;
+
+
+    document
+      .getElementById("productForm")
+      .reset();
+
+
+    await loadProducts();
+
+
+    setTimeout(() => {
+
+      closeAddProduct();
+
+      document
+        .getElementById("productMessage")
+        .innerHTML = "";
+
+    }, 1000);
+
+  });
+
+
+/* LOGOUT */
+
+async function logout() {
+
+  await supabaseClient.auth.signOut();
+
+  currentUser = null;
+  currentProfile = null;
+
+  document
+    .getElementById("app")
+    .classList.add("hidden");
+
+  document
+    .getElementById("authScreen")
+    .classList.remove("hidden");
+
+  showLogin();
+
+}
+
+
+/* SECURITY */
+
+function escapeHtml(value) {
+
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+
+}
+
+
+/* SESSION CHECK */
+
+async function checkSession() {
+
+  const {
+    data
+  } =
+    await supabaseClient.auth.getSession();
+
+
+  if (data.session) {
+
+    await initializeApp(
+      data.session.user
+    );
 
   }
 
+}
 
-  checkSession();
+
+checkSession();
 
 </script>
 
