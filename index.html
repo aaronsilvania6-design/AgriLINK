@@ -1801,7 +1801,9 @@ Cancel Order
 }
 
 
-/* ================= BUY PRODUCT ================= */
+/* =========================================================
+   BUY PRODUCT
+   ========================================================= */
 
 async function buyProduct(productId){
 
@@ -1815,6 +1817,9 @@ return;
 
 }
 
+
+/* ================= GET PRODUCT ================= */
+
 const {data:product,error} =
 await supabaseClient
 .from("products")
@@ -1824,6 +1829,8 @@ await supabaseClient
 
 if(error || !product){
 
+console.error(error);
+
 alert(
 "Product could not be found."
 );
@@ -1831,6 +1838,9 @@ alert(
 return;
 
 }
+
+
+/* ================= OWN PRODUCT CHECK ================= */
 
 if(product.seller_id === currentProfile.id){
 
@@ -1841,6 +1851,9 @@ alert(
 return;
 
 }
+
+
+/* ================= QUANTITY ================= */
 
 const quantityText =
 prompt(
@@ -1888,9 +1901,107 @@ Number(product.price) *
 quantity;
 
 
-/* ================= CREATE ORDER ================= */
+/* =========================================================
+   CREATE / GET CONVERSATION BEFORE ORDER
+   ========================================================= */
 
-const {data:createdOrder,error:orderError} =
+let conversation = null;
+
+const {
+data:existingConversation,
+error:conversationFindError
+} =
+await supabaseClient
+.from("conversations")
+.select("*")
+.eq(
+"buyer_id",
+currentProfile.id
+)
+.eq(
+"seller_id",
+product.seller_id
+)
+.eq(
+"product_id",
+product.id
+)
+.maybeSingle();
+
+if(conversationFindError){
+
+console.error(
+"Conversation lookup error:",
+conversationFindError
+);
+
+alert(
+"Could not prepare the chat conversation.\n\n" +
+conversationFindError.message
+);
+
+return;
+
+}
+
+if(existingConversation){
+
+conversation =
+existingConversation;
+
+}else{
+
+const {
+data:newConversation,
+error:conversationCreateError
+} =
+await supabaseClient
+.from("conversations")
+.insert({
+
+buyer_id:
+currentProfile.id,
+
+seller_id:
+product.seller_id,
+
+product_id:
+product.id
+
+})
+.select()
+.single();
+
+if(conversationCreateError){
+
+console.error(
+"Conversation creation error:",
+conversationCreateError
+);
+
+alert(
+"Could not create the seller conversation.\n\n" +
+conversationCreateError.message
+);
+
+return;
+
+}
+
+conversation =
+newConversation;
+
+}
+
+
+/* =========================================================
+   CREATE ORDER
+   ========================================================= */
+
+const {
+data:order,
+error:orderError
+} =
 await supabaseClient
 .from("orders")
 .insert({
@@ -1933,91 +2044,9 @@ return;
 }
 
 
-/* =====================================================
-   AUTOMATICALLY CREATE / FIND CONVERSATION
-   Buyer can now chat with the farmer without
-   pressing the Chat button on the product.
-===================================================== */
-
-let conversation = null;
-
-
-/* First check if this exact buyer + seller + product
-   conversation already exists */
-
-const {data:existingConversation,error:conversationFindError} =
-await supabaseClient
-.from("conversations")
-.select("*")
-.eq(
-"buyer_id",
-currentProfile.id
-)
-.eq(
-"seller_id",
-product.seller_id
-)
-.eq(
-"product_id",
-product.id
-)
-.maybeSingle();
-
-if(conversationFindError){
-
-console.error(
-"Conversation lookup error:",
-conversationFindError
-);
-
-}else{
-
-conversation =
-existingConversation;
-
-}
-
-
-/* If conversation doesn't exist, create it */
-
-if(!conversation){
-
-const {data:newConversation,error:conversationCreateError} =
-await supabaseClient
-.from("conversations")
-.insert({
-
-buyer_id:
-currentProfile.id,
-
-seller_id:
-product.seller_id,
-
-product_id:
-product.id
-
-})
-.select()
-.single();
-
-if(conversationCreateError){
-
-console.error(
-"Conversation creation error:",
-conversationCreateError
-);
-
-}else{
-
-conversation =
-newConversation;
-
-}
-
-}
-
-
-/* ================= UPDATE PRODUCT ================= */
+/* =========================================================
+   UPDATE PRODUCT QUANTITY
+   ========================================================= */
 
 const remaining =
 Number(product.quantity) -
@@ -2046,15 +2075,82 @@ product.id
 
 if(updateError){
 
-console.error(updateError);
+console.error(
+"Product update error:",
+updateError
+);
 
 }
 
 
-/* ================= SUCCESS ================= */
+/* =========================================================
+   AUTOMATIC INITIAL MESSAGE
+   ========================================================= */
+
+const {
+data:existingMessages,
+error:messageCheckError
+} =
+await supabaseClient
+.from("messages")
+.select("id")
+.eq(
+"conversation_id",
+conversation.id
+)
+.limit(1);
+
+if(messageCheckError){
+
+console.error(
+"Message check error:",
+messageCheckError
+);
+
+}
+else if(
+!existingMessages ||
+existingMessages.length === 0
+){
+
+const {
+error:initialMessageError
+} =
+await supabaseClient
+.from("messages")
+.insert({
+
+conversation_id:
+conversation.id,
+
+sender_id:
+currentProfile.id,
+
+content:
+`Hi! I just placed an order for your ${product.name}.`
+
+});
+
+if(initialMessageError){
+
+console.error(
+"Initial message error:",
+initialMessageError
+);
+
+}
+
+}
+
+
+/* =========================================================
+   SUCCESS
+   ========================================================= */
 
 alert(
-"Order created successfully! You can now chat with the farmer from 💬 Chat."
+"Order created successfully!\n\n" +
+"The seller conversation has also been saved. " +
+"You can open it from 💬 Chat without pressing Chat on the product."
 );
 
 await loadProducts();
@@ -2165,7 +2261,10 @@ return;
 
 }
 
-const {data:existing,error:findError} =
+const {
+data:existing,
+error:findError
+} =
 await supabaseClient
 .from("conversations")
 .select("*")
@@ -2200,7 +2299,10 @@ existing;
 
 if(!conversation){
 
-const {data:newConversation,error} =
+const {
+data:newConversation,
+error
+} =
 await supabaseClient
 .from("conversations")
 .insert({
@@ -2252,6 +2354,12 @@ conversation
 
 async function loadConversations(){
 
+if(!currentProfile){
+
+return;
+
+}
+
 const list =
 document.getElementById(
 "conversationList"
@@ -2262,7 +2370,10 @@ list.innerHTML =
 Loading...
 </div>`;
 
-const {data,error} =
+const {
+data,
+error
+} =
 await supabaseClient
 .from("conversations")
 .select("*")
@@ -2273,7 +2384,8 @@ await supabaseClient
 "created_at",
 {
 ascending:false
-});
+}
+);
 
 if(error){
 
@@ -2430,7 +2542,10 @@ messagesBox.innerHTML =
 Loading messages...
 </div>`;
 
-const {data,error} =
+const {
+data,
+error
+} =
 await supabaseClient
 .from("messages")
 .select("*")
@@ -2688,7 +2803,9 @@ return;
 
 input.disabled = true;
 
-const {error} =
+const {
+error
+} =
 await supabaseClient
 .from("messages")
 .insert({
@@ -2699,11 +2816,6 @@ currentConversation.id,
 sender_id:
 currentProfile.id,
 
-/*
-IMPORTANT:
-Your database uses "content",
-not "message".
-*/
 content:
 text
 
