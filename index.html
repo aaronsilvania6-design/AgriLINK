@@ -1351,14 +1351,6 @@ addButton.classList.remove("hidden");
 await loadProducts();
 await loadOrders();
 
-/*
-IMPORTANT:
-Existing conversations are loaded
-automatically after login.
-*/
-
-await loadConversations();
-
 }
 
 
@@ -1895,7 +1887,10 @@ const total =
 Number(product.price) *
 quantity;
 
-const {error:orderError} =
+
+/* ================= CREATE ORDER ================= */
+
+const {data:createdOrder,error:orderError} =
 await supabaseClient
 .from("orders")
 .insert({
@@ -1921,7 +1916,9 @@ total,
 status:
 "PENDING"
 
-});
+})
+.select()
+.single();
 
 if(orderError){
 
@@ -1934,6 +1931,93 @@ orderError.message
 return;
 
 }
+
+
+/* =====================================================
+   AUTOMATICALLY CREATE / FIND CONVERSATION
+   Buyer can now chat with the farmer without
+   pressing the Chat button on the product.
+===================================================== */
+
+let conversation = null;
+
+
+/* First check if this exact buyer + seller + product
+   conversation already exists */
+
+const {data:existingConversation,error:conversationFindError} =
+await supabaseClient
+.from("conversations")
+.select("*")
+.eq(
+"buyer_id",
+currentProfile.id
+)
+.eq(
+"seller_id",
+product.seller_id
+)
+.eq(
+"product_id",
+product.id
+)
+.maybeSingle();
+
+if(conversationFindError){
+
+console.error(
+"Conversation lookup error:",
+conversationFindError
+);
+
+}else{
+
+conversation =
+existingConversation;
+
+}
+
+
+/* If conversation doesn't exist, create it */
+
+if(!conversation){
+
+const {data:newConversation,error:conversationCreateError} =
+await supabaseClient
+.from("conversations")
+.insert({
+
+buyer_id:
+currentProfile.id,
+
+seller_id:
+product.seller_id,
+
+product_id:
+product.id
+
+})
+.select()
+.single();
+
+if(conversationCreateError){
+
+console.error(
+"Conversation creation error:",
+conversationCreateError
+);
+
+}else{
+
+conversation =
+newConversation;
+
+}
+
+}
+
+
+/* ================= UPDATE PRODUCT ================= */
 
 const remaining =
 Number(product.quantity) -
@@ -1966,8 +2050,11 @@ console.error(updateError);
 
 }
 
+
+/* ================= SUCCESS ================= */
+
 alert(
-"Order created successfully!"
+"Order created successfully! You can now chat with the farmer from 💬 Chat."
 );
 
 await loadProducts();
@@ -2078,12 +2165,6 @@ return;
 
 }
 
-
-/*
-FIRST:
-Check whether this conversation already exists.
-*/
-
 const {data:existing,error:findError} =
 await supabaseClient
 .from("conversations")
@@ -2116,12 +2197,6 @@ return;
 
 let conversation =
 existing;
-
-
-/*
-Only create a conversation if
-there is no existing one.
-*/
 
 if(!conversation){
 
@@ -2160,13 +2235,6 @@ newConversation;
 
 }
 
-
-/*
-Refresh saved conversations.
-*/
-
-await loadConversations();
-
 openChat();
 
 setTimeout(()=>{
@@ -2184,33 +2252,15 @@ conversation
 
 async function loadConversations(){
 
-if(!currentProfile){
-
-return;
-
-}
-
 const list =
 document.getElementById(
 "conversationList"
 );
 
-if(!list){
-
-return;
-
-}
-
 list.innerHTML =
 `<div class="chat-empty">
 Loading...
 </div>`;
-
-
-/*
-Get all conversations for
-the currently logged-in profile.
-*/
 
 const {data,error} =
 await supabaseClient
@@ -2223,8 +2273,7 @@ await supabaseClient
 "created_at",
 {
 ascending:false
-}
-);
+});
 
 if(error){
 
@@ -2254,11 +2303,6 @@ return;
 }
 
 list.innerHTML = "";
-
-
-/*
-Show all saved conversations.
-*/
 
 for(
 const conversation of data
@@ -2386,13 +2430,6 @@ messagesBox.innerHTML =
 Loading messages...
 </div>`;
 
-
-/*
-IMPORTANT:
-This reads messages from the database,
-not from browser memory.
-*/
-
 const {data,error} =
 await supabaseClient
 .from("messages")
@@ -2517,20 +2554,12 @@ Delete
 
 function subscribeToMessages(){
 
-if(!currentConversation){
-
-return;
-
-}
-
 if(messageChannel){
 
 supabaseClient
 .removeChannel(
 messageChannel
 );
-
-messageChannel = null;
 
 }
 
@@ -2659,12 +2688,7 @@ return;
 
 input.disabled = true;
 
-
-/*
-SAVE MESSAGE DIRECTLY TO SUPABASE.
-*/
-
-const {data:savedMessage,error} =
+const {error} =
 await supabaseClient
 .from("messages")
 .insert({
@@ -2675,12 +2699,15 @@ currentConversation.id,
 sender_id:
 currentProfile.id,
 
+/*
+IMPORTANT:
+Your database uses "content",
+not "message".
+*/
 content:
 text
 
-})
-.select()
-.single();
+});
 
 input.disabled = false;
 
@@ -2696,55 +2723,7 @@ return;
 
 }
 
-
-/*
-Only clear the input after
-successful database save.
-*/
-
 input.value = "";
-
-
-/*
-Fallback display in case realtime
-takes a moment to arrive.
-*/
-
-const box =
-document.getElementById(
-"chatMessages"
-);
-
-const empty =
-box.querySelector(
-".chat-empty"
-);
-
-if(empty){
-
-box.innerHTML = "";
-
-}
-
-if(
-savedMessage &&
-!document.getElementById(
-"message-" +
-savedMessage.id
-)
-){
-
-box.insertAdjacentHTML(
-"beforeend",
-renderMessage(
-savedMessage
-)
-);
-
-}
-
-box.scrollTop =
-box.scrollHeight;
 
 });
 
@@ -2783,25 +2762,6 @@ if(error){
 alert(
 error.message
 );
-
-return;
-
-}
-
-
-/*
-Remove from screen immediately.
-*/
-
-const element =
-document.getElementById(
-"message-" +
-messageId
-);
-
-if(element){
-
-element.remove();
 
 }
 
