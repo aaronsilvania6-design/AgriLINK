@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>AgriLink AI</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f7f7f7;
+      color: #222;
+      min-height: 100vh;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 25px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 430px;
+      background: white;
+      border-radius: 24px;
+      padding: 30px;
+      box-shadow: 0 15px 45px rgba(0,0,0,.10);
+    }
+
+    .logo {
+      width: 65px;
+      height: 65px;
+      border-radius: 18px;
+      background: #c62828;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin: 0 auto 15px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #c62828;
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #777;
+      font-size: 14px;
+      margin-bottom: 25px;
+    }
+
+    .tabs {
+      display: flex;
+      background: #f1f1f1;
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 22px;
+    }
+
+    .tab {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 12px;
+      border-radius: 9px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .tab.active {
+      background: white;
+      color: #c62828;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: bold;
+      margin: 14px 0 7px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 15px;
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: #c62828;
+    }
+
+    .button {
+      width: 100%;
+      border: none;
+      padding: 14px;
+      margin-top: 22px;
+      border-radius: 11px;
+      background: #c62828;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .button:hover {
+      background: #a91f1f;
+    }
+
+    .message {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 10px;
+      display: none;
+      font-size: 14px;
+    }
+
+    .error {
+      background: #ffebee;
+      color: #b71c1c;
+    }
+
+    .success {
+      background: #e8f5e9;
+      color: #1b5e20;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .dashboard {
+      text-align: center;
+    }
+
+    .dashboard h2 {
+      margin-bottom: 10px;
+    }
+
+    .dashboard p {
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    .logout {
+      background: #222;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- AUTH -->
+  <div class="card" id="authCard">
+
+    <div class="logo">🌾</div>
+
+    <h1>AgriLink AI</h1>
+
+    <p class="subtitle">
+      Connect. Trade. Grow.
+    </p>
+
+    <div class="tabs">
+      <button class="tab active" id="loginTab" onclick="showLogin()">
+        Login
+      </button>
+
+      <button class="tab" id="signupTab" onclick="showSignup()">
+        Sign Up
+      </button>
+    </div>
+
+    <!-- LOGIN -->
+
+    <form id="loginForm">
+
+      <label>Email</label>
+
+      <input
+        type="email"
+        id="loginEmail"
+        placeholder="you@example.com"
+        required
+      >
+
+      <label>Password</label>
+
+      <input
+        type="password"
+        id="loginPassword"
+        placeholder="Your password"
+        required
+      >
+
+      <button class="button" type="submit">
+        Login
+      </button>
+
+    </form>
+
+    <!-- SIGNUP -->
+
+    <form id="signupForm" class="hidden">
+
+      <label>Full Name</label>
+
+      <input
+        type="text"
+        id="signupName"
+        placeholder="Juan Dela Cruz"
+        required
+      >
+
+      <label>Email</label>
+
+      <input
+        type="email"
+        id="signupEmail"
+        placeholder="you@example.com"
+        required
+      >
+
+      <label>Password</label>
+
+      <input
+        type="password"
+        id="signupPassword"
+        placeholder="Minimum 8 characters"
+        minlength="8"
+        required
+      >
+
+      <label>Account Type</label>
+
+      <select id="signupRole">
+
+        <option value="BUYER">
+          Buyer
+        </option>
+
+        <option value="FARMER">
+          Farmer
+        </option>
+
+        <option value="ORGANIZATION">
+          Organization
+        </option>
+
+      </select>
+
+      <button class="button" type="submit">
+        Create Account
+      </button>
+
+    </form>
+
+    <div id="message" class="message"></div>
+
+  </div>
+
+
+  <!-- DASHBOARD -->
+
+  <div class="card dashboard hidden" id="dashboard">
+
+    <div class="logo">🌾</div>
+
+    <h2>Welcome to AgriLink AI</h2>
+
+    <p id="userInfo"></p>
+
+    <button class="button logout" onclick="logout()">
+      Logout
+    </button>
+
+  </div>
+
+</div>
+
+
+<script>
+
+  /*
+    IMPORTANT:
+    Replace these two values with your own
+    Supabase Project URL and Publishable Key.
+  */
+
+  const SUPABASE_URL = "https://ivbqudztsmsylnodydce.supabase.co";
+
+  const SUPABASE_KEY = "sb_publishable_J6ofqkb71svrAJr1-mvFIA_hy3RKHrM";
+
+
+  const supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+
+  const loginForm =
+    document.getElementById("loginForm");
+
+  const signupForm =
+    document.getElementById("signupForm");
+
+  const message =
+    document.getElementById("message");
+
+
+  function showMessage(text, type) {
+
+    message.textContent = text;
+
+    message.className =
+      "message " + type;
+
+    message.style.display = "block";
+  }
+
+
+  function showLogin() {
+
+    loginForm.classList.remove("hidden");
+
+    signupForm.classList.add("hidden");
+
+    document
+      .getElementById("loginTab")
+      .classList.add("active");
+
+    document
+      .getElementById("signupTab")
+      .classList.remove("active");
+
+    message.style.display = "none";
+  }
+
+
+  function showSignup() {
+
+    loginForm.classList.add("hidden");
+
+    signupForm.classList.remove("hidden");
+
+    document
+      .getElementById("signupTab")
+      .classList.add("active");
+
+    document
+      .getElementById("loginTab")
+      .classList.remove("active");
+
+    message.style.display = "none";
+  }
+
+
+  loginForm.addEventListener(
+    "submit",
+    async function(event) {
+
+      event.preventDefault();
+
+      const email =
+        document.getElementById("loginEmail").value.trim();
+
+      const password =
+        document.getElementById("loginPassword").value;
+
+
+      const {
+        data,
+        error
+      } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
+
+
+      if (error) {
+
+        showMessage(
+          error.message,
+          "error"
+        );
+
+        return;
+      }
+
+
+      showDashboard(data.user);
+
+    }
+  );
+
+
+  signupForm.addEventListener(
+    "submit",
+    async function(event) {
+
+      event.preventDefault();
+
+
+      const name =
+        document.getElementById("signupName").value.trim();
+
+      const email =
+        document.getElementById("signupEmail").value.trim();
+
+      const password =
+        document.getElementById("signupPassword").value;
+
+      const role =
+        document.getElementById("signupRole").value;
+
+
+      const {
+        data,
+        error
+      } = await supabaseClient.auth.signUp({
+
+        email: email,
+
+        password: password,
+
+        options: {
+          data: {
+            full_name: name,
+            role: role
+          }
+        }
+
+      });
+
+
+      if (error) {
+
+        showMessage(
+          error.message,
+          "error"
+        );
+
+        return;
+      }
+
+
+      showMessage(
+        "Account created successfully!",
+        "success"
+      );
+
+
+      signupForm.reset();
+
+    }
+  );
+
+
+  async function showDashboard(user) {
+
+    document
+      .getElementById("authCard")
+      .classList.add("hidden");
+
+    document
+      .getElementById("dashboard")
+      .classList.remove("hidden");
+
+
+    document
+      .getElementById("userInfo")
+      .textContent =
+        "Logged in as " + user.email;
+
+  }
+
+
+  async function logout() {
+
+    await supabaseClient.auth.signOut();
+
+    document
+      .getElementById("dashboard")
+      .classList.add("hidden");
+
+    document
+      .getElementById("authCard")
+      .classList.remove("hidden");
+
+    showLogin();
+
+  }
+
+
+  async function checkSession() {
+
+    const {
+      data
+    } = await supabaseClient.auth.getSession();
+
+
+    if (data.session) {
+
+      showDashboard(
+        data.session.user
+      );
+
+    }
+
+  }
+
+
+  checkSession();
+
+</script>
+
+</body>
+</html>
