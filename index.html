@@ -23,7 +23,6 @@
   --text:#202124;
   --muted:#777;
   --green:#2e7d32;
-  --blue:#1976d2;
   --shadow:0 10px 30px rgba(0,0,0,.08);
 }
 
@@ -741,13 +740,15 @@ Connect. Trade. Grow.
 
 <div class="tabs">
 
-<button id="loginTab"
+<button
+id="loginTab"
 class="tab active"
 onclick="showLogin()">
 Login
 </button>
 
-<button id="signupTab"
+<button
+id="signupTab"
 class="tab"
 onclick="showSignup()">
 Sign Up
@@ -1643,13 +1644,6 @@ container.innerHTML=
 `<div class="empty">Loading orders...</div>`;
 
 
-/*
-  This uses the columns already fixed in your
-  current orders table:
-  unit_price
-  total_price
-*/
-
 const {data,error}=
 await supabaseClient
 .from("orders")
@@ -1855,10 +1849,6 @@ return;
 }
 
 
-/*
-  Reduce inventory after order.
-*/
-
 const remaining=
 Number(product.quantity)-quantity;
 
@@ -2038,7 +2028,7 @@ await supabaseClient
 .or(
 `buyer_id.eq.${currentProfile.id},seller_id.eq.${currentProfile.id}`
 )
-.order("updated_at",{ascending:false});
+.order("id",{ascending:false});
 
 
 if(error){
@@ -2336,13 +2326,21 @@ element.remove();
 }
 
 
+/* ================= SEND MESSAGE ================= */
+
 document
 .getElementById("chatForm")
 .addEventListener("submit",async e=>{
 
 e.preventDefault();
 
-if(!currentConversation)return;
+if(!currentConversation){
+
+alert("Please select a conversation first.");
+
+return;
+
+}
 
 const input=
 document.getElementById("chatInput");
@@ -2352,9 +2350,17 @@ input.value.trim();
 
 if(!text)return;
 
-
 input.disabled=true;
 
+
+/*
+  messages table requires:
+  conversation_id
+  sender_id
+  message
+  is_read
+  created_at
+*/
 
 const {error}=
 await supabaseClient
@@ -2367,33 +2373,38 @@ currentConversation.id,
 sender_id:
 currentProfile.id,
 
-message:text
+message:
+text,
+
+is_read:
+false,
+
+created_at:
+new Date().toISOString()
 
 });
 
 
 input.disabled=false;
 
+
 if(error){
 
+console.error(error);
+
 alert(error.message);
+
 return;
 
 }
 
+
 input.value="";
-
-
-await supabaseClient
-.from("conversations")
-.update({
-updated_at:new Date().toISOString()
-})
-.eq("id",currentConversation.id);
-
 
 });
 
+
+/* ================= DELETE MESSAGE ================= */
 
 async function deleteMessage(messageId){
 
