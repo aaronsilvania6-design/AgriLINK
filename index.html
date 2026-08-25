@@ -1,899 +1,919 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta
+name="viewport"
+content="width=device-width,initial-scale=1.0">
+
 <title>AgriLink AI</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script
+src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+</script>
 
 <style>
+
 *{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
+box-sizing:border-box;
+margin:0;
+padding:0;
 }
 
 :root{
-  --red:#c62828;
-  --red2:#d32f2f;
-  --light:#f6f7f8;
-  --white:#fff;
-  --border:#e5e5e5;
-  --text:#202124;
-  --muted:#777;
-  --green:#2e7d32;
-  --blue:#1976d2;
-  --orange:#ef6c00;
-  --shadow:0 10px 30px rgba(0,0,0,.08);
+--red:#c62828;
+--red2:#d32f2f;
+--light:#f6f7f8;
+--white:#fff;
+--border:#e5e5e5;
+--text:#202124;
+--muted:#777;
+--green:#2e7d32;
+--orange:#ef6c00;
+--blue:#1976d2;
+--shadow:0 10px 30px rgba(0,0,0,.08);
 }
 
 body{
-  font-family:Arial,Helvetica,sans-serif;
-  background:var(--light);
-  color:var(--text);
+font-family:Arial,Helvetica,sans-serif;
+background:var(--light);
+color:var(--text);
 }
 
-button,input,textarea,select{
-  font:inherit;
+button,
+input,
+textarea,
+select{
+font:inherit;
 }
 
 button{
-  cursor:pointer;
+cursor:pointer;
 }
 
 .hidden{
-  display:none!important;
+display:none!important;
 }
 
-/* ================= AUTH ================= */
+
+/* AUTH */
 
 .auth-container{
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:20px;
 }
 
 .auth-card{
-  width:100%;
-  max-width:430px;
-  background:white;
-  padding:30px;
-  border-radius:24px;
-  box-shadow:var(--shadow);
+width:100%;
+max-width:430px;
+background:#fff;
+padding:30px;
+border-radius:24px;
+box-shadow:var(--shadow);
 }
 
 .logo{
-  width:68px;
-  height:68px;
-  border-radius:20px;
-  background:var(--red);
-  color:white;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:34px;
-  margin:auto;
+width:68px;
+height:68px;
+border-radius:20px;
+background:var(--red);
+color:#fff;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:34px;
+margin:auto;
 }
 
 .brand{
-  text-align:center;
-  color:var(--red);
-  margin-top:12px;
+text-align:center;
+color:var(--red);
+margin-top:12px;
 }
 
 .subtitle{
-  text-align:center;
-  color:var(--muted);
-  margin:7px 0 25px;
+text-align:center;
+color:var(--muted);
+margin:7px 0 25px;
 }
 
 .tabs{
-  display:flex;
-  background:#f1f1f1;
-  padding:4px;
-  border-radius:12px;
-  margin-bottom:20px;
+display:flex;
+background:#f1f1f1;
+padding:4px;
+border-radius:12px;
+margin-bottom:20px;
 }
 
 .tab{
-  flex:1;
-  border:none;
-  padding:11px;
-  border-radius:9px;
-  background:transparent;
-  font-weight:bold;
+flex:1;
+border:0;
+padding:11px;
+border-radius:9px;
+background:transparent;
+font-weight:bold;
 }
 
 .tab.active{
-  background:white;
-  color:var(--red);
+background:#fff;
+color:var(--red);
 }
 
 label{
-  display:block;
-  margin:14px 0 6px;
-  font-size:13px;
-  font-weight:bold;
+display:block;
+margin:14px 0 6px;
+font-size:13px;
+font-weight:bold;
 }
 
 input,
 textarea,
 select{
-  width:100%;
-  border:1px solid var(--border);
-  border-radius:11px;
-  padding:13px;
-  outline:none;
-  background:white;
+width:100%;
+border:1px solid var(--border);
+border-radius:11px;
+padding:13px;
+outline:none;
+background:#fff;
 }
 
 textarea{
-  min-height:100px;
-  resize:vertical;
+min-height:100px;
+resize:vertical;
 }
 
 input:focus,
 textarea:focus,
 select:focus{
-  border-color:var(--red);
+border-color:var(--red);
 }
 
 .primary-btn{
-  width:100%;
-  border:none;
-  background:var(--red);
-  color:white;
-  padding:14px;
-  border-radius:11px;
-  font-weight:bold;
-  margin-top:20px;
+width:100%;
+border:0;
+background:var(--red);
+color:#fff;
+padding:14px;
+border-radius:11px;
+font-weight:bold;
+margin-top:20px;
 }
 
 .primary-btn:hover{
-  background:var(--red2);
+background:var(--red2);
 }
 
 .secondary-btn{
-  border:none;
-  background:#eeeeee;
-  padding:11px 15px;
-  border-radius:10px;
+border:0;
+background:#eee;
+padding:11px 15px;
+border-radius:10px;
 }
 
 .danger-btn{
-  border:none;
-  background:#222;
-  color:white;
-  padding:11px 15px;
-  border-radius:10px;
+border:0;
+background:#222;
+color:#fff;
+padding:11px 15px;
+border-radius:10px;
 }
 
 .message{
-  padding:12px;
-  border-radius:10px;
-  margin-top:15px;
-  font-size:14px;
+padding:12px;
+border-radius:10px;
+margin-top:15px;
+font-size:14px;
 }
 
 .success{
-  background:#e8f5e9;
-  color:#1b5e20;
+background:#e8f5e9;
+color:#1b5e20;
 }
 
 .error{
-  background:#ffebee;
-  color:#b71c1c;
+background:#ffebee;
+color:#b71c1c;
 }
 
-/* ================= NAVBAR ================= */
+
+/* NAV */
 
 .navbar{
-  background:white;
-  border-bottom:1px solid var(--border);
-  padding:13px 22px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  position:sticky;
-  top:0;
-  z-index:20;
+background:#fff;
+border-bottom:1px solid var(--border);
+padding:13px 22px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+position:sticky;
+top:0;
+z-index:20;
 }
 
 .nav-brand{
-  display:flex;
-  align-items:center;
-  gap:9px;
-  font-weight:bold;
-  color:var(--red);
-  font-size:19px;
+display:flex;
+align-items:center;
+gap:9px;
+font-weight:bold;
+color:var(--red);
+font-size:19px;
 }
 
 .nav-logo{
-  width:40px;
-  height:40px;
-  border-radius:11px;
-  background:var(--red);
-  color:white;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+width:40px;
+height:40px;
+border-radius:11px;
+background:var(--red);
+color:#fff;
+display:flex;
+align-items:center;
+justify-content:center;
 }
 
 .nav-actions{
-  display:flex;
-  gap:8px;
-  align-items:center;
+display:flex;
+gap:8px;
+align-items:center;
 }
 
-/* ================= MAIN ================= */
+
+/* MAIN */
 
 .container{
-  width:100%;
-  max-width:1200px;
-  margin:auto;
-  padding:25px 20px 50px;
+width:100%;
+max-width:1250px;
+margin:auto;
+padding:25px 20px 50px;
 }
 
 .welcome{
-  background:linear-gradient(135deg,var(--red),var(--red2));
-  color:white;
-  padding:28px;
-  border-radius:20px;
-  margin-bottom:25px;
+background:linear-gradient(135deg,var(--red),var(--red2));
+color:#fff;
+padding:28px;
+border-radius:20px;
+margin-bottom:20px;
 }
 
 .welcome h1{
-  margin-bottom:7px;
+margin-bottom:7px;
 }
 
 .role-badge{
-  display:inline-block;
-  margin-top:10px;
-  background:rgba(255,255,255,.18);
-  padding:7px 12px;
-  border-radius:20px;
-  font-size:13px;
+display:inline-block;
+margin-top:10px;
+background:rgba(255,255,255,.18);
+padding:7px 12px;
+border-radius:20px;
+font-size:13px;
 }
-
-/* ================= DASHBOARD ================= */
-
-.dashboard-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:15px;
-  margin-bottom:28px;
-}
-
-.stat-card{
-  background:white;
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:18px;
-}
-
-.stat-label{
-  color:var(--muted);
-  font-size:13px;
-  margin-bottom:8px;
-}
-
-.stat-value{
-  font-size:28px;
-  font-weight:bold;
-  color:var(--red);
-}
-
-/* ================= SEARCH ================= */
-
-.search-box{
-  background:white;
-  border:1px solid var(--border);
-  border-radius:17px;
-  padding:17px;
-  margin-bottom:22px;
-}
-
-.search-grid{
-  display:grid;
-  grid-template-columns:2fr 1.4fr 1fr auto;
-  gap:10px;
-}
-
-.search-grid button{
-  border:none;
-  background:var(--red);
-  color:white;
-  border-radius:11px;
-  padding:0 20px;
-  font-weight:bold;
-}
-
-.search-hint{
-  color:var(--muted);
-  font-size:12px;
-  margin-top:9px;
-}
-
-/* ================= SECTION ================= */
 
 .section{
-  margin-bottom:30px;
+margin-bottom:30px;
 }
 
 .section-title{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:15px;
-  gap:10px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:15px;
+gap:10px;
 }
 
-/* ================= PRODUCTS ================= */
+
+/* SEARCH */
+
+.search-box{
+background:#fff;
+border:1px solid var(--border);
+border-radius:18px;
+padding:16px;
+margin-bottom:25px;
+box-shadow:0 4px 15px rgba(0,0,0,.03);
+}
+
+.search-grid{
+display:grid;
+grid-template-columns:2fr 2fr 1fr auto;
+gap:10px;
+}
+
+.search-btn{
+border:0;
+background:var(--red);
+color:#fff;
+padding:0 20px;
+border-radius:10px;
+font-weight:bold;
+}
+
+.clear-btn{
+border:0;
+background:#eee;
+padding:0 15px;
+border-radius:10px;
+}
+
+
+/* PRODUCTS */
 
 .products{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:17px;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:17px;
 }
 
 .product-card{
-  background:white;
-  border-radius:17px;
-  overflow:hidden;
-  border:1px solid var(--border);
-  box-shadow:0 5px 15px rgba(0,0,0,.03);
+background:#fff;
+border-radius:17px;
+overflow:hidden;
+border:1px solid var(--border);
+box-shadow:0 5px 15px rgba(0,0,0,.03);
 }
 
 .product-image{
-  width:100%;
-  height:170px;
-  background:#eeeeee;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  overflow:hidden;
+width:100%;
+height:170px;
+background:#eee;
+display:flex;
+justify-content:center;
+align-items:center;
+overflow:hidden;
 }
 
 .product-image img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
+width:100%;
+height:100%;
+object-fit:cover;
 }
 
 .product-placeholder{
-  font-size:50px;
+font-size:50px;
 }
 
 .product-content{
-  padding:16px;
+padding:16px;
 }
 
 .product-content h3{
-  margin-bottom:8px;
+margin-bottom:7px;
 }
 
 .price{
-  color:var(--red);
-  font-size:19px;
-  font-weight:bold;
-  margin-bottom:7px;
+color:var(--red);
+font-size:19px;
+font-weight:bold;
+margin-bottom:7px;
 }
 
 .product-description{
-  color:#555;
-  font-size:14px;
-  margin-bottom:8px;
-  line-height:1.4;
+color:#555;
+font-size:14px;
+line-height:1.4;
+margin-bottom:8px;
 }
 
 .product-location{
-  color:var(--muted);
-  font-size:13px;
-  margin-bottom:13px;
+color:var(--muted);
+font-size:13px;
+margin-bottom:5px;
 }
 
 .product-seller{
-  color:#555;
-  font-size:12px;
-  margin-bottom:12px;
+color:#555;
+font-size:13px;
+margin-bottom:13px;
 }
 
 .product-actions{
-  display:flex;
-  gap:7px;
+display:flex;
+gap:7px;
 }
 
 .product-actions button{
-  flex:1;
-  border:none;
-  padding:10px;
-  border-radius:9px;
-  font-weight:bold;
+flex:1;
+border:0;
+padding:10px;
+border-radius:9px;
+font-weight:bold;
 }
 
 .chat-btn{
-  background:#eeeeee;
+background:#eee;
 }
 
 .buy-btn{
-  background:var(--red);
-  color:white;
+background:var(--red);
+color:#fff;
 }
 
-.delete-product-btn{
-  background:#222;
-  color:white;
+.delete-product{
+background:#222;
+color:#fff;
 }
 
-.empty{
-  background:white;
-  border:1px dashed #ccc;
-  padding:40px 20px;
-  border-radius:16px;
-  text-align:center;
-  color:var(--muted);
-  grid-column:1/-1;
+
+/* FARMER */
+
+.farmer-dashboard{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:12px;
+margin-bottom:25px;
 }
 
-/* ================= TRANSACTIONS ================= */
-
-.transaction-tabs{
-  display:flex;
-  gap:8px;
-  margin-bottom:15px;
-  flex-wrap:wrap;
+.stat-card{
+background:#fff;
+border:1px solid var(--border);
+border-radius:15px;
+padding:17px;
 }
 
-.transaction-tab{
-  border:none;
-  background:#eeeeee;
-  padding:10px 15px;
-  border-radius:10px;
-  font-weight:bold;
+.stat-label{
+color:var(--muted);
+font-size:13px;
 }
 
-.transaction-tab.active{
-  background:var(--red);
-  color:white;
+.stat-value{
+font-size:25px;
+font-weight:bold;
+margin-top:5px;
 }
 
-.transactions{
-  display:grid;
-  gap:12px;
-}
 
-.transaction-card{
-  background:white;
-  border:1px solid var(--border);
-  border-radius:15px;
-  padding:17px;
-}
-
-.transaction-top{
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  margin-bottom:10px;
-}
-
-.transaction-status{
-  padding:5px 10px;
-  border-radius:20px;
-  background:#fff3e0;
-  color:#e65100;
-  font-size:12px;
-  font-weight:bold;
-}
-
-.transaction-info{
-  color:var(--muted);
-  font-size:14px;
-  line-height:1.7;
-}
-
-.transaction-actions{
-  display:flex;
-  gap:8px;
-  margin-top:13px;
-}
-
-.transaction-actions button{
-  border:none;
-  padding:9px 13px;
-  border-radius:9px;
-}
-
-/* ================= ORDERS ================= */
+/* ORDERS */
 
 .orders{
-  display:grid;
-  gap:12px;
+display:grid;
+gap:12px;
 }
 
 .order-card{
-  background:white;
-  border:1px solid var(--border);
-  border-radius:15px;
-  padding:16px;
+background:#fff;
+border:1px solid var(--border);
+border-radius:15px;
+padding:17px;
 }
 
 .order-top{
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  margin-bottom:8px;
+display:flex;
+justify-content:space-between;
+gap:10px;
+margin-bottom:10px;
 }
 
 .order-status{
-  padding:5px 9px;
-  border-radius:20px;
-  background:#eeeeee;
-  font-size:12px;
-  font-weight:bold;
+padding:5px 9px;
+border-radius:20px;
+background:#eee;
+font-size:12px;
+font-weight:bold;
+}
+
+.status-PENDING{
+background:#fff3e0;
+color:#e65100;
+}
+
+.status-CONFIRMED{
+background:#e3f2fd;
+color:#1565c0;
+}
+
+.status-ONGOING{
+background:#e8f5e9;
+color:#2e7d32;
+}
+
+.status-COMPLETED{
+background:#e8f5e9;
+color:#1b5e20;
+}
+
+.status-CANCELLED,
+.status-REJECTED{
+background:#ffebee;
+color:#b71c1c;
 }
 
 .order-info{
-  color:var(--muted);
-  font-size:14px;
-  line-height:1.6;
+color:#666;
+font-size:14px;
+line-height:1.7;
 }
 
 .order-actions{
-  display:flex;
-  gap:8px;
-  margin-top:12px;
+display:flex;
+gap:8px;
+margin-top:13px;
+flex-wrap:wrap;
 }
 
 .order-actions button{
-  border:none;
-  padding:9px 12px;
-  border-radius:9px;
+border:0;
+padding:9px 12px;
+border-radius:9px;
 }
 
-/* ================= MODAL ================= */
+.accept-btn{
+background:var(--green);
+color:#fff;
+}
+
+.reject-btn{
+background:#222;
+color:#fff;
+}
+
+.complete-btn{
+background:var(--blue);
+color:#fff;
+}
+
+.cancel-btn{
+background:#eee;
+}
+
+
+/* EMPTY */
+
+.empty{
+background:#fff;
+border:1px dashed #ccc;
+padding:40px 20px;
+border-radius:16px;
+text-align:center;
+color:var(--muted);
+}
+
+
+/* MODAL */
 
 .modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.55);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  padding:20px;
-  z-index:100;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.55);
+display:flex;
+justify-content:center;
+align-items:center;
+padding:20px;
+z-index:100;
 }
 
 .modal-card{
-  width:100%;
-  max-width:520px;
-  background:white;
-  border-radius:20px;
-  padding:25px;
-  max-height:90vh;
-  overflow-y:auto;
+width:100%;
+max-width:520px;
+background:#fff;
+border-radius:20px;
+padding:25px;
+max-height:90vh;
+overflow-y:auto;
 }
 
 .modal-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:10px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:10px;
 }
 
 .close{
-  border:none;
-  background:#eee;
-  width:35px;
-  height:35px;
-  border-radius:50%;
-  font-size:18px;
+border:0;
+background:#eee;
+width:35px;
+height:35px;
+border-radius:50%;
+font-size:18px;
 }
 
-/* ================= CHAT ================= */
+
+/* CHAT */
 
 .chat-modal .modal-card{
-  max-width:850px;
-  padding:0;
-  overflow:hidden;
+max-width:900px;
+padding:0;
+overflow:hidden;
 }
 
 .chat-layout{
-  display:grid;
-  grid-template-columns:280px 1fr;
-  height:75vh;
-  min-height:500px;
+display:grid;
+grid-template-columns:280px 1fr;
+height:75vh;
+min-height:500px;
 }
 
 .conversation-list{
-  border-right:1px solid var(--border);
-  background:#fafafa;
-  overflow-y:auto;
+border-right:1px solid var(--border);
+background:#fafafa;
+overflow-y:auto;
 }
 
 .chat-list-header{
-  padding:17px;
-  border-bottom:1px solid var(--border);
-  font-weight:bold;
+padding:17px;
+border-bottom:1px solid var(--border);
+font-weight:bold;
 }
 
 .conversation-item{
-  padding:14px;
-  border-bottom:1px solid var(--border);
-  cursor:pointer;
+padding:14px;
+border-bottom:1px solid var(--border);
+cursor:pointer;
 }
 
 .conversation-item:hover,
 .conversation-item.active{
-  background:white;
+background:#fff;
 }
 
 .conversation-name{
-  font-weight:bold;
+font-weight:bold;
 }
 
 .conversation-preview{
-  color:var(--muted);
-  font-size:12px;
-  margin-top:5px;
-  overflow:hidden;
-  white-space:nowrap;
-  text-overflow:ellipsis;
+color:var(--muted);
+font-size:12px;
+margin-top:5px;
+overflow:hidden;
+white-space:nowrap;
+text-overflow:ellipsis;
 }
 
 .chat-window{
-  display:flex;
-  flex-direction:column;
-  min-width:0;
+display:flex;
+flex-direction:column;
+min-width:0;
 }
 
 .chat-header{
-  padding:15px;
-  border-bottom:1px solid var(--border);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
+padding:15px;
+border-bottom:1px solid var(--border);
+display:flex;
+align-items:center;
+justify-content:space-between;
 }
 
 .chat-user{
-  font-weight:bold;
+font-weight:bold;
 }
 
 .online{
-  color:var(--green);
-  font-size:12px;
+color:var(--green);
+font-size:12px;
 }
 
 .chat-messages{
-  flex:1;
-  padding:18px;
-  overflow-y:auto;
-  background:#f8f8f8;
-  display:flex;
-  flex-direction:column;
-  gap:9px;
+flex:1;
+padding:18px;
+overflow-y:auto;
+background:#f8f8f8;
+display:flex;
+flex-direction:column;
+gap:9px;
 }
 
 .message-row{
-  display:flex;
+display:flex;
 }
 
 .message-row.mine{
-  justify-content:flex-end;
+justify-content:flex-end;
 }
 
 .chat-bubble{
-  max-width:75%;
-  padding:10px 13px;
-  border-radius:15px;
-  background:white;
-  border:1px solid var(--border);
-  position:relative;
+max-width:75%;
+padding:10px 13px;
+border-radius:15px;
+background:#fff;
+border:1px solid var(--border);
+position:relative;
 }
 
 .message-row.mine .chat-bubble{
-  background:#ffebee;
-  border-color:#ffcdd2;
+background:#ffebee;
+border-color:#ffcdd2;
 }
 
 .chat-time{
-  font-size:10px;
-  color:#999;
-  margin-top:4px;
+font-size:10px;
+color:#999;
+margin-top:4px;
 }
 
 .message-delete{
-  border:none;
-  background:transparent;
-  color:#999;
-  font-size:11px;
-  margin-left:6px;
+border:0;
+background:transparent;
+color:#999;
+font-size:11px;
+margin-left:6px;
 }
 
 .chat-input{
-  padding:12px;
-  border-top:1px solid var(--border);
-  display:flex;
-  gap:8px;
-  background:white;
+padding:12px;
+border-top:1px solid var(--border);
+display:flex;
+gap:8px;
+background:#fff;
 }
 
 .chat-input input{
-  flex:1;
+flex:1;
 }
 
 .chat-input button{
-  border:none;
-  background:var(--red);
-  color:white;
-  padding:0 18px;
-  border-radius:10px;
+border:0;
+background:var(--red);
+color:#fff;
+padding:0 18px;
+border-radius:10px;
 }
 
 .chat-empty{
-  margin:auto;
-  text-align:center;
-  color:var(--muted);
-  padding:20px;
+margin:auto;
+text-align:center;
+color:var(--muted);
+padding:20px;
 }
 
-/* ================= RESPONSIVE ================= */
 
-@media(max-width:800px){
+/* NOTIFICATION */
 
-  .chat-layout{
-    grid-template-columns:1fr;
-  }
+.notification-panel{
+position:fixed;
+right:20px;
+top:75px;
+width:330px;
+max-height:450px;
+overflow:auto;
+background:#fff;
+border:1px solid var(--border);
+box-shadow:var(--shadow);
+border-radius:16px;
+z-index:50;
+}
 
-  .conversation-list{
-    display:none;
-  }
+.notification-header{
+padding:15px;
+font-weight:bold;
+border-bottom:1px solid var(--border);
+}
 
-  .chat-modal .modal-card{
-    max-width:100%;
-  }
+.notification-item{
+padding:13px;
+border-bottom:1px solid var(--border);
+}
 
-  .chat-layout{
-    height:85vh;
-  }
+.notification-item.unread{
+background:#fff5f5;
+}
 
-  .search-grid{
-    grid-template-columns:1fr 1fr;
-  }
+.notification-item small{
+display:block;
+color:#999;
+margin-top:5px;
+}
 
-  .search-grid button{
-    padding:12px;
-  }
 
-  .dashboard-grid{
-    grid-template-columns:1fr 1fr;
-  }
+/* RESPONSIVE */
+
+@media(max-width:900px){
+
+.search-grid{
+grid-template-columns:1fr 1fr;
+}
+
+.farmer-dashboard{
+grid-template-columns:1fr 1fr;
+}
+
+.chat-layout{
+grid-template-columns:1fr;
+}
+
+.conversation-list{
+display:none;
+}
+
 }
 
 @media(max-width:600px){
 
-  .auth-card{
-    padding:22px;
-  }
-
-  .navbar{
-    padding:11px;
-  }
-
-  .nav-brand{
-    font-size:16px;
-  }
-
-  .nav-logo{
-    width:36px;
-    height:36px;
-  }
-
-  .nav-actions{
-    gap:5px;
-  }
-
-  .nav-actions button{
-    padding:9px;
-    font-size:12px;
-  }
-
-  .container{
-    padding:17px 12px 40px;
-  }
-
-  .welcome{
-    padding:21px;
-    border-radius:16px;
-  }
-
-  .products{
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:10px;
-  }
-
-  .product-image{
-    height:120px;
-  }
-
-  .product-content{
-    padding:11px;
-  }
-
-  .product-content h3{
-    font-size:15px;
-  }
-
-  .price{
-    font-size:16px;
-  }
-
-  .product-description{
-    font-size:12px;
-  }
-
-  .product-actions{
-    flex-direction:column;
-  }
-
-  .search-grid{
-    grid-template-columns:1fr;
-  }
-
-  .search-grid button{
-    padding:13px;
-  }
-
-  .dashboard-grid{
-    grid-template-columns:1fr;
-  }
-
-  .modal{
-    padding:8px;
-  }
-
-  .modal-card{
-    padding:18px;
-    border-radius:16px;
-  }
-
-  .chat-modal{
-    padding:0;
-  }
-
-  .chat-modal .modal-card{
-    border-radius:0;
-    height:100vh;
-    max-height:100vh;
-  }
-
-  .chat-layout{
-    height:100vh;
-  }
-
-  .chat-bubble{
-    max-width:85%;
-  }
+.auth-card{
+padding:22px;
 }
 
-@media(min-width:1400px){
-
-  .container{
-    max-width:1350px;
-  }
-
-  .products{
-    grid-template-columns:repeat(5,1fr);
-  }
+.navbar{
+padding:11px;
 }
+
+.nav-brand{
+font-size:16px;
+}
+
+.nav-actions{
+gap:5px;
+}
+
+.nav-actions button{
+padding:9px;
+font-size:12px;
+}
+
+.container{
+padding:17px 12px 40px;
+}
+
+.welcome{
+padding:21px;
+}
+
+.search-grid{
+grid-template-columns:1fr;
+}
+
+.search-btn,
+.clear-btn{
+padding:12px;
+}
+
+.products{
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:10px;
+}
+
+.product-image{
+height:120px;
+}
+
+.product-content{
+padding:11px;
+}
+
+.product-content h3{
+font-size:15px;
+}
+
+.price{
+font-size:16px;
+}
+
+.product-description{
+font-size:12px;
+}
+
+.product-actions{
+flex-direction:column;
+}
+
+.farmer-dashboard{
+grid-template-columns:1fr 1fr;
+}
+
+.modal{
+padding:8px;
+}
+
+.chat-modal{
+padding:0;
+}
+
+.chat-modal .modal-card{
+border-radius:0;
+height:100vh;
+max-height:100vh;
+}
+
+.chat-layout{
+height:100vh;
+}
+
+.chat-bubble{
+max-width:85%;
+}
+
+.notification-panel{
+right:8px;
+left:8px;
+width:auto;
+}
+
+}
+
 </style>
+
 </head>
+
 
 <body>
 
-<!-- ================= AUTH ================= -->
+
+<!-- =========================================================
+AUTH
+========================================================= -->
 
 <div id="authScreen" class="auth-container">
 
@@ -901,11 +921,14 @@ select:focus{
 
 <div class="logo">🌾</div>
 
-<h1 class="brand">AgriLink AI</h1>
+<h1 class="brand">
+AgriLink AI
+</h1>
 
 <p class="subtitle">
 Connect. Trade. Grow.
 </p>
+
 
 <div class="tabs">
 
@@ -913,17 +936,22 @@ Connect. Trade. Grow.
 id="loginTab"
 class="tab active"
 onclick="showLogin()">
+
 Login
+
 </button>
 
 <button
 id="signupTab"
 class="tab"
 onclick="showSignup()">
+
 Sign Up
+
 </button>
 
 </div>
+
 
 <form id="loginForm">
 
@@ -935,6 +963,7 @@ type="email"
 required
 placeholder="you@example.com">
 
+
 <label>Password</label>
 
 <input
@@ -943,11 +972,13 @@ type="password"
 required
 placeholder="Your password">
 
+
 <button class="primary-btn">
 Login
 </button>
 
 </form>
+
 
 <form id="signupForm" class="hidden">
 
@@ -958,6 +989,7 @@ id="signupName"
 required
 placeholder="Juan Dela Cruz">
 
+
 <label>Email</label>
 
 <input
@@ -965,6 +997,7 @@ id="signupEmail"
 type="email"
 required
 placeholder="you@example.com">
+
 
 <label>Password</label>
 
@@ -975,12 +1008,21 @@ minlength="8"
 required
 placeholder="Minimum 8 characters">
 
+
 <label>Account Type</label>
 
 <select id="signupRole">
-<option value="BUYER">Buyer</option>
-<option value="FARMER">Farmer</option>
+
+<option value="BUYER">
+Buyer
+</option>
+
+<option value="FARMER">
+Farmer
+</option>
+
 </select>
+
 
 <button class="primary-btn">
 Create Account
@@ -988,42 +1030,71 @@ Create Account
 
 </form>
 
+
 <div id="authMessage"></div>
 
 </div>
+
 </div>
 
 
-<!-- ================= APP ================= -->
+
+<!-- =========================================================
+APP
+========================================================= -->
 
 <div id="app" class="hidden">
+
 
 <nav class="navbar">
 
 <div class="nav-brand">
-<div class="nav-logo">🌾</div>
-AgriLink AI
+
+<div class="nav-logo">
+🌾
 </div>
+
+AgriLink AI
+
+</div>
+
 
 <div class="nav-actions">
 
 <button
 class="secondary-btn"
-onclick="openChat()">
-💬 Messages
+onclick="toggleNotifications()">
+
+🔔
+
 </button>
+
+
+<button
+class="secondary-btn"
+onclick="openChat()">
+
+💬 Chat
+
+</button>
+
 
 <button
 id="addProductButton"
-class="secondary-btn"
+class="secondary-btn hidden"
 onclick="openAddProduct()">
+
 + Product
+
 </button>
+
 
 <button
 class="danger-btn"
 onclick="logout()">
+
 Logout
+
 </button>
 
 </div>
@@ -1031,7 +1102,23 @@ Logout
 </nav>
 
 
+<div
+id="notificationPanel"
+class="notification-panel hidden">
+
+<div class="notification-header">
+Notifications
+</div>
+
+<div id="notifications">
+Loading...
+</div>
+
+</div>
+
+
 <main class="container">
+
 
 <section class="welcome">
 
@@ -1039,274 +1126,308 @@ Logout
 Welcome, <span id="userName">User</span>!
 </h1>
 
-<p id="welcomeText">
+<p>
 Your agricultural marketplace.
 </p>
 
-<div id="roleBadge" class="role-badge"></div>
+<div
+id="roleBadge"
+class="role-badge">
+</div>
 
 </section>
 
 
-<!-- ================= FARMER DASHBOARD ================= -->
+
+<!-- =====================================================
+BUYER SEARCH
+===================================================== -->
 
 <section
-id="farmerDashboard"
-class="hidden">
-
-<div class="dashboard-grid">
-
-<div class="stat-card">
-
-<div class="stat-label">
-My Products
-</div>
-
-<div
-id="farmerProductCount"
-class="stat-value">
-0
-</div>
-
-</div>
-
-<div class="stat-card">
-
-<div class="stat-label">
-Pending Orders
-</div>
-
-<div
-id="farmerPendingCount"
-class="stat-value">
-0
-</div>
-
-</div>
-
-<div class="stat-card">
-
-<div class="stat-label">
-Ongoing Transactions
-</div>
-
-<div
-id="farmerOngoingCount"
-class="stat-value">
-0
-</div>
-
-</div>
-
-</div>
-
-<section class="section">
+id="buyerSearchSection"
+class="search-box">
 
 <div class="section-title">
 
-<h2>My Transactions</h2>
-
-<button
-class="secondary-btn"
-onclick="loadFarmerTransactions()">
-Refresh
-</button>
+<h2>
+Find Products
+</h2>
 
 </div>
 
-<div class="transaction-tabs">
-
-<button
-id="pendingTab"
-class="transaction-tab active"
-onclick="showTransactionTab('PENDING')">
-Pending
-</button>
-
-<button
-id="ongoingTab"
-class="transaction-tab"
-onclick="showTransactionTab('ONGOING')">
-Ongoing Transactions
-</button>
-
-</div>
-
-<div
-id="farmerTransactions"
-class="transactions">
-</div>
-
-</section>
-
-</section>
-
-
-<!-- ================= BUYER MARKETPLACE ================= -->
-
-<section
-id="buyerMarketplace">
-
-<section class="section">
-
-<div class="section-title">
-
-<h2>Marketplace</h2>
-
-<button
-class="secondary-btn"
-onclick="loadProducts()">
-Refresh
-</button>
-
-</div>
-
-<div class="search-box">
 
 <div class="search-grid">
 
 <input
 id="searchName"
-placeholder="Search product name...">
+placeholder="Product name...">
+
 
 <input
 id="searchLocation"
-placeholder="Search location...">
+placeholder="Location...">
 
-<select id="searchUnit">
 
-<option value="">
-Any unit
-</option>
+<input
+id="searchPrice"
+type="number"
+min="0"
+placeholder="Max price">
 
-<option value="kg">
-kg
-</option>
 
-<option value="piece">
-piece
-</option>
+<button
+class="search-btn"
+onclick="searchProducts()">
 
-<option value="sack">
-sack
-</option>
-
-<option value="box">
-box
-</option>
-
-<option value="dozen">
-dozen
-</option>
-
-</select>
-
-<button onclick="searchProducts()">
 Search
+
+</button>
+
+<button
+class="clear-btn"
+onclick="clearSearch()">
+
+Clear
+
 </button>
 
 </div>
 
-<div class="search-hint">
-You only need to fill in one field. Matching products will be shown automatically.
-</div>
+</section>
 
+
+
+<!-- =====================================================
+FARMER STATS
+===================================================== -->
+
+<section
+id="farmerDashboard"
+class="farmer-dashboard hidden">
+
+<div class="stat-card">
+
+<div class="stat-label">
+Active Products
 </div>
 
 <div
-id="products"
-class="products">
+id="statProducts"
+class="stat-value">
+0
+</div>
+
+</div>
+
+
+<div class="stat-card">
+
+<div class="stat-label">
+Pending
+</div>
+
+<div
+id="statPending"
+class="stat-value">
+0
+</div>
+
+</div>
+
+
+<div class="stat-card">
+
+<div class="stat-label">
+Ongoing
+</div>
+
+<div
+id="statOngoing"
+class="stat-value">
+0
+</div>
+
+</div>
+
+
+<div class="stat-card">
+
+<div class="stat-label">
+Completed
+</div>
+
+<div
+id="statCompleted"
+class="stat-value">
+0
+</div>
+
 </div>
 
 </section>
 
+
+
+<!-- =====================================================
+PRODUCTS
+===================================================== -->
 
 <section class="section">
 
 <div class="section-title">
 
-<h2>My Orders</h2>
+<h2 id="marketplaceTitle">
+Marketplace
+</h2>
 
 <button
 class="secondary-btn"
-onclick="loadOrders()">
+onclick="loadProducts()">
+
 Refresh
+
 </button>
 
 </div>
 
+
 <div
-id="orders"
-class="orders">
+id="products"
+class="products">
+
 </div>
 
 </section>
 
-</section>
 
 
-<!-- ================= FARMER PRODUCTS ================= -->
+<!-- =====================================================
+FARMER TRANSACTIONS
+===================================================== -->
 
 <section
-id="farmerProductsSection"
+id="farmerTransactions"
 class="section hidden">
 
 <div class="section-title">
 
-<h2>My Products</h2>
+<h2>
+Transactions
+</h2>
 
 <button
 class="secondary-btn"
-onclick="loadFarmerProducts()">
+onclick="loadOrders()">
+
 Refresh
+
 </button>
 
 </div>
 
+
 <div
-id="farmerProducts"
-class="products">
+id="farmerOrders"
+class="orders">
+
 </div>
 
 </section>
 
-</main>
+
+
+<!-- =====================================================
+BUYER ORDERS
+===================================================== -->
+
+<section
+id="buyerOrders"
+class="section">
+
+<div class="section-title">
+
+<h2>
+My Orders
+</h2>
+
+<button
+class="secondary-btn"
+onclick="loadOrders()">
+
+Refresh
+
+</button>
+
 </div>
 
 
-<!-- ================= ADD PRODUCT ================= -->
+<div
+id="orders"
+class="orders">
 
-<div id="productModal" class="modal hidden">
+</div>
+
+</section>
+
+
+</main>
+
+</div>
+
+
+
+<!-- =========================================================
+ADD PRODUCT MODAL
+========================================================= -->
+
+<div
+id="productModal"
+class="modal hidden">
 
 <div class="modal-card">
 
 <div class="modal-header">
 
-<h2>Add Product</h2>
+<h2>
+Add Product
+</h2>
 
 <button
 class="close"
 onclick="closeAddProduct()">
+
 ×
+
 </button>
 
 </div>
 
+
 <form id="productForm">
 
-<label>Product Name</label>
+
+<label>
+Product Name
+</label>
 
 <input
 id="productName"
 placeholder="Fresh Tomatoes">
 
-<label>Description</label>
+
+<label>
+Description
+</label>
 
 <textarea
 id="productDescription"
-placeholder="Describe your product"></textarea>
+placeholder="Describe your product">
+</textarea>
 
-<label>Price</label>
+
+<label>
+Price
+</label>
 
 <input
 id="productPrice"
@@ -1315,7 +1436,10 @@ min="0"
 step="0.01"
 placeholder="Optional">
 
-<label>Quantity</label>
+
+<label>
+Quantity
+</label>
 
 <input
 id="productQuantity"
@@ -1324,7 +1448,10 @@ min="0"
 step="0.01"
 placeholder="Optional">
 
-<label>Unit</label>
+
+<label>
+Unit
+</label>
 
 <select id="productUnit">
 
@@ -1350,43 +1477,164 @@ dozen
 
 </select>
 
-<label>Location</label>
+
+<label>
+Location
+</label>
 
 <input
 id="productLocation"
 placeholder="Municipality / Province">
 
-<label>Product Image</label>
+
+<label>
+Product Image
+</label>
 
 <input
 id="productImage"
 type="file"
 accept="image/*">
 
+
 <button class="primary-btn">
+
 Publish Product
+
 </button>
+
 
 <div id="productMessage"></div>
 
 </form>
 
 </div>
+
 </div>
 
 
-<!-- ================= CHAT ================= -->
 
-<div id="chatModal" class="modal chat-modal hidden">
+<!-- =========================================================
+BUY MODAL
+========================================================= -->
+
+<div
+id="buyModal"
+class="modal hidden">
+
+<div class="modal-card">
+
+<div class="modal-header">
+
+<h2>
+Place Order
+</h2>
+
+<button
+class="close"
+onclick="closeBuyModal()">
+
+×
+
+</button>
+
+</div>
+
+
+<div id="buyProductInfo"></div>
+
+
+<form id="buyForm">
+
+<input
+id="buyProductId"
+type="hidden">
+
+
+<label>
+Quantity
+</label>
+
+<input
+id="buyQuantity"
+type="number"
+min="0.01"
+step="0.01"
+value="1"
+required>
+
+
+<label>
+Payment Method
+</label>
+
+<select id="paymentMethod">
+
+<option value="GCASH">
+GCash
+</option>
+
+<option value="MAYA">
+Maya
+</option>
+
+<option value="BANK_TRANSFER">
+Bank Transfer
+</option>
+
+<option value="CASH_ON_PICKUP">
+Cash on Pickup
+</option>
+
+</select>
+
+
+<label>
+Buyer Note
+</label>
+
+<textarea
+id="buyerNote"
+placeholder="Optional note for the farmer">
+</textarea>
+
+
+<button class="primary-btn">
+
+Place Order
+
+</button>
+
+
+<div id="buyMessage"></div>
+
+</form>
+
+</div>
+
+</div>
+
+
+
+<!-- =========================================================
+CHAT MODAL
+========================================================= -->
+
+<div
+id="chatModal"
+class="modal chat-modal hidden">
 
 <div class="modal-card">
 
 <div class="chat-layout">
 
+
 <div class="conversation-list">
 
 <div class="chat-list-header">
+
 💬 Conversations
+
 </div>
 
 <div id="conversationList"></div>
@@ -1394,29 +1642,41 @@ Publish Product
 </div>
 
 
+
 <div class="chat-window">
+
 
 <div class="chat-header">
 
 <div>
 
-<div id="chatUserName" class="chat-user">
+<div
+id="chatUserName"
+class="chat-user">
+
 Select a conversation
+
 </div>
 
 <div class="online">
+
 ● AgriLink Chat
+
 </div>
 
 </div>
+
 
 <button
 class="close"
 onclick="closeChat()">
+
 ×
+
 </button>
 
 </div>
+
 
 
 <div
@@ -1424,10 +1684,13 @@ id="chatMessages"
 class="chat-messages">
 
 <div class="chat-empty">
+
 Select a conversation to start chatting.
+
 </div>
 
 </div>
+
 
 
 <form
@@ -1450,12 +1713,17 @@ Send
 </div>
 
 </div>
+
 </div>
+
 
 
 <script>
 
-/* ================= SUPABASE ================= */
+
+/* =========================================================
+SUPABASE
+========================================================= */
 
 const SUPABASE_URL =
 "https://ivbqudztsmsylnodydce.supabase.co";
@@ -1470,18 +1738,25 @@ SUPABASE_KEY
 );
 
 
-/* ================= GLOBALS ================= */
+/* =========================================================
+GLOBALS
+========================================================= */
 
 let currentUser = null;
 let currentProfile = null;
 
 let currentConversation = null;
+let currentProduct = null;
+
 let messageChannel = null;
+let orderChannel = null;
 
-let currentTransactionTab = "PENDING";
+let allProducts = [];
 
 
-/* ================= HELPERS ================= */
+/* =========================================================
+HELPERS
+========================================================= */
 
 function escapeHtml(value){
 
@@ -1495,7 +1770,31 @@ return String(value ?? "")
 }
 
 
-/* ================= AUTH TABS ================= */
+function formatMoney(value){
+
+return Number(value || 0)
+.toLocaleString(
+"en-PH",
+{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+}
+);
+
+
+}
+
+
+function getCurrentUserId(){
+
+return currentProfile?.id || null;
+
+}
+
+
+/* =========================================================
+AUTH TABS
+========================================================= */
 
 function showLogin(){
 
@@ -1539,26 +1838,34 @@ document
 }
 
 
-/* ================= AUTH MESSAGE ================= */
-
-function showAuthMessage(text,type){
+function showAuthMessage(
+text,
+type
+){
 
 const box =
-document.getElementById("authMessage");
+document.getElementById(
+"authMessage"
+);
 
 box.className =
 "message " + type;
 
-box.textContent = text;
+box.textContent =
+text;
 
 }
 
 
-/* ================= LOGIN ================= */
+/* =========================================================
+LOGIN
+========================================================= */
 
 document
 .getElementById("loginForm")
-.addEventListener("submit",async e=>{
+.addEventListener(
+"submit",
+async e=>{
 
 e.preventDefault();
 
@@ -1574,7 +1881,8 @@ document
 .value;
 
 const {data,error} =
-await supabaseClient.auth.signInWithPassword({
+await supabaseClient.auth
+.signInWithPassword({
 email,
 password
 });
@@ -1590,16 +1898,23 @@ return;
 
 }
 
-await initializeApp(data.user);
+await initializeApp(
+data.user
+);
 
-});
+}
+);
 
 
-/* ================= SIGNUP ================= */
+/* =========================================================
+SIGNUP
+========================================================= */
 
 document
 .getElementById("signupForm")
-.addEventListener("submit",async e=>{
+.addEventListener(
+"submit",
+async e=>{
 
 e.preventDefault();
 
@@ -1626,9 +1941,11 @@ document
 .value;
 
 const {data,error} =
-await supabaseClient.auth.signUp({
+await supabaseClient.auth
+.signUp({
 
 email,
+
 password,
 
 options:{
@@ -1652,7 +1969,7 @@ return;
 }
 
 showAuthMessage(
-"Account created successfully. You can now log in.",
+"Account created successfully. Check your email if verification is enabled.",
 "success"
 );
 
@@ -1660,35 +1977,79 @@ document
 .getElementById("signupForm")
 .reset();
 
-});
+}
+);
 
 
-/* ================= INITIALIZE ================= */
+/* =========================================================
+INITIALIZE
+========================================================= */
 
 async function initializeApp(user){
 
-currentUser = user;
+currentUser =
+user;
 
-const {data:profile,error} =
+let {data:profile,error} =
 await supabaseClient
 .from("users")
 .select("*")
-.eq("auth_user_id",user.id)
-.single();
+.eq(
+"auth_user_id",
+user.id
+)
+.maybeSingle();
 
-if(error){
+
+/*
+If the database trigger has not finished yet,
+try one more time.
+*/
+
+if(!profile){
+
+await new Promise(
+resolve=>setTimeout(
+resolve,
+800
+)
+);
+
+const retry =
+await supabaseClient
+.from("users")
+.select("*")
+.eq(
+"auth_user_id",
+user.id
+)
+.maybeSingle();
+
+profile =
+retry.data;
+
+error =
+retry.error;
+
+}
+
+
+if(error || !profile){
 
 console.error(error);
 
 alert(
-"Your AgriLink profile could not be loaded."
+"Your AgriLink profile could not be loaded. Make sure you ran supabase.sql."
 );
 
 return;
 
 }
 
-currentProfile = profile;
+
+currentProfile =
+profile;
+
 
 document
 .getElementById("authScreen")
@@ -1698,10 +2059,13 @@ document
 .getElementById("app")
 .classList.remove("hidden");
 
+
 document
 .getElementById("userName")
 .textContent =
-profile.full_name || "User";
+profile.full_name ||
+"User";
+
 
 document
 .getElementById("roleBadge")
@@ -1709,124 +2073,205 @@ document
 profile.role;
 
 
-/* ================= ROLE UI ================= */
+const farmer =
+profile.role === "FARMER";
 
-const addButton =
-document.getElementById(
-"addProductButton"
-);
 
-const buyerMarketplace =
-document.getElementById(
-"buyerMarketplace"
-);
-
-const farmerDashboard =
-document.getElementById(
-"farmerDashboard"
-);
-
-const farmerProductsSection =
-document.getElementById(
-"farmerProductsSection"
+document
+.getElementById("addProductButton")
+.classList.toggle(
+"hidden",
+!farmer
 );
 
 
-if(profile.role === "FARMER"){
+document
+.getElementById("farmerDashboard")
+.classList.toggle(
+"hidden",
+!farmer
+);
 
-addButton.classList.remove("hidden");
 
-buyerMarketplace.classList.add("hidden");
+document
+.getElementById("farmerTransactions")
+.classList.toggle(
+"hidden",
+!farmer
+);
 
-farmerDashboard.classList.remove("hidden");
 
-farmerProductsSection.classList.remove("hidden");
+document
+.getElementById("buyerSearchSection")
+.classList.toggle(
+"hidden",
+farmer
+);
 
-document.getElementById(
-"welcomeText"
-).textContent =
-"Manage your products, orders, and ongoing transactions.";
 
-await loadFarmerProducts();
-await loadFarmerTransactions();
+document
+.getElementById("buyerOrders")
+.classList.toggle(
+"hidden",
+farmer
+);
 
-}else{
 
-addButton.classList.add("hidden");
+document
+.getElementById("marketplaceTitle")
+.textContent =
+farmer
+?
+"My Products"
+:
+"Marketplace";
 
-buyerMarketplace.classList.remove("hidden");
-
-farmerDashboard.classList.add("hidden");
-
-farmerProductsSection.classList.add("hidden");
-
-document.getElementById(
-"welcomeText"
-).textContent =
-"Discover fresh agricultural products from farmers.";
 
 await loadProducts();
+
 await loadOrders();
 
-}
+await loadConversations();
+
+await loadNotifications();
+
+subscribeToOrders();
 
 }
 
 
-/* ================= SEARCH ================= */
+/* =========================================================
+SEARCH
+========================================================= */
 
-function searchProducts(){
-
-loadProducts();
-
-}
-
-
-/* ================= PRODUCTS ================= */
-
-async function loadProducts(){
-
-const container =
-document.getElementById("products");
-
-container.innerHTML =
-`<div class="empty">
-Loading products...
-</div>`;
-
+async function searchProducts(){
 
 const name =
 document
 .getElementById("searchName")
-?.value
+.value
 .trim()
-.toLowerCase() || "";
+.toLowerCase();
 
 const location =
 document
 .getElementById("searchLocation")
-?.value
+.value
 .trim()
-.toLowerCase() || "";
+.toLowerCase();
 
-const unit =
+const priceValue =
 document
-.getElementById("searchUnit")
-?.value || "";
+.getElementById("searchPrice")
+.value;
+
+const maxPrice =
+priceValue
+?
+Number(priceValue)
+:
+null;
 
 
-/*
-IMPORTANT:
+let results =
+[...allProducts];
 
-We load active products from Supabase,
-then filter locally.
 
-This allows ANY ONE of the search fields
-to work independently.
-*/
+if(name){
 
-const {data,error} =
-await supabaseClient
+results =
+results.filter(
+product=>
+String(
+product.name || ""
+)
+.toLowerCase()
+.includes(name)
+);
+
+}
+
+
+if(location){
+
+results =
+results.filter(
+product=>
+String(
+product.location || ""
+)
+.toLowerCase()
+.includes(location)
+);
+
+}
+
+
+if(
+maxPrice !== null &&
+Number.isFinite(maxPrice)
+){
+
+results =
+results.filter(
+product=>
+Number(product.price || 0)
+<= maxPrice
+);
+
+}
+
+
+renderProducts(
+results
+);
+
+
+}
+
+
+function clearSearch(){
+
+document
+.getElementById("searchName")
+.value="";
+
+document
+.getElementById("searchLocation")
+.value="";
+
+document
+.getElementById("searchPrice")
+.value="";
+
+renderProducts(
+allProducts
+);
+
+}
+
+
+/* =========================================================
+LOAD PRODUCTS
+========================================================= */
+
+async function loadProducts(){
+
+const container =
+document.getElementById(
+"products"
+);
+
+container.innerHTML =
+`
+<div class="empty">
+Loading products...
+</div>
+`;
+
+
+let query =
+supabaseClient
 .from("products")
 .select(`
 id,
@@ -1838,11 +2283,57 @@ unit,
 location,
 image_url,
 status,
-seller_id
+seller_id,
+created_at,
+users:seller_id(
+id,
+full_name,
+role
+)
 `)
-.eq("status","ACTIVE")
-.gt("quantity",0)
-.order("created_at",{ascending:false});
+.eq(
+"status",
+"ACTIVE"
+)
+.order(
+"created_at",
+{
+ascending:false
+}
+);
+
+
+/*
+Buyer:
+only products with stock.
+
+Farmer:
+show own products including zero inventory.
+*/
+
+if(
+currentProfile?.role === "FARMER"
+){
+
+query =
+query.eq(
+"seller_id",
+currentProfile.id
+);
+
+}else{
+
+query =
+query.gt(
+"quantity",
+0
+);
+
+}
+
+
+const {data,error} =
+await query;
 
 
 if(error){
@@ -1850,92 +2341,105 @@ if(error){
 console.error(error);
 
 container.innerHTML =
-`<div class="empty">
-Unable to load products.<br>
+`
+<div class="empty">
+
+Unable to load products.
+
+<br><br>
+
 ${escapeHtml(error.message)}
-</div>`;
+
+</div>
+`;
 
 return;
 
 }
 
 
-let products =
+allProducts =
 data || [];
 
 
-/* ================= SEARCH FILTER ================= */
-
-if(name){
-
-products =
-products.filter(product=>
-String(product.name || "")
-.toLowerCase()
-.includes(name)
+renderProducts(
+allProducts
 );
+
+
+updateFarmerStats();
 
 }
 
 
-if(location){
+/* =========================================================
+RENDER PRODUCTS
+========================================================= */
 
-products =
-products.filter(product=>
-String(product.location || "")
-.toLowerCase()
-.includes(location)
+function renderProducts(
+products
+){
+
+const container =
+document.getElementById(
+"products"
 );
 
-}
 
-
-if(unit){
-
-products =
-products.filter(product=>
-String(product.unit || "")
-.toLowerCase() === unit
-);
-
-}
-
-
-/* ================= EMPTY ================= */
-
-if(products.length === 0){
+if(
+!products ||
+products.length === 0
+){
 
 container.innerHTML =
-`<div class="empty">
+`
+<div class="empty">
 
-<h3>No matching products</h3>
+<h3>
+No matching products
+</h3>
 
 <p>
-Try another product name, location, or unit.
+Try another product name or location.
 </p>
 
-</div>`;
+</div>
+`;
 
 return;
 
 }
 
 
-/* ================= RENDER ================= */
-
 container.innerHTML =
-products.map(product=>{
+products
+.map(
+product=>{
 
 const image =
 product.image_url
 ?
-`<img
+`
+<img
 src="${escapeHtml(product.image_url)}"
-alt="${escapeHtml(product.name)}">`
+alt="${escapeHtml(product.name || "Product")}">
+`
 :
-`<div class="product-placeholder">
+`
+<div class="product-placeholder">
 🌱
-</div>`;
+</div>
+`;
+
+
+const sellerName =
+product.users?.full_name ||
+"Farmer";
+
+
+const isOwner =
+currentProfile?.id ===
+product.seller_id;
 
 
 return `
@@ -1946,44 +2450,41 @@ return `
 ${image}
 </div>
 
+
 <div class="product-content">
 
 <h3>
 ${escapeHtml(
-product.name || "Unnamed Product"
+product.name ||
+"Unnamed Product"
 )}
 </h3>
 
+
 <div class="price">
 
-${
-product.price !== null &&
-product.price !== undefined &&
-product.price !== ""
-?
-`₱${Number(product.price).toLocaleString()}`
-:
-"Price not specified"
-}
+₱${formatMoney(
+product.price
+)}
 
-${
-product.unit
-?
-` / ${escapeHtml(product.unit)}`
-:
-""
-}
+/
+${escapeHtml(
+product.unit ||
+"unit"
+)}
 
 </div>
+
 
 <div class="product-description">
 
 ${escapeHtml(
 product.description ||
-"No description available."
+"No description provided."
 )}
 
 </div>
+
 
 <div class="product-location">
 
@@ -1995,19 +2496,65 @@ product.location ||
 
 </div>
 
+
+<div class="product-seller">
+
+👤
+${escapeHtml(
+sellerName
+)}
+
+</div>
+
+
+<div class="product-location">
+
+📦
+Stock:
+${escapeHtml(
+product.quantity
+)}
+${escapeHtml(
+product.unit ||
+""
+)}
+
+</div>
+
+
 <div class="product-actions">
 
+${
+isOwner
+?
+`
+<button
+class="delete-product"
+onclick="deleteProduct('${product.id}')">
+
+Delete
+
+</button>
+`
+:
+`
 <button
 class="chat-btn"
 onclick="startChat('${product.seller_id}','${product.id}')">
-💬 Chat Seller
+
+💬 Chat
+
 </button>
 
 <button
 class="buy-btn"
-onclick="buyProduct('${product.id}')">
+onclick="openBuyModal('${product.id}')">
+
 Buy
+
 </button>
+`
+}
 
 </div>
 
@@ -2017,12 +2564,79 @@ Buy
 
 `;
 
-}).join("");
+}
+)
+.join("");
 
 }
 
 
-/* ================= ADD PRODUCT ================= */
+/* =========================================================
+FARMER STATS
+========================================================= */
+
+async function updateFarmerStats(){
+
+if(
+currentProfile?.role !== "FARMER"
+){
+
+return;
+
+}
+
+
+const {data:orders} =
+await supabaseClient
+.from("orders")
+.select("status")
+.eq(
+"seller_id",
+currentProfile.id
+);
+
+
+const list =
+orders || [];
+
+
+document
+.getElementById("statProducts")
+.textContent =
+allProducts.length;
+
+
+document
+.getElementById("statPending")
+.textContent =
+list.filter(
+x=>x.status === "PENDING"
+).length;
+
+
+document
+.getElementById("statOngoing")
+.textContent =
+list.filter(
+x=>
+x.status === "CONFIRMED" ||
+x.status === "ONGOING"
+).length;
+
+
+document
+.getElementById("statCompleted")
+.textContent =
+list.filter(
+x=>x.status === "COMPLETED"
+).length;
+
+}
+
+
+/* =========================================================
+ADD PRODUCT
+========================================================= */
 
 function openAddProduct(){
 
@@ -2044,13 +2658,15 @@ document
 
 document
 .getElementById("productForm")
-.addEventListener("submit",async e=>{
+.addEventListener(
+"submit",
+async e=>{
 
 e.preventDefault();
 
+
 if(
-!currentProfile ||
-currentProfile.role !== "FARMER"
+currentProfile?.role !== "FARMER"
 ){
 
 alert(
@@ -2062,43 +2678,12 @@ return;
 }
 
 
-const message =
-document.getElementById(
-"productMessage"
-);
-
-message.innerHTML =
-`<div class="message">
-Publishing...
-</div>`;
-
-
 const name =
 document
 .getElementById("productName")
 .value
 .trim();
 
-const description =
-document
-.getElementById("productDescription")
-.value
-.trim();
-
-const priceValue =
-document
-.getElementById("productPrice")
-.value;
-
-const quantityValue =
-document
-.getElementById("productQuantity")
-.value;
-
-const unit =
-document
-.getElementById("productUnit")
-.value;
 
 const location =
 document
@@ -2107,21 +2692,31 @@ document
 .trim();
 
 
-/*
-At least NAME or LOCATION is required.
-Other fields are optional.
-*/
+if(
+!name &&
+!location
+){
 
-if(!name && !location){
-
-message.innerHTML =
-`<div class="message error">
-Please provide at least a product name or location.
-</div>`;
+alert(
+"Enter at least a Product Name or Location."
+);
 
 return;
 
 }
+
+
+const message =
+document
+.getElementById("productMessage");
+
+
+message.innerHTML =
+`
+<div class="message">
+Publishing...
+</div>
+`;
 
 
 const file =
@@ -2129,20 +2724,27 @@ document
 .getElementById("productImage")
 .files[0];
 
-let imageUrl = null;
+
+let imageUrl =
+null;
 
 
 if(file){
 
-const fileName =
-`${currentUser.id}/${Date.now()}-${file.name.replace(
+const safeName =
+file.name.replace(
 /[^a-zA-Z0-9._-]/g,
 "_"
-)}`;
+);
+
+
+const fileName =
+`${currentUser.id}/${Date.now()}-${safeName}`;
 
 
 const {error:uploadError} =
-await supabaseClient.storage
+await supabaseClient
+.storage
 .from("product-images")
 .upload(
 fileName,
@@ -2156,11 +2758,13 @@ upsert:false
 if(uploadError){
 
 message.innerHTML =
-`<div class="message error">
+`
+<div class="message error">
 ${escapeHtml(
 uploadError.message
 )}
-</div>`;
+</div>
+`;
 
 return;
 
@@ -2168,9 +2772,13 @@ return;
 
 
 const {data:urlData} =
-supabaseClient.storage
+supabaseClient
+.storage
 .from("product-images")
-.getPublicUrl(fileName);
+.getPublicUrl(
+fileName
+);
+
 
 imageUrl =
 urlData.publicUrl;
@@ -2178,31 +2786,16 @@ urlData.publicUrl;
 }
 
 
-/*
-If quantity is empty,
-use 1 so the product can still
-appear in the marketplace.
-*/
-
-const quantity =
-quantityValue === ""
-?
-1
-:
-Number(quantityValue);
+const priceInput =
+document
+.getElementById("productPrice")
+.value;
 
 
-/*
-If price is empty,
-use 0 instead of blocking listing.
-*/
-
-const price =
-priceValue === ""
-?
-0
-:
-Number(priceValue);
+const quantityInput =
+document
+.getElementById("productQuantity")
+.value;
 
 
 const product = {
@@ -2211,27 +2804,48 @@ seller_id:
 currentProfile.id,
 
 name:
-name || "Unnamed Product",
+name,
 
 description:
-description || null,
+document
+.getElementById("productDescription")
+.value
+.trim()
+|| null,
 
 price:
-price,
+priceInput
+?
+Number(priceInput)
+:
+0,
 
 quantity:
-quantity,
+quantityInput
+?
+Number(quantityInput)
+:
+0,
 
 unit:
-unit,
+document
+.getElementById("productUnit")
+.value,
 
 location:
-location || null,
+location
+|| null,
 
 image_url:
 imageUrl,
 
-status:"ACTIVE"
+status:
+quantityInput &&
+Number(quantityInput) <= 0
+?
+"SOLD"
+:
+"ACTIVE"
 
 };
 
@@ -2247,11 +2861,13 @@ if(error){
 console.error(error);
 
 message.innerHTML =
-`<div class="message error">
+`
+<div class="message error">
 ${escapeHtml(
 error.message
 )}
-</div>`;
+</div>
+`;
 
 return;
 
@@ -2259,9 +2875,11 @@ return;
 
 
 message.innerHTML =
-`<div class="message success">
+`
+<div class="message success">
 Product published successfully!
-</div>`;
+</div>
+`;
 
 
 document
@@ -2269,222 +2887,35 @@ document
 .reset();
 
 
-await loadFarmerProducts();
+await loadProducts();
 
 
-setTimeout(()=>{
+setTimeout(
+()=>{
 
 closeAddProduct();
 
-message.innerHTML = "";
+message.innerHTML="";
 
-},1000);
+},
+800
+);
 
-});
+}
+);
 
 
-/* ================= FARMER PRODUCTS ================= */
+/* =========================================================
+DELETE PRODUCT
+========================================================= */
 
-async function loadFarmerProducts(){
-
-if(
-!currentProfile ||
-currentProfile.role !== "FARMER"
+async function deleteProduct(
+productId
 ){
-
-return;
-
-}
-
-
-const container =
-document.getElementById(
-"farmerProducts"
-);
-
-
-container.innerHTML =
-`<div class="empty">
-Loading your products...
-</div>`;
-
-
-const {data,error} =
-await supabaseClient
-.from("products")
-.select(`
-id,
-name,
-description,
-price,
-quantity,
-unit,
-location,
-image_url,
-status,
-created_at
-`)
-.eq(
-"seller_id",
-currentProfile.id
-)
-.order(
-"created_at",
-{
-ascending:false
-}
-);
-
-
-if(error){
-
-console.error(error);
-
-container.innerHTML =
-`<div class="empty">
-Unable to load products.<br>
-${escapeHtml(
-error.message
-)}
-</div>`;
-
-return;
-
-}
-
-
-document.getElementById(
-"farmerProductCount"
-).textContent =
-data?.length || 0;
-
-
-if(!data || data.length === 0){
-
-container.innerHTML =
-`<div class="empty">
-
-<h3>No products yet</h3>
-
-<p>
-Publish your first agricultural product.
-</p>
-
-</div>`;
-
-return;
-
-}
-
-
-container.innerHTML =
-data.map(product=>{
-
-const image =
-product.image_url
-?
-`<img
-src="${escapeHtml(product.image_url)}"
-alt="${escapeHtml(product.name)}">`
-:
-`<div class="product-placeholder">
-🌱
-</div>`;
-
-
-return `
-
-<div class="product-card">
-
-<div class="product-image">
-${image}
-</div>
-
-<div class="product-content">
-
-<h3>
-${escapeHtml(
-product.name ||
-"Unnamed Product"
-)}
-</h3>
-
-<div class="price">
-
-₱${Number(
-product.price || 0
-).toLocaleString()}
-
- /
-${escapeHtml(
-product.unit || ""
-)}
-
-</div>
-
-<div class="product-description">
-
-${escapeHtml(
-product.description ||
-"No description"
-)}
-
-</div>
-
-<div class="product-location">
-
-📍
-${escapeHtml(
-product.location ||
-"Location not specified"
-)}
-
-</div>
-
-<div class="product-location">
-
-Quantity:
-${escapeHtml(
-product.quantity
-)}
-
-<br>
-
-Status:
-${escapeHtml(
-product.status
-)}
-
-</div>
-
-<div class="product-actions">
-
-<button
-class="delete-product-btn"
-onclick="deleteProduct('${product.id}')">
-🗑 Delete
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-`;
-
-}).join("");
-
-}
-
-
-/* ================= DELETE PRODUCT ================= */
-
-async function deleteProduct(productId){
 
 if(
 !confirm(
-"Are you sure you want to delete this product?"
+"Delete this product? This will remove it from the marketplace."
 )
 ){
 
@@ -2493,16 +2924,55 @@ return;
 }
 
 
-/*
-.eq seller_id is important.
-A farmer can only delete their own product.
-*/
+const {data:product,error:findError} =
+await supabaseClient
+.from("products")
+.select(
+"id,seller_id,image_url"
+)
+.eq(
+"id",
+productId
+)
+.single();
+
+
+if(
+findError ||
+!product
+){
+
+alert(
+"Product not found."
+);
+
+return;
+
+}
+
+
+if(
+product.seller_id !==
+currentProfile.id
+){
+
+alert(
+"You can only delete your own products."
+);
+
+return;
+
+}
+
 
 const {error} =
 await supabaseClient
 .from("products")
 .delete()
-.eq("id",productId)
+.eq(
+"id",
+productId
+)
 .eq(
 "seller_id",
 currentProfile.id
@@ -2511,10 +2981,7 @@ currentProfile.id
 
 if(error){
 
-console.error(error);
-
 alert(
-"Unable to delete product:\n" +
 error.message
 );
 
@@ -2522,222 +2989,40 @@ return;
 
 }
 
-
-alert(
-"Product deleted successfully."
-);
-
-
-await loadFarmerProducts();
-
-
-if(currentProfile.role === "BUYER"){
 
 await loadProducts();
 
 }
 
-}
 
+/* =========================================================
+BUY MODAL
+========================================================= */
 
-/* ================= ORDERS ================= */
-
-async function loadOrders(){
-
-if(
-!currentProfile ||
-currentProfile.role !== "BUYER"
+async function openBuyModal(
+productId
 ){
-
-return;
-
-}
-
-
-const container =
-document.getElementById("orders");
-
-
-container.innerHTML =
-`<div class="empty">
-Loading orders...
-</div>`;
-
-
-const {data,error} =
-await supabaseClient
-.from("orders")
-.select(`
-id,
-product_id,
-buyer_id,
-seller_id,
-quantity,
-unit_price,
-total_price,
-status,
-created_at
-`)
-.eq(
-"buyer_id",
-currentProfile.id
-)
-.order(
-"created_at",
-{
-ascending:false
-}
-);
-
-
-if(error){
-
-console.error(error);
-
-container.innerHTML =
-`<div class="empty">
-Unable to load orders.<br>
-${escapeHtml(
-error.message
-)}
-</div>`;
-
-return;
-
-}
-
-
-if(!data || data.length === 0){
-
-container.innerHTML =
-`<div class="empty">
-
-<h3>No orders yet</h3>
-
-<p>
-Your orders will appear here.
-</p>
-
-</div>`;
-
-return;
-
-}
-
-
-container.innerHTML =
-data.map(order=>{
-
-return `
-
-<div class="order-card">
-
-<div class="order-top">
-
-<strong>
-Order #${escapeHtml(
-String(order.id)
-).slice(0,8)}
-</strong>
-
-<span class="order-status">
-${escapeHtml(
-order.status || "PENDING"
-)}
-</span>
-
-</div>
-
-<div class="order-info">
-
-Quantity:
-${escapeHtml(
-order.quantity
-)}
-
-<br>
-
-Unit Price:
-₱${Number(
-order.unit_price || 0
-).toLocaleString()}
-
-<br>
-
-Total:
-<strong>
-₱${Number(
-order.total_price || 0
-).toLocaleString()}
-</strong>
-
-</div>
-
-<div class="order-actions">
-
-${
-["PENDING","CONFIRMED"].includes(
-order.status
-)
-?
-`
-<button
-onclick="cancelOrder('${order.id}')">
-Cancel Order
-</button>
-`
-:
-""
-}
-
-</div>
-
-</div>
-
-`;
-
-}).join("");
-
-}
-
-
-/* ================= BUY PRODUCT ================= */
-
-async function buyProduct(productId){
-
-if(!currentUser){
-
-alert(
-"Please login first."
-);
-
-return;
-
-}
-
-
-if(
-currentProfile.role !== "BUYER"
-){
-
-alert(
-"Only buyers can place orders."
-);
-
-return;
-
-}
-
 
 const {data:product,error} =
 await supabaseClient
 .from("products")
-.select("*")
-.eq("id",productId)
+.select(`
+*,
+users:seller_id(
+full_name
+)
+`)
+.eq(
+"id",
+productId
+)
 .single();
 
 
-if(error || !product){
+if(
+error ||
+!product
+){
 
 alert(
 "Product could not be found."
@@ -2749,7 +3034,8 @@ return;
 
 
 if(
-product.seller_id === currentProfile.id
+product.seller_id ===
+currentProfile.id
 ){
 
 alert(
@@ -2761,14 +3047,112 @@ return;
 }
 
 
-const quantityText =
-prompt(
-`How many ${product.unit || "units"} do you want to buy?`,
-"1"
+if(
+Number(product.quantity) <= 0
+){
+
+alert(
+"This product is out of stock."
 );
 
+return;
 
-if(quantityText === null){
+}
+
+
+currentProduct =
+product;
+
+
+document
+.getElementById("buyProductId")
+.value =
+product.id;
+
+
+document
+.getElementById("buyQuantity")
+.value =
+"1";
+
+
+document
+.getElementById("buyProductInfo")
+.innerHTML =
+`
+<div
+style="
+background:#f7f7f7;
+padding:14px;
+border-radius:12px;
+margin-bottom:10px;
+">
+
+<strong>
+${escapeHtml(
+product.name ||
+"Product"
+)}
+</strong>
+
+<br>
+
+₱${formatMoney(product.price)}
+/
+${escapeHtml(product.unit)}
+
+<br>
+
+Available:
+${escapeHtml(product.quantity)}
+
+<br>
+
+Seller:
+${escapeHtml(
+product.users?.full_name ||
+"Farmer"
+)}
+
+</div>
+`;
+
+
+document
+.getElementById("buyModal")
+.classList.remove("hidden");
+
+}
+
+
+function closeBuyModal(){
+
+document
+.getElementById("buyModal")
+.classList.add("hidden");
+
+currentProduct =
+null;
+
+}
+
+
+/* =========================================================
+PLACE ORDER
+========================================================= */
+
+document
+.getElementById("buyForm")
+.addEventListener(
+"submit",
+async e=>{
+
+e.preventDefault();
+
+
+if(
+!currentProduct
+){
 
 return;
 
@@ -2776,7 +3160,11 @@ return;
 
 
 const quantity =
-Number(quantityText);
+Number(
+document
+.getElementById("buyQuantity")
+.value
+);
 
 
 if(
@@ -2785,7 +3173,7 @@ quantity <= 0
 ){
 
 alert(
-"Please enter a valid quantity."
+"Enter a valid quantity."
 );
 
 return;
@@ -2795,7 +3183,7 @@ return;
 
 if(
 quantity >
-Number(product.quantity)
+Number(currentProduct.quantity)
 ){
 
 alert(
@@ -2807,47 +3195,102 @@ return;
 }
 
 
+const paymentMethod =
+document
+.getElementById("paymentMethod")
+.value;
+
+
+const note =
+document
+.getElementById("buyerNote")
+.value
+.trim();
+
+
 const total =
-Number(product.price || 0) *
+Number(currentProduct.price)
+*
 quantity;
 
 
-const {error:orderError} =
+const buyMessage =
+document
+.getElementById("buyMessage");
+
+
+buyMessage.innerHTML =
+`
+<div class="message">
+Creating order...
+</div>
+`;
+
+
+/*
+IMPORTANT:
+The actual stock update should ideally be performed
+inside a PostgreSQL RPC transaction in a larger production
+backend. This frontend version keeps the existing Supabase
+architecture.
+*/
+
+
+const {data:order,error:orderError} =
 await supabaseClient
 .from("orders")
 .insert({
 
 product_id:
-product.id,
+currentProduct.id,
 
 buyer_id:
 currentProfile.id,
 
 seller_id:
-product.seller_id,
+currentProduct.seller_id,
 
 quantity:
 quantity,
 
 unit_price:
-Number(product.price || 0),
+Number(currentProduct.price),
 
 total_price:
 total,
 
-status:
-"PENDING"
+payment_method:
+paymentMethod,
 
-});
+payment_status:
+paymentMethod ===
+"CASH_ON_PICKUP"
+?
+"UNPAID"
+:
+"PENDING",
+
+status:
+"PENDING",
+
+buyer_note:
+note || null
+
+})
+.select()
+.single();
 
 
 if(orderError){
 
-console.error(orderError);
-
-alert(
+buyMessage.innerHTML =
+`
+<div class="message error">
+${escapeHtml(
 orderError.message
-);
+)}
+</div>
+`;
 
 return;
 
@@ -2855,7 +3298,8 @@ return;
 
 
 const remaining =
-Number(product.quantity) -
+Number(currentProduct.quantity)
+-
 quantity;
 
 
@@ -2877,36 +3321,78 @@ remaining <= 0
 })
 .eq(
 "id",
-product.id
+currentProduct.id
+)
+.eq(
+"status",
+"ACTIVE"
 );
 
 
 if(updateError){
 
-console.error(updateError);
+console.error(
+updateError
+);
 
 }
 
 
-alert(
-"Order created successfully!"
-);
+await supabaseClient
+.from("notifications")
+.insert({
 
+user_id:
+currentProduct.seller_id,
+
+title:
+"New Order",
+
+body:
+`${currentProfile.full_name} placed an order for ${quantity} ${currentProduct.unit}.`,
+
+type:
+"ORDER",
+
+reference_id:
+order.id
+
+});
+
+
+buyMessage.innerHTML =
+`
+<div class="message success">
+Order created successfully!
+</div>
+`;
+
+
+setTimeout(
+async ()=>{
+
+closeBuyModal();
 
 await loadProducts();
+
 await loadOrders();
 
+},
+700
+);
+
 }
+);
 
 
-/* ================= CANCEL ORDER ================= */
+/* =========================================================
+ORDERS
+========================================================= */
 
-async function cancelOrder(orderId){
+async function loadOrders(){
 
 if(
-!confirm(
-"Cancel this order?"
-)
+!currentProfile
 ){
 
 return;
@@ -2914,77 +3400,150 @@ return;
 }
 
 
-const {error} =
-await supabaseClient
-.from("orders")
-.update({
-status:"CANCELLED"
-})
-.eq(
-"id",
-orderId
-)
-.eq(
-"buyer_id",
-currentProfile.id
-);
-
-
-if(error){
-
-alert(
-error.message
-);
-
-return;
-
-}
-
-
-await loadOrders();
-
-}
-
-
-/* ================= FARMER TRANSACTIONS ================= */
-
-async function loadFarmerTransactions(){
-
 if(
-!currentProfile ||
-currentProfile.role !== "FARMER"
+currentProfile.role ===
+"FARMER"
 ){
 
-return;
+await loadFarmerOrders();
+
+}else{
+
+await loadBuyerOrders();
 
 }
 
+}
+
+
+/* =========================================================
+BUYER ORDERS
+========================================================= */
+
+async function loadBuyerOrders(){
 
 const container =
 document.getElementById(
-"farmerTransactions"
+"orders"
 );
 
 
 container.innerHTML =
-`<div class="empty">
-Loading transactions...
-</div>`;
+`
+<div class="empty">
+Loading orders...
+</div>
+`;
 
 
 const {data,error} =
 await supabaseClient
 .from("orders")
 .select(`
-id,
-product_id,
-buyer_id,
-seller_id,
-quantity,
-unit_price,
-total_price,
-status,
-created_at
+*,
+products:product_id(
+name,
+unit
+),
+seller:seller_id(
+full_name
+)
+`)
+.eq(
+"buyer_id",
+currentProfile.id
+)
+.order(
+"created_at",
+{
+ascending:false
+}
+);
+
+
+if(error){
+
+container.innerHTML =
+`
+<div class="empty">
+${escapeHtml(
+error.message
+)}
+</div>
+`;
+
+return;
+
+}
+
+
+if(
+!data ||
+data.length === 0
+){
+
+container.innerHTML =
+`
+<div class="empty">
+
+<h3>
+No orders yet
+</h3>
+
+<p>
+Your orders will appear here.
+</p>
+
+</div>
+`;
+
+return;
+
+}
+
+
+container.innerHTML =
+data
+.map(
+renderOrder
+)
+.join("");
+
+}
+
+
+/* =========================================================
+FARMER ORDERS
+========================================================= */
+
+async function loadFarmerOrders(){
+
+const container =
+document.getElementById(
+"farmerOrders"
+);
+
+
+container.innerHTML =
+`
+<div class="empty">
+Loading transactions...
+</div>
+`;
+
+
+const {data,error} =
+await supabaseClient
+.from("orders")
+.select(`
+*,
+products:product_id(
+name,
+unit
+),
+buyer:buyer_id(
+full_name
+)
 `)
 .eq(
 "seller_id",
@@ -3000,124 +3559,39 @@ ascending:false
 
 if(error){
 
-console.error(error);
-
 container.innerHTML =
-`<div class="empty">
-Unable to load transactions.<br>
+`
+<div class="empty">
 ${escapeHtml(
 error.message
 )}
-</div>`;
+</div>
+`;
 
 return;
 
 }
 
 
-const pending =
-(data || []).filter(order =>
-order.status === "PENDING"
-);
-
-
-const ongoing =
-(data || []).filter(order =>
-[
-"CONFIRMED",
-"PROCESSING",
-"SHIPPED",
-"READY_FOR_PICKUP"
-].includes(
-order.status
-)
-);
-
-
-document.getElementById(
-"farmerPendingCount"
-).textContent =
-pending.length;
-
-
-document.getElementById(
-"farmerOngoingCount"
-).textContent =
-ongoing.length;
-
-
-renderFarmerTransactions(
-currentTransactionTab === "PENDING"
-?
-pending
-:
-ongoing
-);
-
-}
-
-
-/* ================= TRANSACTION TABS ================= */
-
-function showTransactionTab(tab){
-
-currentTransactionTab =
-tab;
-
-
-document
-.getElementById("pendingTab")
-.classList.toggle(
-"active",
-tab === "PENDING"
-);
-
-
-document
-.getElementById("ongoingTab")
-.classList.toggle(
-"active",
-tab === "ONGOING"
-);
-
-
-loadFarmerTransactions();
-
-}
-
-
-/* ================= RENDER FARMER TRANSACTIONS ================= */
-
-async function renderFarmerTransactions(
-orders
+if(
+!data ||
+data.length === 0
 ){
 
-const container =
-document.getElementById(
-"farmerTransactions"
-);
-
-
-if(!orders || orders.length === 0){
-
 container.innerHTML =
-`<div class="empty">
+`
+<div class="empty">
 
 <h3>
-${
-currentTransactionTab === "PENDING"
-?
-"No pending orders"
-:
-"No ongoing transactions"
-}
+No transactions yet
 </h3>
 
 <p>
-Transactions will appear here automatically.
+New buyer orders will appear here.
 </p>
 
-</div>`;
+</div>
+`;
 
 return;
 
@@ -3125,125 +3599,225 @@ return;
 
 
 container.innerHTML =
-orders.map(order=>{
+data
+.map(
+renderOrder
+)
+.join("");
+
+
+updateFarmerStats();
+
+}
+
+
+/* =========================================================
+RENDER ORDER
+========================================================= */
+
+function renderOrder(
+order
+){
+
+const productName =
+order.products?.name ||
+"Deleted product";
+
+
+const unit =
+order.products?.unit ||
+"unit";
+
+
+const otherName =
+currentProfile.role === "FARMER"
+?
+order.buyer?.full_name ||
+"Buyer"
+:
+order.seller?.full_name ||
+"Farmer";
+
+
+const status =
+order.status ||
+"PENDING";
+
+
+let actions =
+"";
+
+
+if(
+currentProfile.role ===
+"FARMER"
+){
+
+if(
+status === "PENDING"
+){
+
+actions +=
+`
+<button
+class="accept-btn"
+onclick="updateOrderStatus('${order.id}','CONFIRMED')">
+
+Accept
+
+</button>
+
+<button
+class="reject-btn"
+onclick="updateOrderStatus('${order.id}','REJECTED')">
+
+Reject
+
+</button>
+`;
+
+}
+
+
+if(
+status === "CONFIRMED"
+){
+
+actions +=
+`
+<button
+class="complete-btn"
+onclick="updateOrderStatus('${order.id}','ONGOING')">
+
+Start Transaction
+
+</button>
+`;
+
+}
+
+
+if(
+status === "ONGOING"
+){
+
+actions +=
+`
+<button
+class="complete-btn"
+onclick="updateOrderStatus('${order.id}','COMPLETED')">
+
+Mark Completed
+
+</button>
+`;
+
+}
+
+}else{
+
+if(
+status === "PENDING" ||
+status === "CONFIRMED"
+){
+
+actions +=
+`
+<button
+class="cancel-btn"
+onclick="updateOrderStatus('${order.id}','CANCELLED')">
+
+Cancel Order
+
+</button>
+`;
+
+}
+
+}
+
 
 return `
 
-<div class="transaction-card">
+<div class="order-card">
 
-<div class="transaction-top">
+<div class="order-top">
 
 <strong>
-Order #${escapeHtml(
-String(order.id)
-).slice(0,8)}
+${escapeHtml(productName)}
 </strong>
 
-<span class="transaction-status">
-${escapeHtml(
-order.status
-)}
+<span
+class="order-status status-${escapeHtml(status)}">
+
+${escapeHtml(status)}
+
 </span>
 
 </div>
 
-<div class="transaction-info">
 
-Quantity:
+<div class="order-info">
+
+${currentProfile.role === "FARMER"
+? "Buyer"
+: "Farmer"
+}:
+
 <strong>
-${escapeHtml(
-order.quantity
-)}
+${escapeHtml(otherName)}
 </strong>
 
 <br>
 
+Quantity:
+${escapeHtml(order.quantity)}
+${escapeHtml(unit)}
+
+<br>
+
 Unit Price:
-₱${Number(
-order.unit_price || 0
-).toLocaleString()}
+₱${formatMoney(order.unit_price)}
 
 <br>
 
 Total:
 <strong>
-₱${Number(
-order.total_price || 0
-).toLocaleString()}
+₱${formatMoney(order.total_price)}
 </strong>
 
 <br>
 
-Created:
-${order.created_at
+Payment:
+${formatPaymentMethod(
+order.payment_method
+)}
+
+<br>
+
+Payment Status:
+${escapeHtml(
+order.payment_status
+)}
+
+<br>
+
+${order.buyer_note
 ?
-new Date(
-order.created_at
-).toLocaleString()
+`
+Note:
+${escapeHtml(order.buyer_note)}
+`
 :
 ""
 }
 
 </div>
 
-<div class="transaction-actions">
 
-${
-order.status === "PENDING"
-?
-`
-<button
-onclick="updateOrderStatus('${order.id}','CONFIRMED')">
-Accept Order
-</button>
+<div class="order-actions">
 
-<button
-onclick="updateOrderStatus('${order.id}','CANCELLED')">
-Reject
-</button>
-`
-:
-""
-}
-
-${
-order.status === "CONFIRMED"
-?
-`
-<button
-onclick="updateOrderStatus('${order.id}','PROCESSING')">
-Start Processing
-</button>
-`
-:
-""
-}
-
-${
-order.status === "PROCESSING"
-?
-`
-<button
-onclick="updateOrderStatus('${order.id}','READY_FOR_PICKUP')">
-Ready for Pickup
-</button>
-`
-:
-""
-}
-
-${
-order.status === "READY_FOR_PICKUP"
-?
-`
-<button
-onclick="updateOrderStatus('${order.id}','COMPLETED')">
-Mark Completed
-</button>
-`
-:
-""
-}
+${actions}
 
 </div>
 
@@ -3251,38 +3825,107 @@ Mark Completed
 
 `;
 
-}).join("");
+}
+
+
+function formatPaymentMethod(
+method
+){
+
+const names = {
+
+GCASH:"GCash",
+
+MAYA:"Maya",
+
+BANK_TRANSFER:
+"Bank Transfer",
+
+CASH_ON_PICKUP:
+"Cash on Pickup"
+
+};
+
+return names[method] ||
+method ||
+"Not specified";
 
 }
 
 
-/* ================= UPDATE ORDER STATUS ================= */
+/* =========================================================
+UPDATE ORDER
+========================================================= */
 
 async function updateOrderStatus(
 orderId,
 newStatus
 ){
 
-const {error} =
+const {data:order,error:findError} =
 await supabaseClient
 .from("orders")
-.update({
-status:newStatus
-})
+.select("*")
 .eq(
 "id",
 orderId
 )
-.eq(
-"seller_id",
+.single();
+
+
+if(
+findError ||
+!order
+){
+
+alert(
+"Order not found."
+);
+
+return;
+
+}
+
+
+const allowed =
+currentProfile.role === "FARMER"
+?
+order.seller_id ===
 currentProfile.id
+:
+order.buyer_id ===
+currentProfile.id;
+
+
+if(!allowed){
+
+alert(
+"You cannot update this order."
+);
+
+return;
+
+}
+
+
+const {error} =
+await supabaseClient
+.from("orders")
+.update({
+
+status:
+newStatus
+
+})
+.eq(
+"id",
+orderId
 );
 
 
 if(error){
 
 alert(
-"Unable to update order:\n" +
 error.message
 );
 
@@ -3291,12 +3934,44 @@ return;
 }
 
 
-await loadFarmerTransactions();
+const targetUser =
+currentProfile.role === "FARMER"
+?
+order.buyer_id
+:
+order.seller_id;
+
+
+await supabaseClient
+.from("notifications")
+.insert({
+
+user_id:
+targetUser,
+
+title:
+"Order Updated",
+
+body:
+`Order status changed to ${newStatus}.`,
+
+type:
+"ORDER",
+
+reference_id:
+orderId
+
+});
+
+
+await loadOrders();
 
 }
 
 
-/* ================= CHAT ================= */
+/* =========================================================
+CHAT
+========================================================= */
 
 function openChat(){
 
@@ -3323,24 +3998,31 @@ supabaseClient
 messageChannel
 );
 
-messageChannel = null;
+messageChannel =
+null;
 
 }
 
 
-currentConversation = null;
+currentConversation =
+null;
 
 }
 
 
-/* ================= START CHAT ================= */
+/* =========================================================
+START CHAT
+========================================================= */
 
 async function startChat(
 sellerId,
 productId
 ){
 
-if(!currentUser){
+if(
+!currentUser ||
+!currentProfile
+){
 
 alert(
 "Please login first."
@@ -3352,7 +4034,8 @@ return;
 
 
 if(
-sellerId === currentProfile.id
+sellerId ===
+currentProfile.id
 ){
 
 alert(
@@ -3365,36 +4048,54 @@ return;
 
 
 /*
-The conversation is created in Supabase.
-Once created, it remains available in
-Messages even after leaving the product page.
+First search for an existing conversation.
+This is what makes the conversation persistent.
 */
 
-const {data:existing,error:findError} =
-await supabaseClient
+let query =
+supabaseClient
 .from("conversations")
 .select("*")
 .eq(
 "buyer_id",
+currentProfile.role === "BUYER"
+?
 currentProfile.id
-)
-.eq(
-"seller_id",
+:
 sellerId
 )
 .eq(
+"seller_id",
+currentProfile.role === "BUYER"
+?
+sellerId
+:
+currentProfile.id
+);
+
+
+if(productId){
+
+query =
+query.eq(
 "product_id",
 productId
-)
+);
+
+}
+
+
+const {data:existing,error} =
+await query
 .maybeSingle();
 
 
-if(findError){
+if(error){
 
-console.error(findError);
+console.error(error);
 
 alert(
-findError.message
+error.message
 );
 
 return;
@@ -3408,31 +4109,58 @@ existing;
 
 if(!conversation){
 
-const {data:newConversation,error} =
+const buyerId =
+currentProfile.role ===
+"BUYER"
+?
+currentProfile.id
+:
+null;
+
+
+const finalBuyer =
+buyerId ||
+await findBuyerForConversation(
+sellerId
+);
+
+
+if(!finalBuyer){
+
+alert(
+"Could not identify buyer."
+);
+
+return;
+
+}
+
+
+const {data:newConversation,error:createError} =
 await supabaseClient
 .from("conversations")
 .insert({
 
 buyer_id:
-currentProfile.id,
+finalBuyer,
 
 seller_id:
 sellerId,
 
 product_id:
-productId
+productId || null
 
 })
 .select()
 .single();
 
 
-if(error){
+if(createError){
 
-console.error(error);
+console.error(createError);
 
 alert(
-error.message
+createError.message
 );
 
 return;
@@ -3449,22 +4177,45 @@ newConversation;
 openChat();
 
 
-setTimeout(()=>{
+await loadConversations();
+
+
+setTimeout(
+()=>{
 
 selectConversation(
 conversation
 );
 
-},300);
+},
+200
+);
 
 }
 
 
-/* ================= LOAD CONVERSATIONS ================= */
+/*
+For a farmer starting a conversation,
+this helper is only relevant if a buyer id
+is explicitly available through the UI.
+*/
+
+async function findBuyerForConversation(){
+
+return null;
+
+}
+
+
+/* =========================================================
+LOAD CONVERSATIONS
+========================================================= */
 
 async function loadConversations(){
 
-if(!currentProfile){
+if(
+!currentProfile
+){
 
 return;
 
@@ -3478,20 +4229,34 @@ document.getElementById(
 
 
 list.innerHTML =
-`<div class="chat-empty">
+`
+<div class="chat-empty">
 Loading...
-</div>`;
+</div>
+`;
 
 
 const {data,error} =
 await supabaseClient
 .from("conversations")
-.select("*")
+.select(`
+*,
+buyer:buyer_id(
+id,
+full_name,
+role
+),
+seller:seller_id(
+id,
+full_name,
+role
+)
+`)
 .or(
 `buyer_id.eq.${currentProfile.id},seller_id.eq.${currentProfile.id}`
 )
 .order(
-"created_at",
+"updated_at",
 {
 ascending:false
 }
@@ -3503,11 +4268,11 @@ if(error){
 console.error(error);
 
 list.innerHTML =
-`<div class="chat-empty">
-${escapeHtml(
-error.message
-)}
-</div>`;
+`
+<div class="chat-empty">
+${escapeHtml(error.message)}
+</div>
+`;
 
 return;
 
@@ -3520,47 +4285,38 @@ data.length === 0
 ){
 
 list.innerHTML =
-`<div class="chat-empty">
+`
+<div class="chat-empty">
 
 No conversations yet.
 
 <br><br>
 
-Start a conversation from a product.
+Start a chat from a product.
 
-</div>`;
+</div>
+`;
 
 return;
 
 }
 
 
-list.innerHTML = "";
+list.innerHTML =
+"";
 
 
 for(
 const conversation of data
 ){
 
-const otherUserId =
-conversation.buyer_id === currentProfile.id
+const otherUser =
+conversation.buyer_id ===
+currentProfile.id
 ?
-conversation.seller_id
+conversation.seller
 :
-conversation.buyer_id;
-
-
-const {data:user} =
-await supabaseClient
-.from("users")
-.select(
-"id,full_name,role"
-)
-.eq(
-"id",
-otherUserId
-)
-.single();
+conversation.buyer;
 
 
 const item =
@@ -3573,25 +4329,32 @@ item.className =
 "conversation-item";
 
 
-item.innerHTML = `
+item.innerHTML =
+`
 
 <div class="conversation-name">
+
 ${escapeHtml(
-user?.full_name ||
+otherUser?.full_name ||
 "User"
 )}
+
 </div>
 
 <div class="conversation-preview">
+
 ${escapeHtml(
-user?.role || ""
+otherUser?.role ||
+""
 )}
+
 </div>
 
 `;
 
 
-item.onclick = () => {
+item.onclick =
+()=>{
 
 selectConversation(
 conversation
@@ -3609,7 +4372,9 @@ item
 }
 
 
-/* ================= SELECT CONVERSATION ================= */
+/* =========================================================
+SELECT CONVERSATION
+========================================================= */
 
 async function selectConversation(
 conversation
@@ -3619,31 +4384,19 @@ currentConversation =
 conversation;
 
 
-const otherUserId =
-conversation.buyer_id === currentProfile.id
+const otherUser =
+conversation.buyer_id ===
+currentProfile.id
 ?
-conversation.seller_id
+conversation.seller
 :
-conversation.buyer_id;
-
-
-const {data:user} =
-await supabaseClient
-.from("users")
-.select(
-"full_name,role"
-)
-.eq(
-"id",
-otherUserId
-)
-.single();
+conversation.buyer;
 
 
 document
 .getElementById("chatUserName")
 .textContent =
-user?.full_name ||
+otherUser?.full_name ||
 "User";
 
 
@@ -3654,27 +4407,33 @@ subscribeToMessages();
 }
 
 
-/* ================= LOAD MESSAGES ================= */
+/* =========================================================
+LOAD MESSAGES
+========================================================= */
 
 async function loadMessages(){
 
-if(!currentConversation){
+if(
+!currentConversation
+){
 
 return;
 
 }
 
 
-const messagesBox =
+const box =
 document.getElementById(
 "chatMessages"
 );
 
 
-messagesBox.innerHTML =
-`<div class="chat-empty">
+box.innerHTML =
+`
+<div class="chat-empty">
 Loading messages...
-</div>`;
+</div>
+`;
 
 
 const {data,error} =
@@ -3697,12 +4456,12 @@ if(error){
 
 console.error(error);
 
-messagesBox.innerHTML =
-`<div class="chat-empty">
-${escapeHtml(
-error.message
-)}
-</div>`;
+box.innerHTML =
+`
+<div class="chat-empty">
+${escapeHtml(error.message)}
+</div>
+`;
 
 return;
 
@@ -3714,8 +4473,9 @@ if(
 data.length === 0
 ){
 
-messagesBox.innerHTML =
-`<div class="chat-empty">
+box.innerHTML =
+`
+<div class="chat-empty">
 
 No messages yet.
 
@@ -3723,28 +4483,35 @@ No messages yet.
 
 Say hello 👋
 
-</div>`;
+</div>
+`;
 
 return;
 
 }
 
 
-messagesBox.innerHTML =
+box.innerHTML =
 data
-.map(renderMessage)
+.map(
+renderMessage
+)
 .join("");
 
 
-messagesBox.scrollTop =
-messagesBox.scrollHeight;
+box.scrollTop =
+box.scrollHeight;
 
 }
 
 
-/* ================= RENDER MESSAGE ================= */
+/* =========================================================
+MESSAGE
+========================================================= */
 
-function renderMessage(message){
+function renderMessage(
+message
+){
 
 const mine =
 message.sender_id ===
@@ -3776,10 +4543,13 @@ id="message-${message.id}">
 <div class="chat-bubble">
 
 <div>
+
 ${escapeHtml(
 message.content
 )}
+
 </div>
+
 
 <div class="chat-time">
 
@@ -3792,7 +4562,9 @@ mine
 <button
 class="message-delete"
 onclick="deleteMessage('${message.id}')">
+
 Delete
+
 </button>
 `
 :
@@ -3810,11 +4582,15 @@ Delete
 }
 
 
-/* ================= REALTIME CHAT ================= */
+/* =========================================================
+REALTIME CHAT
+========================================================= */
 
 function subscribeToMessages(){
 
-if(!currentConversation){
+if(
+!currentConversation
+){
 
 return;
 
@@ -3842,11 +4618,16 @@ currentConversation.id
 .on(
 "postgres_changes",
 {
+
 event:"INSERT",
+
 schema:"public",
+
 table:"messages",
+
 filter:
 `conversation_id=eq.${currentConversation.id}`
+
 },
 payload=>{
 
@@ -3864,7 +4645,8 @@ box.querySelector(
 
 if(empty){
 
-box.innerHTML = "";
+box.innerHTML =
+"";
 
 }
 
@@ -3896,11 +4678,16 @@ box.scrollHeight;
 .on(
 "postgres_changes",
 {
+
 event:"DELETE",
+
 schema:"public",
+
 table:"messages",
+
 filter:
 `conversation_id=eq.${currentConversation.id}`
+
 },
 payload=>{
 
@@ -3926,7 +4713,9 @@ element.remove();
 }
 
 
-/* ================= SEND MESSAGE ================= */
+/* =========================================================
+SEND MESSAGE
+========================================================= */
 
 document
 .getElementById("chatForm")
@@ -3967,7 +4756,8 @@ return;
 }
 
 
-input.disabled = true;
+input.disabled =
+true;
 
 
 const {error} =
@@ -3981,18 +4771,14 @@ currentConversation.id,
 sender_id:
 currentProfile.id,
 
-/*
-IMPORTANT:
-Database column is "content".
-*/
-
 content:
 text
 
 });
 
 
-input.disabled = false;
+input.disabled =
+false;
 
 
 if(error){
@@ -4008,12 +4794,34 @@ return;
 }
 
 
-input.value = "";
+input.value =
+"";
+
+
+/*
+Update conversation timestamp so
+it appears at the top next time.
+*/
+
+await supabaseClient
+.from("conversations")
+.update({
+
+updated_at:
+new Date().toISOString()
+
+})
+.eq(
+"id",
+currentConversation.id
+);
 
 });
 
 
-/* ================= DELETE MESSAGE ================= */
+/* =========================================================
+DELETE MESSAGE
+========================================================= */
 
 async function deleteMessage(
 messageId
@@ -4055,7 +4863,237 @@ error.message
 }
 
 
-/* ================= LOGOUT ================= */
+/* =========================================================
+NOTIFICATIONS
+========================================================= */
+
+function toggleNotifications(){
+
+document
+.getElementById(
+"notificationPanel"
+)
+.classList.toggle(
+"hidden"
+);
+
+loadNotifications();
+
+}
+
+
+async function loadNotifications(){
+
+if(
+!currentProfile
+){
+
+return;
+
+}
+
+
+const box =
+document.getElementById(
+"notifications"
+);
+
+
+const {data,error} =
+await supabaseClient
+.from("notifications")
+.select("*")
+.eq(
+"user_id",
+currentProfile.id
+)
+.order(
+"created_at",
+{
+ascending:false
+}
+)
+.limit(30);
+
+
+if(error){
+
+box.innerHTML =
+`
+<div style="padding:15px">
+${escapeHtml(error.message)}
+</div>
+`;
+
+return;
+
+}
+
+
+if(
+!data ||
+data.length === 0
+){
+
+box.innerHTML =
+`
+<div style="padding:15px;color:#777">
+
+No notifications.
+
+</div>
+`;
+
+return;
+
+}
+
+
+box.innerHTML =
+data
+.map(
+notification=>
+`
+
+<div
+class="notification-item ${
+notification.is_read
+?
+""
+:
+"unread"
+}"
+onclick="markNotificationRead('${notification.id}')">
+
+<strong>
+
+${escapeHtml(
+notification.title
+)}
+
+</strong>
+
+<br>
+
+${escapeHtml(
+notification.body
+)}
+
+<small>
+
+${new Date(
+notification.created_at
+).toLocaleString()
+}
+
+</small>
+
+</div>
+
+`
+)
+.join("");
+
+}
+
+
+async function markNotificationRead(
+id
+){
+
+await supabaseClient
+.from("notifications")
+.update({
+is_read:true
+})
+.eq(
+"id",
+id
+)
+.eq(
+"user_id",
+currentProfile.id
+);
+
+await loadNotifications();
+
+}
+
+
+/* =========================================================
+REALTIME ORDERS
+========================================================= */
+
+function subscribeToOrders(){
+
+if(
+!currentProfile
+){
+
+return;
+
+}
+
+
+if(orderChannel){
+
+supabaseClient
+.removeChannel(
+orderChannel
+);
+
+}
+
+
+orderChannel =
+supabaseClient
+.channel(
+"orders-" +
+currentProfile.id
+)
+
+
+.on(
+"postgres_changes",
+{
+
+event:"*",
+
+schema:"public",
+
+table:"orders"
+
+},
+async payload=>{
+
+const row =
+payload.new ||
+payload.old;
+
+
+if(
+row.buyer_id ===
+currentProfile.id ||
+row.seller_id ===
+currentProfile.id
+){
+
+await loadOrders();
+
+}
+
+}
+)
+
+
+.subscribe();
+
+}
+
+
+/* =========================================================
+LOGOUT
+========================================================= */
 
 async function logout(){
 
@@ -4066,7 +5104,21 @@ await supabaseClient
 messageChannel
 );
 
-messageChannel = null;
+messageChannel =
+null;
+
+}
+
+
+if(orderChannel){
+
+await supabaseClient
+.removeChannel(
+orderChannel
+);
+
+orderChannel =
+null;
 
 }
 
@@ -4076,9 +5128,14 @@ await supabaseClient
 .signOut();
 
 
-currentUser = null;
-currentProfile = null;
-currentConversation = null;
+currentUser =
+null;
+
+currentProfile =
+null;
+
+currentConversation =
+null;
 
 
 document
@@ -4096,7 +5153,9 @@ showLogin();
 }
 
 
-/* ================= SESSION ================= */
+/* =========================================================
+SESSION
+========================================================= */
 
 async function checkSession(){
 
@@ -4117,6 +5176,30 @@ data.session.user
 }
 
 }
+
+
+supabaseClient
+.auth
+.onAuthStateChange(
+async(
+event,
+session
+)=>{
+
+if(
+event ===
+"SIGNED_IN" &&
+session
+){
+
+await initializeApp(
+session.user
+);
+
+}
+
+}
+);
 
 
 checkSession();
