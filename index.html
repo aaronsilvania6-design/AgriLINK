@@ -187,40 +187,33 @@ select:focus{
   color:#b71c1c;
 }
 
-/* ================= APP LAYOUT ================= */
+/* ================= NAVBAR ================= */
 
-.app-layout{
-  display:flex;
-  min-height:100vh;
-}
-
-.sidebar{
-  width:250px;
+.navbar{
   background:white;
-  border-right:1px solid var(--border);
-  position:fixed;
-  left:0;
+  border-bottom:1px solid var(--border);
+  padding:13px 22px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  position:sticky;
   top:0;
-  bottom:0;
-  z-index:50;
-  padding:20px 14px;
+  z-index:20;
 }
 
-.sidebar-brand{
+.nav-brand{
   display:flex;
   align-items:center;
-  gap:10px;
-  color:var(--red);
-  font-size:20px;
+  gap:9px;
   font-weight:bold;
-  padding:10px;
-  margin-bottom:25px;
+  color:var(--red);
+  font-size:19px;
 }
 
-.sidebar-logo{
-  width:42px;
-  height:42px;
-  border-radius:12px;
+.nav-logo{
+  width:40px;
+  height:40px;
+  border-radius:11px;
   background:var(--red);
   color:white;
   display:flex;
@@ -228,226 +221,57 @@ select:focus{
   justify-content:center;
 }
 
-.sidebar-menu{
+.nav-actions{
   display:flex;
-  flex-direction:column;
-  gap:5px;
+  gap:8px;
+  align-items:center;
 }
 
-.side-btn{
+/* ================= MAIN ================= */
+
+.container{
   width:100%;
-  border:none;
-  background:transparent;
-  text-align:left;
-  padding:13px 14px;
-  border-radius:11px;
-  font-weight:bold;
-  color:#555;
-}
-
-.side-btn:hover,
-.side-btn.active{
-  background:#ffebee;
-  color:var(--red);
-}
-
-.sidebar-bottom{
-  position:absolute;
-  bottom:20px;
-  left:14px;
-  right:14px;
-}
-
-.main-area{
-  margin-left:250px;
-  width:calc(100% - 250px);
-  min-height:100vh;
-}
-
-.topbar{
-  background:white;
-  border-bottom:1px solid var(--border);
-  height:68px;
-  padding:0 25px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  position:sticky;
-  top:0;
-  z-index:30;
-}
-
-.mobile-menu{
-  display:none;
-  border:none;
-  background:#eee;
-  padding:10px;
-  border-radius:9px;
-}
-
-.top-user{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.avatar{
-  width:38px;
-  height:38px;
-  border-radius:50%;
-  background:#ffebee;
-  color:var(--red);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:bold;
-}
-
-.content{
-  max-width:1350px;
+  max-width:1200px;
   margin:auto;
-  padding:25px;
+  padding:25px 20px 50px;
 }
 
-/* ================= DASHBOARD ================= */
-
-.page{
-  display:none;
-}
-
-.page.active{
-  display:block;
-}
-
-.hero{
+.welcome{
   background:linear-gradient(135deg,var(--red),var(--red2));
   color:white;
-  padding:30px;
-  border-radius:22px;
-  margin-bottom:22px;
+  padding:28px;
+  border-radius:20px;
+  margin-bottom:25px;
 }
 
-.hero h1{
-  font-size:30px;
-  margin-bottom:8px;
+.welcome h1{
+  margin-bottom:7px;
 }
 
 .role-badge{
   display:inline-block;
-  margin-top:12px;
+  margin-top:10px;
+  background:rgba(255,255,255,.18);
   padding:7px 12px;
   border-radius:20px;
-  background:rgba(255,255,255,.18);
   font-size:13px;
 }
 
-.quick-actions{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:15px;
-  margin-bottom:25px;
+.section{
+  margin-bottom:30px;
 }
-
-.quick-card{
-  background:white;
-  border:1px solid var(--border);
-  border-radius:17px;
-  padding:20px;
-  cursor:pointer;
-  transition:.2s;
-}
-
-.quick-card:hover{
-  transform:translateY(-2px);
-  box-shadow:var(--shadow);
-}
-
-.quick-icon{
-  font-size:28px;
-  margin-bottom:10px;
-}
-
-.quick-card h3{
-  margin-bottom:5px;
-}
-
-.quick-card p{
-  color:var(--muted);
-  font-size:13px;
-}
-
-.stats{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:15px;
-  margin-bottom:25px;
-}
-
-.stat-card{
-  background:white;
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:20px;
-}
-
-.stat-label{
-  color:var(--muted);
-  font-size:13px;
-}
-
-.stat-value{
-  font-size:30px;
-  font-weight:bold;
-  margin-top:7px;
-}
-
-.dashboard-grid{
-  display:grid;
-  grid-template-columns:2fr 1fr;
-  gap:20px;
-}
-
-.panel{
-  background:white;
-  border:1px solid var(--border);
-  border-radius:17px;
-  padding:20px;
-}
-
-.panel-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:17px;
-}
-
-/* ================= PRODUCTS ================= */
 
 .section-title{
   display:flex;
   justify-content:space-between;
   align-items:center;
+  margin-bottom:15px;
   gap:10px;
-  margin-bottom:18px;
-}
-
-.filters{
-  display:flex;
-  gap:10px;
-  margin-bottom:20px;
-}
-
-.filters input{
-  flex:1;
-}
-
-.filters select{
-  max-width:180px;
 }
 
 .products{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
   gap:17px;
 }
 
@@ -529,6 +353,15 @@ select:focus{
   color:white;
 }
 
+.empty{
+  background:white;
+  border:1px dashed #ccc;
+  padding:40px 20px;
+  border-radius:16px;
+  text-align:center;
+  color:var(--muted);
+}
+
 /* ================= ORDERS ================= */
 
 .orders{
@@ -574,150 +407,6 @@ select:focus{
   border:none;
   padding:9px 12px;
   border-radius:9px;
-}
-
-/* ================= MY PRODUCTS ================= */
-
-.my-products{
-  display:grid;
-  gap:12px;
-}
-
-.my-product{
-  background:white;
-  border:1px solid var(--border);
-  border-radius:15px;
-  padding:17px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:15px;
-}
-
-.my-product-info h3{
-  margin-bottom:5px;
-}
-
-.my-product-info p{
-  color:var(--muted);
-  font-size:13px;
-}
-
-.my-product-actions{
-  display:flex;
-  gap:7px;
-}
-
-/* ================= AI ================= */
-
-.ai-box{
-  background:white;
-  border:1px solid var(--border);
-  border-radius:20px;
-  overflow:hidden;
-}
-
-.ai-header{
-  background:linear-gradient(135deg,#2e7d32,#43a047);
-  color:white;
-  padding:25px;
-}
-
-.ai-header h2{
-  margin-bottom:7px;
-}
-
-.ai-header p{
-  opacity:.9;
-  font-size:14px;
-}
-
-.ai-chat{
-  height:430px;
-  display:flex;
-  flex-direction:column;
-}
-
-.ai-messages{
-  flex:1;
-  overflow-y:auto;
-  padding:20px;
-  background:#fafafa;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-
-.ai-row{
-  display:flex;
-}
-
-.ai-row.user{
-  justify-content:flex-end;
-}
-
-.ai-bubble{
-  max-width:75%;
-  padding:12px 15px;
-  border-radius:15px;
-  background:white;
-  border:1px solid var(--border);
-  line-height:1.5;
-}
-
-.ai-row.user .ai-bubble{
-  background:#e8f5e9;
-  border-color:#c8e6c9;
-}
-
-.ai-input{
-  display:flex;
-  gap:8px;
-  padding:12px;
-  border-top:1px solid var(--border);
-}
-
-.ai-input button{
-  border:none;
-  background:var(--green);
-  color:white;
-  padding:0 20px;
-  border-radius:10px;
-}
-
-/* ================= PROFILE ================= */
-
-.profile-card{
-  max-width:650px;
-  background:white;
-  border:1px solid var(--border);
-  border-radius:20px;
-  padding:25px;
-}
-
-.profile-avatar{
-  width:80px;
-  height:80px;
-  border-radius:50%;
-  background:#ffebee;
-  color:var(--red);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-size:30px;
-  font-weight:bold;
-  margin-bottom:15px;
-}
-
-.info-row{
-  padding:15px 0;
-  border-bottom:1px solid var(--border);
-}
-
-.info-label{
-  color:var(--muted);
-  font-size:12px;
-  margin-bottom:5px;
 }
 
 /* ================= MODAL ================= */
@@ -805,6 +494,9 @@ select:focus{
   color:var(--muted);
   font-size:12px;
   margin-top:5px;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
 }
 
 .chat-window{
@@ -854,6 +546,7 @@ select:focus{
   border-radius:15px;
   background:white;
   border:1px solid var(--border);
+  position:relative;
 }
 
 .message-row.mine .chat-bubble{
@@ -895,133 +588,137 @@ select:focus{
   border-radius:10px;
 }
 
-/* ================= EMPTY ================= */
-
-.empty{
-  background:white;
-  border:1px dashed #ccc;
-  padding:40px 20px;
-  border-radius:16px;
+.chat-empty{
+  margin:auto;
   text-align:center;
   color:var(--muted);
-  grid-column:1/-1;
+  padding:20px;
 }
 
 /* ================= RESPONSIVE ================= */
 
-@media(max-width:900px){
+@media(max-width:800px){
 
-.sidebar{
-  transform:translateX(-100%);
-  transition:.25s;
+  .chat-layout{
+    grid-template-columns:1fr;
+  }
+
+  .conversation-list{
+    display:none;
+  }
+
+  .chat-modal .modal-card{
+    max-width:100%;
+  }
+
+  .chat-layout{
+    height:85vh;
+  }
 }
 
-.sidebar.open{
-  transform:translateX(0);
+@media(max-width:600px){
+
+  .auth-card{
+    padding:22px;
+  }
+
+  .navbar{
+    padding:11px;
+  }
+
+  .nav-brand{
+    font-size:16px;
+  }
+
+  .nav-logo{
+    width:36px;
+    height:36px;
+  }
+
+  .nav-actions{
+    gap:5px;
+  }
+
+  .nav-actions button{
+    padding:9px;
+    font-size:12px;
+  }
+
+  .container{
+    padding:17px 12px 40px;
+  }
+
+  .welcome{
+    padding:21px;
+    border-radius:16px;
+  }
+
+  .products{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
+  }
+
+  .product-image{
+    height:120px;
+  }
+
+  .product-content{
+    padding:11px;
+  }
+
+  .product-content h3{
+    font-size:15px;
+  }
+
+  .price{
+    font-size:16px;
+  }
+
+  .product-description{
+    font-size:12px;
+  }
+
+  .product-actions{
+    flex-direction:column;
+  }
+
+  .modal{
+    padding:8px;
+  }
+
+  .modal-card{
+    padding:18px;
+    border-radius:16px;
+  }
+
+  .chat-modal{
+    padding:0;
+  }
+
+  .chat-modal .modal-card{
+    border-radius:0;
+    height:100vh;
+    max-height:100vh;
+  }
+
+  .chat-layout{
+    height:100vh;
+  }
+
+  .chat-bubble{
+    max-width:85%;
+  }
 }
 
-.main-area{
-  margin-left:0;
-  width:100%;
-}
+@media(min-width:1400px){
 
-.mobile-menu{
-  display:block;
-}
+  .container{
+    max-width:1350px;
+  }
 
-.quick-actions,
-.stats{
-  grid-template-columns:1fr;
-}
-
-.dashboard-grid{
-  grid-template-columns:1fr;
-}
-
-}
-
-@media(max-width:650px){
-
-.topbar{
-  padding:0 12px;
-}
-
-.content{
-  padding:17px 12px 40px;
-}
-
-.hero{
-  padding:22px;
-}
-
-.hero h1{
-  font-size:24px;
-}
-
-.products{
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:10px;
-}
-
-.product-image{
-  height:120px;
-}
-
-.product-content{
-  padding:11px;
-}
-
-.product-content h3{
-  font-size:15px;
-}
-
-.price{
-  font-size:16px;
-}
-
-.product-description{
-  font-size:12px;
-}
-
-.product-actions{
-  flex-direction:column;
-}
-
-.filters{
-  flex-direction:column;
-}
-
-.filters select{
-  max-width:none;
-}
-
-.my-product{
-  align-items:flex-start;
-  flex-direction:column;
-}
-
-.chat-layout{
-  grid-template-columns:1fr;
-}
-
-.conversation-list{
-  display:none;
-}
-
-.chat-modal{
-  padding:0;
-}
-
-.chat-modal .modal-card{
-  border-radius:0;
-  height:100vh;
-  max-height:100vh;
-}
-
-.chat-layout{
-  height:100vh;
-}
-
+  .products{
+    grid-template-columns:repeat(5,1fr);
+  }
 }
 </style>
 </head>
@@ -1044,11 +741,17 @@ Connect. Trade. Grow.
 
 <div class="tabs">
 
-<button id="loginTab" class="tab active" onclick="showLogin()">
+<button
+id="loginTab"
+class="tab active"
+onclick="showLogin()">
 Login
 </button>
 
-<button id="signupTab" class="tab" onclick="showSignup()">
+<button
+id="signupTab"
+class="tab"
+onclick="showSignup()">
 Sign Up
 </button>
 
@@ -1128,405 +831,85 @@ Create Account
 
 <div id="app" class="hidden">
 
-<div class="app-layout">
+<nav class="navbar">
 
-<!-- SIDEBAR -->
-
-<aside id="sidebar" class="sidebar">
-
-<div class="sidebar-brand">
-<div class="sidebar-logo">🌾</div>
+<div class="nav-brand">
+<div class="nav-logo">🌾</div>
 AgriLink AI
 </div>
 
-<div class="sidebar-menu">
-
-<button class="side-btn active" onclick="showPage('dashboard',this)">
-🏠 Dashboard
-</button>
-
-<button class="side-btn" onclick="showPage('marketplace',this)">
-🛒 Marketplace
-</button>
-
-<button id="myProductsNav" class="side-btn" onclick="showPage('myProducts',this)">
-🌱 My Products
-</button>
-
-<button class="side-btn" onclick="showPage('orders',this)">
-📦 My Orders
-</button>
-
-<button class="side-btn" onclick="openChat()">
-💬 Messages
-</button>
-
-<button class="side-btn" onclick="showPage('ai',this)">
-🤖 AgriLink AI
-</button>
-
-<button class="side-btn" onclick="showPage('profile',this)">
-👤 Profile
-</button>
-
-</div>
-
-<div class="sidebar-bottom">
-
-<button class="side-btn" onclick="logout()">
-🚪 Logout
-</button>
-
-</div>
-
-</aside>
-
-
-<!-- MAIN -->
-
-<div class="main-area">
-
-<header class="topbar">
-
-<div style="display:flex;align-items:center;gap:10px;">
+<div class="nav-actions">
 
 <button
-class="mobile-menu"
-onclick="toggleSidebar()">
-☰
+class="secondary-btn"
+onclick="openChat()">
+💬 Chat
 </button>
 
-<strong id="pageTitle">
-Dashboard
-</strong>
+<button
+id="addProductButton"
+class="secondary-btn"
+onclick="openAddProduct()">
++ Product
+</button>
+
+<button
+class="danger-btn"
+onclick="logout()">
+Logout
+</button>
 
 </div>
 
-<div class="top-user">
-
-<div>
-<strong id="topUserName">
-User
-</strong>
-</div>
-
-<div id="topAvatar" class="avatar">
-U
-</div>
-
-</div>
-
-</header>
+</nav>
 
 
-<main class="content">
+<main class="container">
 
-<!-- ================= DASHBOARD ================= -->
-
-<section id="dashboardPage" class="page active">
-
-<div class="hero">
+<section class="welcome">
 
 <h1>
-Welcome, <span id="userName">User</span>! 👋
+Welcome, <span id="userName">User</span>!
 </h1>
 
 <p>
-Manage your agricultural marketplace, products and orders in one place.
+Your agricultural marketplace.
 </p>
 
 <div id="roleBadge" class="role-badge"></div>
 
-</div>
-
-
-<div class="quick-actions">
-
-<div
-class="quick-card"
-onclick="showPage('marketplace')">
-
-<div class="quick-icon">
-🛒
-</div>
-
-<h3>
-Browse Marketplace
-</h3>
-
-<p>
-Find fresh agricultural products from local sellers.
-</p>
-
-</div>
-
-
-<div
-id="sellQuickCard"
-class="quick-card"
-onclick="openAddProduct()">
-
-<div class="quick-icon">
-🌱
-</div>
-
-<h3>
-Sell a Product
-</h3>
-
-<p>
-Publish your agricultural products.
-</p>
-
-</div>
-
-
-<div
-class="quick-card"
-onclick="showPage('ai')">
-
-<div class="quick-icon">
-🤖
-</div>
-
-<h3>
-Ask AgriLink AI
-</h3>
-
-<p>
-Get helpful agricultural information and guidance.
-</p>
-
-</div>
-
-</div>
-
-
-<div class="stats">
-
-<div class="stat-card">
-
-<div class="stat-label">
-Orders
-</div>
-
-<div id="statOrders" class="stat-value">
-0
-</div>
-
-</div>
-
-<div class="stat-card">
-
-<div class="stat-label">
-My Products
-</div>
-
-<div id="statProducts" class="stat-value">
-0
-</div>
-
-</div>
-
-<div class="stat-card">
-
-<div class="stat-label">
-Messages
-</div>
-
-<div id="statMessages" class="stat-value">
-0
-</div>
-
-</div>
-
-</div>
-
-
-<div class="dashboard-grid">
-
-<div class="panel">
-
-<div class="panel-header">
-
-<h2>
-🌾 Recent Products
-</h2>
-
-<button
-class="secondary-btn"
-onclick="showPage('marketplace')">
-View All
-</button>
-
-</div>
-
-<div id="dashboardProducts" class="products"></div>
-
-</div>
-
-
-<div class="panel">
-
-<div class="panel-header">
-
-<h2>
-🤖 AgriLink AI
-</h2>
-
-</div>
-
-<p style="color:#666;line-height:1.6;margin-bottom:20px;">
-
-Need help with crops, farming, agricultural products,
-or marketplace questions?
-
-</p>
-
-<button
-class="primary-btn"
-onclick="showPage('ai')">
-Ask AgriLink AI
-</button>
-
-</div>
-
-</div>
-
 </section>
 
 
-<!-- ================= MARKETPLACE ================= -->
-
-<section id="marketplacePage" class="page">
+<section class="section">
 
 <div class="section-title">
 
-<div>
-
-<h1>
-🛒 Marketplace
-</h1>
-
-<p style="color:#777;margin-top:5px;">
-Find agricultural products available near you.
-</p>
-
-</div>
+<h2>Marketplace</h2>
 
 <button
 class="secondary-btn"
 onclick="loadProducts()">
-↻ Refresh
+Refresh
 </button>
 
 </div>
-
-
-<div class="filters">
-
-<input
-id="searchProduct"
-placeholder="🔎 Search products..."
-oninput="filterProducts()">
-
-<select
-id="categoryFilter"
-onchange="filterProducts()">
-
-<option value="">
-All Products
-</option>
-
-<option value="vegetable">
-Vegetables
-</option>
-
-<option value="fruit">
-Fruits
-</option>
-
-<option value="rice">
-Rice
-</option>
-
-<option value="corn">
-Corn
-</option>
-
-<option value="livestock">
-Livestock
-</option>
-
-<option value="other">
-Other
-</option>
-
-</select>
-
-</div>
-
 
 <div id="products" class="products"></div>
 
 </section>
 
 
-<!-- ================= MY PRODUCTS ================= -->
-
-<section id="myProductsPage" class="page">
+<section class="section">
 
 <div class="section-title">
 
-<div>
-
-<h1>
-🌱 My Products
-</h1>
-
-<p style="color:#777;margin-top:5px;">
-Manage the products you have published.
-</p>
-
-</div>
-
-<button
-class="primary-btn"
-style="width:auto;margin:0;"
-onclick="openAddProduct()">
-+ Add Product
-</button>
-
-</div>
-
-
-<div id="myProducts" class="my-products"></div>
-
-</section>
-
-
-<!-- ================= ORDERS ================= -->
-
-<section id="ordersPage" class="page">
-
-<div class="section-title">
-
-<div>
-
-<h1>
-📦 My Orders
-</h1>
-
-<p style="color:#777;margin-top:5px;">
-Track your purchases and orders.
-</p>
-
-</div>
+<h2>My Orders</h2>
 
 <button
 class="secondary-btn"
 onclick="loadOrders()">
-↻ Refresh
+Refresh
 </button>
 
 </div>
@@ -1535,178 +918,11 @@ onclick="loadOrders()">
 
 </section>
 
-
-<!-- ================= AI ================= -->
-
-<section id="aiPage" class="page">
-
-<div class="section-title">
-
-<div>
-
-<h1>
-🤖 AgriLink AI
-</h1>
-
-<p style="color:#777;margin-top:5px;">
-Your agricultural assistant.
-</p>
-
-</div>
-
-</div>
-
-
-<div class="ai-box">
-
-<div class="ai-header">
-
-<h2>
-🌾 AgriLink AI Assistant
-</h2>
-
-<p>
-Ask questions about farming, crops, agricultural products,
-or general marketplace information.
-</p>
-
-</div>
-
-
-<div class="ai-chat">
-
-<div id="aiMessages" class="ai-messages">
-
-<div class="ai-row">
-
-<div class="ai-bubble">
-
-Hi! 👋 I'm AgriLink AI.
-
-<br><br>
-
-You can ask me things like:
-
-<br>
-• What crops grow well in the Philippines?
-<br>
-• How do I take care of tomatoes?
-<br>
-• What should I consider when selling rice?
-<br>
-• How can farmers reduce food waste?
-
-</div>
-
-</div>
-
-</div>
-
-
-<form id="aiForm" class="ai-input">
-
-<input
-id="aiInput"
-placeholder="Ask AgriLink AI..."
-autocomplete="off">
-
-<button>
-Send
-</button>
-
-</form>
-
-</div>
-
-</div>
-
-</section>
-
-
-<!-- ================= PROFILE ================= -->
-
-<section id="profilePage" class="page">
-
-<div class="section-title">
-
-<div>
-
-<h1>
-👤 Profile
-</h1>
-
-<p style="color:#777;margin-top:5px;">
-Your AgriLink account information.
-</p>
-
-</div>
-
-</div>
-
-
-<div class="profile-card">
-
-<div id="profileAvatar" class="profile-avatar">
-U
-</div>
-
-<h2 id="profileName">
-User
-</h2>
-
-
-<div class="info-row">
-
-<div class="info-label">
-EMAIL
-</div>
-
-<div id="profileEmail">
--
-</div>
-
-</div>
-
-
-<div class="info-row">
-
-<div class="info-label">
-ACCOUNT TYPE
-</div>
-
-<div id="profileRole">
--
-</div>
-
-</div>
-
-
-<div class="info-row">
-
-<div class="info-label">
-ACCOUNT ID
-</div>
-
-<div id="profileId">
--
-</div>
-
-</div>
-
-</div>
-
-</section>
-
 </main>
-
-</div>
-
-</div>
-
 </div>
 
 
-<!-- ================= ADD PRODUCT MODAL ================= -->
+<!-- ================= ADD PRODUCT ================= -->
 
 <div id="productModal" class="modal hidden">
 
@@ -1714,9 +930,7 @@ ACCOUNT ID
 
 <div class="modal-header">
 
-<h2>
-Add Product
-</h2>
+<h2>Add Product</h2>
 
 <button
 class="close"
@@ -1726,32 +940,22 @@ onclick="closeAddProduct()">
 
 </div>
 
-
 <form id="productForm">
 
-<label>
-Product Name
-</label>
+<label>Product Name</label>
 
 <input
 id="productName"
 required
 placeholder="Fresh Tomatoes">
 
-
-<label>
-Description
-</label>
+<label>Description</label>
 
 <textarea
 id="productDescription"
-placeholder="Describe your product">
-</textarea>
+placeholder="Describe your product"></textarea>
 
-
-<label>
-Price
-</label>
+<label>Price</label>
 
 <input
 id="productPrice"
@@ -1760,10 +964,7 @@ min="0"
 step="0.01"
 required>
 
-
-<label>
-Quantity
-</label>
+<label>Quantity</label>
 
 <input
 id="productQuantity"
@@ -1772,87 +973,28 @@ min="0"
 step="0.01"
 required>
 
-
-<label>
-Unit
-</label>
+<label>Unit</label>
 
 <select id="productUnit">
-
-<option value="kg">
-kg
-</option>
-
-<option value="piece">
-piece
-</option>
-
-<option value="sack">
-sack
-</option>
-
-<option value="box">
-box
-</option>
-
-<option value="dozen">
-dozen
-</option>
-
+<option value="kg">kg</option>
+<option value="piece">piece</option>
+<option value="sack">sack</option>
+<option value="box">box</option>
+<option value="dozen">dozen</option>
 </select>
 
-
-<label>
-Category
-</label>
-
-<select id="productCategory">
-
-<option value="vegetable">
-Vegetables
-</option>
-
-<option value="fruit">
-Fruits
-</option>
-
-<option value="rice">
-Rice
-</option>
-
-<option value="corn">
-Corn
-</option>
-
-<option value="livestock">
-Livestock
-</option>
-
-<option value="other">
-Other
-</option>
-
-</select>
-
-
-<label>
-Location
-</label>
+<label>Location</label>
 
 <input
 id="productLocation"
 placeholder="Municipality / Province">
 
-
-<label>
-Product Image
-</label>
+<label>Product Image</label>
 
 <input
 id="productImage"
 type="file"
 accept="image/*">
-
 
 <button class="primary-btn">
 Publish Product
@@ -1863,11 +1005,10 @@ Publish Product
 </form>
 
 </div>
-
 </div>
 
 
-<!-- ================= CHAT MODAL ================= -->
+<!-- ================= CHAT ================= -->
 
 <div id="chatModal" class="modal chat-modal hidden">
 
@@ -1938,15 +1079,12 @@ Send
 </div>
 
 </div>
-
 </div>
 
 
 <script>
 
-/* =========================================================
-   SUPABASE
-========================================================= */
+/* ================= SUPABASE ================= */
 
 const SUPABASE_URL =
 "https://ivbqudztsmsylnodydce.supabase.co";
@@ -1961,21 +1099,16 @@ SUPABASE_KEY
 );
 
 
-/* =========================================================
-   GLOBALS
-========================================================= */
+/* ================= GLOBALS ================= */
 
 let currentUser = null;
 let currentProfile = null;
+
 let currentConversation = null;
 let messageChannel = null;
 
-let allProducts = [];
 
-
-/* =========================================================
-   HELPERS
-========================================================= */
+/* ================= HELPERS ================= */
 
 function escapeHtml(value){
 
@@ -1989,124 +1122,7 @@ return String(value ?? "")
 }
 
 
-function initials(name){
-
-if(!name) return "U";
-
-return name
-.split(" ")
-.map(x=>x[0])
-.join("")
-.substring(0,2)
-.toUpperCase();
-
-}
-
-
-/* =========================================================
-   NAVIGATION
-========================================================= */
-
-function showPage(page,button){
-
-document
-.querySelectorAll(".page")
-.forEach(p=>{
-p.classList.remove("active");
-});
-
-const target =
-document.getElementById(
-page + "Page"
-);
-
-if(target){
-
-target.classList.add("active");
-
-}
-
-document
-.querySelectorAll(".side-btn")
-.forEach(btn=>{
-btn.classList.remove("active");
-});
-
-if(button){
-
-button.classList.add("active");
-
-}
-
-const titles = {
-
-dashboard:"Dashboard",
-
-marketplace:"Marketplace",
-
-myProducts:"My Products",
-
-orders:"My Orders",
-
-ai:"AgriLink AI",
-
-profile:"Profile"
-
-};
-
-document
-.getElementById("pageTitle")
-.textContent =
-titles[page] || "AgriLink AI";
-
-
-if(page === "marketplace"){
-
-loadProducts();
-
-}
-
-if(page === "myProducts"){
-
-loadMyProducts();
-
-}
-
-if(page === "orders"){
-
-loadOrders();
-
-}
-
-if(page === "profile"){
-
-loadProfile();
-
-}
-
-if(window.innerWidth <= 900){
-
-document
-.getElementById("sidebar")
-.classList.remove("open");
-
-}
-
-}
-
-
-function toggleSidebar(){
-
-document
-.getElementById("sidebar")
-.classList.toggle("open");
-
-}
-
-
-/* =========================================================
-   AUTH TABS
-========================================================= */
+/* ================= AUTH TABS ================= */
 
 function showLogin(){
 
@@ -2150,31 +1166,26 @@ document
 }
 
 
+/* ================= AUTH MESSAGE ================= */
+
 function showAuthMessage(text,type){
 
 const box =
-document.getElementById(
-"authMessage"
-);
+document.getElementById("authMessage");
 
 box.className =
 "message " + type;
 
-box.textContent =
-text;
+box.textContent = text;
 
 }
 
 
-/* =========================================================
-   LOGIN
-========================================================= */
+/* ================= LOGIN ================= */
 
 document
 .getElementById("loginForm")
-.addEventListener(
-"submit",
-async e=>{
+.addEventListener("submit",async e=>{
 
 e.preventDefault();
 
@@ -2206,23 +1217,16 @@ return;
 
 }
 
-await initializeApp(
-data.user
-);
+await initializeApp(data.user);
 
-}
-);
+});
 
 
-/* =========================================================
-   SIGNUP
-========================================================= */
+/* ================= SIGNUP ================= */
 
 document
 .getElementById("signupForm")
-.addEventListener(
-"submit",
-async e=>{
+.addEventListener("submit",async e=>{
 
 e.preventDefault();
 
@@ -2275,7 +1279,7 @@ return;
 }
 
 showAuthMessage(
-"Account created successfully. Check your email if confirmation is required.",
+"Account created successfully. You can now log in.",
 "success"
 );
 
@@ -2283,30 +1287,21 @@ document
 .getElementById("signupForm")
 .reset();
 
-}
-);
+});
 
 
-/* =========================================================
-   INITIALIZE APP
-========================================================= */
+/* ================= INITIALIZE ================= */
 
 async function initializeApp(user){
 
-currentUser =
-user;
-
+currentUser = user;
 
 const {data:profile,error} =
 await supabaseClient
 .from("users")
 .select("*")
-.eq(
-"auth_user_id",
-user.id
-)
+.eq("auth_user_id",user.id)
 .single();
-
 
 if(error){
 
@@ -2320,10 +1315,7 @@ return;
 
 }
 
-
-currentProfile =
-profile;
-
+currentProfile = profile;
 
 document
 .getElementById("authScreen")
@@ -2333,96 +1325,46 @@ document
 .getElementById("app")
 .classList.remove("hidden");
 
-
-const name =
-profile.full_name ||
-user.email ||
-"User";
-
-
 document
 .getElementById("userName")
 .textContent =
-name;
-
-document
-.getElementById("topUserName")
-.textContent =
-name;
-
-document
-.getElementById("topAvatar")
-.textContent =
-initials(name);
-
-document
-.getElementById("profileAvatar")
-.textContent =
-initials(name);
+profile.full_name;
 
 document
 .getElementById("roleBadge")
 .textContent =
 profile.role;
 
+const addButton =
+document.getElementById("addProductButton");
 
-const isFarmer =
-profile.role === "FARMER";
+if(profile.role !== "FARMER"){
 
+addButton.classList.add("hidden");
 
-document
-.getElementById("myProductsNav")
-.classList.toggle(
-"hidden",
-!isFarmer
-);
+}else{
 
+addButton.classList.remove("hidden");
 
-document
-.getElementById("sellQuickCard")
-classList
-.toggle(
-"hidden",
-!isFarmer
-);
-
+}
 
 await loadProducts();
 await loadOrders();
-await loadMyProducts();
-await loadStats();
-
-loadProfile();
 
 }
 
 
-/* =========================================================
-   PRODUCTS
-========================================================= */
+/* ================= PRODUCTS ================= */
 
 async function loadProducts(){
 
 const container =
-document.getElementById(
-"products"
-);
-
-const dashboardContainer =
-document.getElementById(
-"dashboardProducts"
-);
-
-
-if(container){
+document.getElementById("products");
 
 container.innerHTML =
 `<div class="empty">
 Loading products...
 </div>`;
-
-}
-
 
 const {data,error} =
 await supabaseClient
@@ -2437,31 +1379,15 @@ unit,
 location,
 image_url,
 status,
-seller_id,
-category,
-created_at
+seller_id
 `)
-.eq(
-"status",
-"ACTIVE"
-)
-.gt(
-"quantity",
-0
-)
-.order(
-"created_at",
-{
-ascending:false
-}
-);
-
+.eq("status","ACTIVE")
+.gt("quantity",0)
+.order("created_at",{ascending:false});
 
 if(error){
 
 console.error(error);
-
-if(container){
 
 container.innerHTML =
 `<div class="empty">
@@ -2469,47 +1395,24 @@ Unable to load products.<br>
 ${escapeHtml(error.message)}
 </div>`;
 
+return;
+
 }
+
+if(!data || data.length === 0){
+
+container.innerHTML =
+`<div class="empty">
+<h3>No products yet</h3>
+<p>Be the first farmer to publish a product.</p>
+</div>`;
 
 return;
 
 }
 
-
-allProducts =
-data || [];
-
-
-renderProducts(
-allProducts
-);
-
-
-if(dashboardContainer){
-
-const recent =
-allProducts.slice(
-0,
-4
-);
-
-dashboardContainer.innerHTML =
-recent.length
-?
-recent.map(
-renderProductCard
-).join("")
-:
-`<div class="empty">
-No products available yet.
-</div>`;
-
-}
-
-}
-
-
-function renderProductCard(product){
+container.innerHTML =
+data.map(product=>{
 
 const image =
 product.image_url
@@ -2518,10 +1421,7 @@ product.image_url
 src="${escapeHtml(product.image_url)}"
 alt="${escapeHtml(product.name)}">`
 :
-`<div class="product-placeholder">
-🌱
-</div>`;
-
+`<div class="product-placeholder">🌱</div>`;
 
 return `
 
@@ -2538,189 +1438,57 @@ ${escapeHtml(product.name)}
 </h3>
 
 <div class="price">
-₱${Number(
-product.price || 0
-).toLocaleString()}
+₱${Number(product.price).toLocaleString()}
  /
-${escapeHtml(
-product.unit || "unit"
-)}
+${escapeHtml(product.unit)}
 </div>
 
 <div class="product-description">
 ${escapeHtml(
-product.description ||
-"No description"
+product.description || "No description"
 )}
 </div>
 
 <div class="product-location">
 📍
 ${escapeHtml(
-product.location ||
-"Location not specified"
+product.location || "Location not specified"
 )}
-</div>
-
-<div style="font-size:12px;color:#777;margin-bottom:10px;">
-Available:
-${escapeHtml(product.quantity)}
-${escapeHtml(product.unit || "")}
 </div>
 
 <div class="product-actions">
 
 <button
 class="chat-btn"
-onclick="startChat(
-'${product.seller_id}',
-'${product.id}'
-)">
+onclick="startChat('${product.seller_id}','${product.id}')">
 💬 Chat
 </button>
 
 <button
 class="buy-btn"
-onclick="buyProduct(
-'${product.id}'
-)">
+onclick="buyProduct('${product.id}')">
 Buy
 </button>
 
 </div>
 
 </div>
-
 </div>
 
 `;
 
-}
-
-
-function renderProducts(products){
-
-const container =
-document.getElementById(
-"products"
-);
-
-if(!container) return;
-
-
-if(!products.length){
-
-container.innerHTML =
-`<div class="empty">
-
-<h3>
-No products found
-</h3>
-
-<p>
-Try another search or category.
-</p>
-
-</div>`;
-
-return;
+}).join("");
 
 }
 
 
-container.innerHTML =
-products
-.map(renderProductCard)
-.join("");
-
-}
-
-
-function filterProducts(){
-
-const search =
-document
-.getElementById(
-"searchProduct"
-)
-.value
-.toLowerCase()
-.trim();
-
-const category =
-document
-.getElementById(
-"categoryFilter"
-)
-.value;
-
-
-const filtered =
-allProducts.filter(product=>{
-
-const name =
-String(
-product.name || ""
-)
-.toLowerCase();
-
-const description =
-String(
-product.description || ""
-)
-.toLowerCase();
-
-const matchesSearch =
-!search ||
-name.includes(search) ||
-description.includes(search);
-
-const matchesCategory =
-!category ||
-String(
-product.category || "other"
-)
-.toLowerCase() ===
-category;
-
-return (
-matchesSearch &&
-matchesCategory
-);
-
-});
-
-
-renderProducts(
-filtered
-);
-
-
-/* =========================================================
-   ADD PRODUCT
-========================================================= */
+/* ================= ADD PRODUCT ================= */
 
 function openAddProduct(){
 
-if(
-!currentProfile ||
-currentProfile.role !== "FARMER"
-){
-
-alert(
-"Only farmers can publish products."
-);
-
-return;
-
-}
-
 document
-.getElementById(
-"productModal"
-)
-.classList
-.remove("hidden");
+.getElementById("productModal")
+.classList.remove("hidden");
 
 }
 
@@ -2728,23 +1496,17 @@ document
 function closeAddProduct(){
 
 document
-.getElementById(
-"productModal"
-)
-.classList
-.add("hidden");
+.getElementById("productModal")
+.classList.add("hidden");
 
 }
 
 
 document
 .getElementById("productForm")
-.addEventListener(
-"submit",
-async e=>{
+.addEventListener("submit",async e=>{
 
 e.preventDefault();
-
 
 if(
 !currentProfile ||
@@ -2759,48 +1521,31 @@ return;
 
 }
 
-
 const message =
-document.getElementById(
-"productMessage"
-);
+document.getElementById("productMessage");
 
 message.innerHTML =
 `<div class="message">
 Publishing...
 </div>`;
 
-
 const file =
 document
-.getElementById(
-"productImage"
-)
+.getElementById("productImage")
 .files[0];
 
-
-let imageUrl =
-null;
-
+let imageUrl = null;
 
 if(file){
 
-const safeName =
-file.name.replace(
+const fileName =
+`${currentUser.id}/${Date.now()}-${file.name.replace(
 /[^a-zA-Z0-9._-]/g,
 "_"
-);
+)}`;
 
-
-const fileName =
-`${currentUser.id}/${Date.now()}-${safeName}`;
-
-
-const {
-error:uploadError
-} =
-await supabaseClient
-.storage
+const {error:uploadError} =
+await supabaseClient.storage
 .from("product-images")
 .upload(
 fileName,
@@ -2810,37 +1555,26 @@ upsert:false
 }
 );
 
-
 if(uploadError){
 
 message.innerHTML =
 `<div class="message error">
-${escapeHtml(
-uploadError.message
-)}
+${escapeHtml(uploadError.message)}
 </div>`;
 
 return;
 
 }
 
-
-const {
-data:urlData
-} =
-supabaseClient
-.storage
+const {data:urlData} =
+supabaseClient.storage
 .from("product-images")
-.getPublicUrl(
-fileName
-);
-
+.getPublicUrl(fileName);
 
 imageUrl =
 urlData.publicUrl;
 
 }
-
 
 const product = {
 
@@ -2849,76 +1583,52 @@ currentProfile.id,
 
 name:
 document
-.getElementById(
-"productName"
-)
+.getElementById("productName")
 .value
 .trim(),
 
 description:
 document
-.getElementById(
-"productDescription"
-)
+.getElementById("productDescription")
 .value
 .trim(),
 
 price:
 Number(
 document
-.getElementById(
-"productPrice"
-)
+.getElementById("productPrice")
 .value
 ),
 
 quantity:
 Number(
 document
-.getElementById(
-"productQuantity"
-)
+.getElementById("productQuantity")
 .value
 ),
 
 unit:
 document
-.getElementById(
-"productUnit"
-)
-.value,
-
-category:
-document
-.getElementById(
-"productCategory"
-)
+.getElementById("productUnit")
 .value,
 
 location:
 document
-.getElementById(
-"productLocation"
-)
+.getElementById("productLocation")
 .value
 .trim(),
 
 image_url:
 imageUrl,
 
-status:
-"ACTIVE"
+status:"ACTIVE"
 
 };
 
-
-const {
-error
-} =
+const {error} =
 await supabaseClient
 .from("products")
 .insert(product);
-
 
 if(error){
 
@@ -2926,349 +1636,54 @@ console.error(error);
 
 message.innerHTML =
 `<div class="message error">
-${escapeHtml(
-error.message
-)}
+${escapeHtml(error.message)}
 </div>`;
 
 return;
 
 }
 
-
 message.innerHTML =
 `<div class="message success">
-Product published successfully! 🌱
+Product published successfully!
 </div>`;
 
-
 document
-.getElementById(
-"productForm"
-)
+.getElementById("productForm")
 .reset();
 
-
 await loadProducts();
-await loadMyProducts();
-await loadStats();
-
 
 setTimeout(()=>{
 
 closeAddProduct();
 
-message.innerHTML =
-"";
+message.innerHTML = "";
 
 },1000);
 
-}
-);
+});
 
 
-/* =========================================================
-   MY PRODUCTS
-========================================================= */
-
-async function loadMyProducts(){
-
-const container =
-document.getElementById(
-"myProducts"
-);
-
-if(!container ||
-!currentProfile){
-
-return;
-
-}
-
-
-if(
-currentProfile.role !== "FARMER"
-){
-
-container.innerHTML =
-`<div class="empty">
-Only farmer accounts can manage products.
-</div>`;
-
-return;
-
-}
-
-
-container.innerHTML =
-`<div class="empty">
-Loading...
-</div>`;
-
-
-const {
-data,
-error
-} =
-await supabaseClient
-.from("products")
-.select("*")
-.eq(
-"seller_id",
-currentProfile.id
-)
-.order(
-"created_at",
-{
-ascending:false
-}
-);
-
-
-if(error){
-
-container.innerHTML =
-`<div class="empty">
-${escapeHtml(
-error.message
-)}
-</div>`;
-
-return;
-
-}
-
-
-if(!data || !data.length){
-
-container.innerHTML =
-`<div class="empty">
-
-<h3>
-No products yet
-</h3>
-
-<p>
-Publish your first agricultural product.
-</p>
-
-<br>
-
-<button
-class="primary-btn"
-style="width:auto;"
-onclick="openAddProduct()">
-+ Add Product
-</button>
-
-</div>`;
-
-return;
-
-}
-
-
-container.innerHTML =
-data
-.map(product=>`
-
-<div class="my-product">
-
-<div class="my-product-info">
-
-<h3>
-${escapeHtml(
-product.name
-)}
-</h3>
-
-<p>
-₱${Number(
-product.price || 0
-).toLocaleString()}
-/
-${escapeHtml(
-product.unit || ""
-)}
-&nbsp; • &nbsp;
-
-Quantity:
-${escapeHtml(
-product.quantity
-)}
-
-</p>
-
-<p>
-Status:
-<strong>
-${escapeHtml(
-product.status || "ACTIVE"
-)}
-</strong>
-</p>
-
-</div>
-
-
-<div class="my-product-actions">
-
-<button
-class="secondary-btn"
-onclick="toggleProductStatus(
-'${product.id}',
-'${product.status}'
-)">
-${product.status === "ACTIVE"
-? "Pause"
-: "Activate"}
-</button>
-
-
-<button
-class="danger-btn"
-onclick="deleteProduct(
-'${product.id}'
-)">
-Delete
-</button>
-
-</div>
-
-</div>
-
-`)
-.join("");
-
-}
-
-
-async function toggleProductStatus(
-productId,
-status
-){
-
-const newStatus =
-status === "ACTIVE"
-?
-"INACTIVE"
-:
-"ACTIVE";
-
-
-const {
-error
-} =
-await supabaseClient
-.from("products")
-.update({
-status:newStatus
-})
-.eq(
-"id",
-productId
-)
-.eq(
-"seller_id",
-currentProfile.id
-);
-
-
-if(error){
-
-alert(
-error.message
-);
-
-return;
-
-}
-
-
-await loadProducts();
-await loadMyProducts();
-
-}
-
-
-async function deleteProduct(
-productId
-){
-
-if(
-!confirm(
-"Delete this product?"
-)
-){
-
-return;
-
-}
-
-
-const {
-error
-} =
-await supabaseClient
-.from("products")
-.delete()
-.eq(
-"id",
-productId
-)
-.eq(
-"seller_id",
-currentProfile.id
-);
-
-
-if(error){
-
-alert(
-error.message
-);
-
-return;
-
-}
-
-
-await loadProducts();
-await loadMyProducts();
-await loadStats();
-
-}
-
-
-/* =========================================================
-   ORDERS
-========================================================= */
+/* ================= ORDERS ================= */
 
 async function loadOrders(){
 
 const container =
-document.getElementById(
-"orders"
-);
-
-if(!container ||
-!currentProfile){
-
-return;
-
-}
-
+document.getElementById("orders");
 
 container.innerHTML =
 `<div class="empty">
 Loading orders...
 </div>`;
 
+if(!currentProfile){
 
-const {
-data,
-error
-} =
+return;
+
+}
+
+const {data,error} =
 await supabaseClient
 .from("orders")
 .select(`
@@ -3292,7 +1707,6 @@ ascending:false
 }
 );
 
-
 if(error){
 
 console.error(error);
@@ -3300,47 +1714,36 @@ console.error(error);
 container.innerHTML =
 `<div class="empty">
 Unable to load orders.<br>
-${escapeHtml(
-error.message
-)}
+${escapeHtml(error.message)}
 </div>`;
 
 return;
 
 }
 
-
-if(!data || !data.length){
+if(!data || data.length === 0){
 
 container.innerHTML =
 `<div class="empty">
-
-<h3>
-No orders yet
-</h3>
-
-<p>
-Your orders will appear here.
-</p>
-
+<h3>No orders yet</h3>
+<p>Your orders will appear here.</p>
 </div>`;
 
 return;
 
 }
 
-
 container.innerHTML =
-data.map(order=>`
+data.map(order=>{
+
+return `
 
 <div class="order-card">
 
 <div class="order-top">
 
 <strong>
-Order #${escapeHtml(
-String(order.id)
-).slice(0,8)}
+Order #${escapeHtml(order.id).slice(0,8)}
 </strong>
 
 <span class="order-status">
@@ -3351,21 +1754,16 @@ order.status || "PENDING"
 
 </div>
 
-
 <div class="order-info">
 
 Quantity:
-${escapeHtml(
-order.quantity
-)}
-
+${escapeHtml(order.quantity)}
 <br>
 
 Unit Price:
 ₱${Number(
 order.unit_price || 0
 ).toLocaleString()}
-
 <br>
 
 Total:
@@ -3375,32 +1773,16 @@ order.total_price || 0
 ).toLocaleString()}
 </strong>
 
-<br>
-
-Date:
-${order.created_at
-?
-new Date(
-order.created_at
-).toLocaleString()
-:
-"-"
-}
-
 </div>
-
 
 <div class="order-actions">
 
 ${
-["PENDING","CONFIRMED"]
-.includes(order.status)
+["PENDING","CONFIRMED"].includes(order.status)
 ?
 `
 <button
-onclick="cancelOrder(
-'${order.id}'
-)">
+onclick="cancelOrder('${order.id}')">
 Cancel Order
 </button>
 `
@@ -3412,23 +1794,16 @@ Cancel Order
 
 </div>
 
-`)
-.join("");
+`;
 
-
-document
-.getElementById(
-"statOrders"
-)
-.textContent =
-data.length;
+}).join("");
 
 }
 
 
-async function buyProduct(
-productId
-){
+/* ================= BUY PRODUCT ================= */
+
+async function buyProduct(productId){
 
 if(!currentUser){
 
@@ -3440,20 +1815,12 @@ return;
 
 }
 
-
-const {
-data:product,
-error
-} =
+const {data:product,error} =
 await supabaseClient
 .from("products")
 .select("*")
-.eq(
-"id",
-productId
-)
+.eq("id",productId)
 .single();
-
 
 if(error || !product){
 
@@ -3465,11 +1832,7 @@ return;
 
 }
 
-
-if(
-product.seller_id ===
-currentProfile.id
-){
+if(product.seller_id === currentProfile.id){
 
 alert(
 "You cannot buy your own product."
@@ -3479,13 +1842,11 @@ return;
 
 }
 
-
 const quantityText =
 prompt(
 `How many ${product.unit} do you want to buy?`,
 "1"
 );
-
 
 if(quantityText === null){
 
@@ -3493,12 +1854,8 @@ return;
 
 }
 
-
 const quantity =
-Number(
-quantityText
-);
-
+Number(quantityText);
 
 if(
 !Number.isFinite(quantity) ||
@@ -3513,7 +1870,6 @@ return;
 
 }
 
-
 if(
 quantity >
 Number(product.quantity)
@@ -3527,15 +1883,11 @@ return;
 
 }
 
-
 const total =
 Number(product.price) *
 quantity;
 
-
-const {
-error:orderError
-} =
+const {error:orderError} =
 await supabaseClient
 .from("orders")
 .insert({
@@ -3550,7 +1902,6 @@ seller_id:
 product.seller_id,
 
 quantity:
-
 quantity,
 
 unit_price:
@@ -3564,7 +1915,6 @@ status:
 
 });
 
-
 if(orderError){
 
 console.error(orderError);
@@ -3577,15 +1927,11 @@ return;
 
 }
 
-
 const remaining =
 Number(product.quantity) -
 quantity;
 
-
-const {
-error:updateError
-} =
+const {error:updateError} =
 await supabaseClient
 .from("products")
 .update({
@@ -3606,31 +1952,25 @@ remaining <= 0
 product.id
 );
 
-
 if(updateError){
 
-console.error(
-updateError
-);
+console.error(updateError);
 
 }
 
-
 alert(
-"Order created successfully! 📦"
+"Order created successfully!"
 );
-
 
 await loadProducts();
 await loadOrders();
-await loadStats();
 
 }
 
 
-async function cancelOrder(
-orderId
-){
+/* ================= CANCEL ORDER ================= */
+
+async function cancelOrder(orderId){
 
 if(
 !confirm(
@@ -3642,10 +1982,7 @@ return;
 
 }
 
-
-const {
-error
-} =
+const {error} =
 await supabaseClient
 .from("orders")
 .update({
@@ -3655,7 +1992,6 @@ status:"CANCELLED"
 "id",
 orderId
 );
-
 
 if(error){
 
@@ -3667,25 +2003,18 @@ return;
 
 }
 
-
 await loadOrders();
-await loadStats();
 
 }
 
 
-/* =========================================================
-   CHAT
-========================================================= */
+/* ================= CHAT ================= */
 
 function openChat(){
 
 document
-.getElementById(
-"chatModal"
-)
-.classList
-.remove("hidden");
+.getElementById("chatModal")
+.classList.remove("hidden");
 
 loadConversations();
 
@@ -3695,12 +2024,8 @@ loadConversations();
 function closeChat(){
 
 document
-.getElementById(
-"chatModal"
-)
-.classList
-.add("hidden");
-
+.getElementById("chatModal")
+.classList.add("hidden");
 
 if(messageChannel){
 
@@ -3709,14 +2034,11 @@ supabaseClient
 messageChannel
 );
 
-messageChannel =
-null;
+messageChannel = null;
 
 }
 
-
-currentConversation =
-null;
+currentConversation = null;
 
 }
 
@@ -3736,10 +2058,8 @@ return;
 
 }
 
-
 if(
-sellerId ===
-currentProfile.id
+sellerId === currentProfile.id
 ){
 
 alert(
@@ -3750,11 +2070,7 @@ return;
 
 }
 
-
-const {
-data:existing,
-error:findError
-} =
+const {data:existing,error:findError} =
 await supabaseClient
 .from("conversations")
 .select("*")
@@ -3772,12 +2088,9 @@ productId
 )
 .maybeSingle();
 
-
 if(findError){
 
-console.error(
-findError
-);
+console.error(findError);
 
 alert(
 findError.message
@@ -3787,17 +2100,12 @@ return;
 
 }
 
-
 let conversation =
 existing;
 
-
 if(!conversation){
 
-const {
-data:newConversation,
-error
-} =
+const {data:newConversation,error} =
 await supabaseClient
 .from("conversations")
 .insert({
@@ -3815,12 +2123,9 @@ productId
 .select()
 .single();
 
-
 if(error){
 
-console.error(
-error
-);
+console.error(error);
 
 alert(
 error.message
@@ -3830,15 +2135,12 @@ return;
 
 }
 
-
 conversation =
 newConversation;
 
 }
 
-
 openChat();
-
 
 setTimeout(()=>{
 
@@ -3851,6 +2153,8 @@ conversation
 }
 
 
+/* ================= LOAD CONVERSATIONS ================= */
+
 async function loadConversations(){
 
 const list =
@@ -3858,17 +2162,12 @@ document.getElementById(
 "conversationList"
 );
 
-
 list.innerHTML =
 `<div class="chat-empty">
 Loading...
 </div>`;
 
-
-const {
-data,
-error
-} =
+const {data,error} =
 await supabaseClient
 .from("conversations")
 .select("*")
@@ -3879,29 +2178,25 @@ await supabaseClient
 "created_at",
 {
 ascending:false
-}
-);
-
+});
 
 if(error){
 
-console.error(
-error
-);
+console.error(error);
 
 list.innerHTML =
 `<div class="chat-empty">
-${escapeHtml(
-error.message
-)}
+${escapeHtml(error.message)}
 </div>`;
 
 return;
 
 }
 
-
-if(!data || !data.length){
+if(
+!data ||
+data.length === 0
+){
 
 list.innerHTML =
 `<div class="chat-empty">
@@ -3912,28 +2207,20 @@ return;
 
 }
 
-
-list.innerHTML =
-"";
-
+list.innerHTML = "";
 
 for(
-const conversation
-of data
+const conversation of data
 ){
 
 const otherUserId =
-conversation.buyer_id ===
-currentProfile.id
+conversation.buyer_id === currentProfile.id
 ?
 conversation.seller_id
 :
 conversation.buyer_id;
 
-
-const {
-data:user
-} =
+const {data:user} =
 await supabaseClient
 .from("users")
 .select(
@@ -3945,16 +2232,13 @@ otherUserId
 )
 .single();
 
-
 const item =
 document.createElement(
 "div"
 );
 
-
 item.className =
 "conversation-item";
-
 
 item.innerHTML = `
 
@@ -3973,7 +2257,6 @@ user?.role || ""
 
 `;
 
-
 item.onclick = () => {
 
 selectConversation(
@@ -3981,7 +2264,6 @@ conversation
 );
 
 };
-
 
 list.appendChild(
 item
@@ -3992,6 +2274,8 @@ item
 }
 
 
+/* ================= SELECT CONVERSATION ================= */
+
 async function selectConversation(
 conversation
 ){
@@ -3999,19 +2283,14 @@ conversation
 currentConversation =
 conversation;
 
-
 const otherUserId =
-conversation.buyer_id ===
-currentProfile.id
+conversation.buyer_id === currentProfile.id
 ?
 conversation.seller_id
 :
 conversation.buyer_id;
 
-
-const {
-data:user
-} =
+const {data:user} =
 await supabaseClient
 .from("users")
 .select(
@@ -4023,15 +2302,11 @@ otherUserId
 )
 .single();
 
-
 document
-.getElementById(
-"chatUserName"
-)
+.getElementById("chatUserName")
 .textContent =
 user?.full_name ||
 "User";
-
 
 await loadMessages();
 
@@ -4039,6 +2314,8 @@ subscribeToMessages();
 
 }
 
+
+/* ================= LOAD MESSAGES ================= */
 
 async function loadMessages(){
 
@@ -4048,23 +2325,17 @@ return;
 
 }
 
-
 const messagesBox =
 document.getElementById(
 "chatMessages"
 );
-
 
 messagesBox.innerHTML =
 `<div class="chat-empty">
 Loading messages...
 </div>`;
 
-
-const {
-data,
-error
-} =
+const {data,error} =
 await supabaseClient
 .from("messages")
 .select("*")
@@ -4079,26 +2350,23 @@ ascending:true
 }
 );
 
-
 if(error){
 
-console.error(
-error
-);
+console.error(error);
 
 messagesBox.innerHTML =
 `<div class="chat-empty">
-${escapeHtml(
-error.message
-)}
+${escapeHtml(error.message)}
 </div>`;
 
 return;
 
 }
 
-
-if(!data || !data.length){
+if(
+!data ||
+data.length === 0
+){
 
 messagesBox.innerHTML =
 `<div class="chat-empty">
@@ -4110,14 +2378,10 @@ return;
 
 }
 
-
 messagesBox.innerHTML =
 data
-.map(
-renderMessage
-)
+.map(renderMessage)
 .join("");
-
 
 messagesBox.scrollTop =
 messagesBox.scrollHeight;
@@ -4125,14 +2389,13 @@ messagesBox.scrollHeight;
 }
 
 
-function renderMessage(
-message
-){
+/* ================= RENDER MESSAGE ================= */
+
+function renderMessage(message){
 
 const mine =
 message.sender_id ===
 currentProfile.id;
-
 
 const time =
 message.created_at
@@ -4148,7 +2411,6 @@ minute:"2-digit"
 )
 :
 "";
-
 
 return `
 
@@ -4174,9 +2436,7 @@ mine
 `
 <button
 class="message-delete"
-onclick="deleteMessage(
-'${message.id}'
-)">
+onclick="deleteMessage('${message.id}')">
 Delete
 </button>
 `
@@ -4195,6 +2455,8 @@ Delete
 }
 
 
+/* ================= REALTIME CHAT ================= */
+
 function subscribeToMessages(){
 
 if(messageChannel){
@@ -4206,14 +2468,12 @@ messageChannel
 
 }
 
-
 messageChannel =
 supabaseClient
 .channel(
 "conversation-" +
 currentConversation.id
 )
-
 
 .on(
 "postgres_changes",
@@ -4231,20 +2491,16 @@ document.getElementById(
 "chatMessages"
 );
 
-
 const empty =
 box.querySelector(
 ".chat-empty"
 );
 
-
 if(empty){
 
-box.innerHTML =
-"";
+box.innerHTML = "";
 
 }
-
 
 if(
 !document.getElementById(
@@ -4262,13 +2518,11 @@ payload.new
 
 }
 
-
 box.scrollTop =
 box.scrollHeight;
 
 }
 )
-
 
 .on(
 "postgres_changes",
@@ -4287,7 +2541,6 @@ document.getElementById(
 payload.old.id
 );
 
-
 if(element){
 
 element.remove();
@@ -4297,29 +2550,24 @@ element.remove();
 }
 )
 
-
 .subscribe();
 
 }
 
 
-/* =========================================================
-   SEND MESSAGE
-   IMPORTANT: USES content
-========================================================= */
+/* ================= SEND MESSAGE ================= */
 
 document
-.getElementById(
-"chatForm"
-)
+.getElementById("chatForm")
 .addEventListener(
 "submit",
 async e=>{
 
 e.preventDefault();
 
-
-if(!currentConversation){
+if(
+!currentConversation
+){
 
 alert(
 "Please select a conversation first."
@@ -4329,16 +2577,13 @@ return;
 
 }
 
-
 const input =
 document.getElementById(
 "chatInput"
 );
 
-
 const text =
 input.value.trim();
-
 
 if(!text){
 
@@ -4346,14 +2591,9 @@ return;
 
 }
 
+input.disabled = true;
 
-input.disabled =
-true;
-
-
-const {
-error
-} =
+const {error} =
 await supabaseClient
 .from("messages")
 .insert({
@@ -4364,21 +2604,21 @@ currentConversation.id,
 sender_id:
 currentProfile.id,
 
+/*
+IMPORTANT:
+Your database uses "content",
+not "message".
+*/
 content:
 text
 
 });
 
-
-input.disabled =
-false;
-
+input.disabled = false;
 
 if(error){
 
-console.error(
-error
-);
+console.error(error);
 
 alert(
 error.message
@@ -4388,13 +2628,12 @@ return;
 
 }
 
+input.value = "";
 
-input.value =
-"";
+});
 
-}
-);
 
+/* ================= DELETE MESSAGE ================= */
 
 async function deleteMessage(
 messageId
@@ -4410,10 +2649,7 @@ return;
 
 }
 
-
-const {
-error
-} =
+const {error} =
 await supabaseClient
 .from("messages")
 .delete()
@@ -4426,7 +2662,6 @@ messageId
 currentProfile.id
 );
 
-
 if(error){
 
 alert(
@@ -4438,362 +2673,7 @@ error.message
 }
 
 
-/* =========================================================
-   AI ASSISTANT
-========================================================= */
-
-document
-.getElementById(
-"aiForm"
-)
-.addEventListener(
-"submit",
-async e=>{
-
-e.preventDefault();
-
-
-const input =
-document.getElementById(
-"aiInput"
-);
-
-
-const text =
-input.value.trim();
-
-
-if(!text){
-
-return;
-
-}
-
-
-addAIMessage(
-text,
-true
-);
-
-
-input.value =
-"";
-
-
-const response =
-getAIResponse(
-text
-);
-
-
-setTimeout(()=>{
-
-addAIMessage(
-response,
-false
-);
-
-},500);
-
-}
-);
-
-
-function addAIMessage(
-text,
-user
-){
-
-const box =
-document.getElementById(
-"aiMessages"
-);
-
-
-const row =
-document.createElement(
-"div"
-);
-
-
-row.className =
-"user"
-?
-"ai-row user"
-:
-"ai-row";
-
-
-row.innerHTML = `
-
-<div class="ai-bubble">
-${escapeHtml(text)}
-</div>
-
-`;
-
-
-box.appendChild(
-row
-);
-
-
-box.scrollTop =
-box.scrollHeight;
-
-}
-
-
-function getAIResponse(
-question
-){
-
-const q =
-question
-.toLowerCase();
-
-
-if(
-q.includes("tomato") ||
-q.includes("kamatis")
-){
-
-return "For tomatoes, make sure they receive enough sunlight, use well-draining soil, water consistently without overwatering, and monitor the plants for pests and diseases.";
-
-}
-
-
-if(
-q.includes("rice") ||
-q.includes("palay")
-){
-
-return "For rice farming, good water management, proper soil preparation, healthy seedlings, and regular monitoring for pests can help improve crop performance.";
-
-}
-
-
-if(
-q.includes("corn") ||
-q.includes("mais")
-){
-
-return "Corn generally benefits from adequate sunlight, proper spacing, sufficient water, and nutrient-rich soil. Monitor the crop regularly for insects and disease.";
-
-}
-
-
-if(
-q.includes("fertilizer") ||
-q.includes("pataba")
-){
-
-return "Fertilizer needs depend on the crop and soil condition. A soil test is the best way to determine which nutrients are needed instead of applying fertilizer blindly.";
-
-}
-
-
-if(
-q.includes("sell") ||
-q.includes("benta") ||
-q.includes("market")
-){
-
-return "When selling agricultural products, consider product quality, available quantity, location, current market demand, and a fair price. Clear photos and accurate descriptions can also help buyers.";
-
-}
-
-
-if(
-q.includes("food waste") ||
-q.includes("waste")
-){
-
-return "Farmers and households can reduce food waste by planning harvests, storing produce properly, selling surplus products, composting suitable organic waste, and using edible parts creatively.";
-
-}
-
-
-return "I can help with general agricultural topics such as crops, farming practices, product selling, food waste reduction, and marketplace questions. Try asking me a specific question! 🌱";
-
-}
-
-
-/* =========================================================
-   PROFILE
-========================================================= */
-
-function loadProfile(){
-
-if(!currentProfile ||
-!currentUser){
-
-return;
-
-}
-
-
-const name =
-currentProfile.full_name ||
-currentUser.email ||
-"User";
-
-
-document
-.getElementById(
-"profileName"
-)
-.textContent =
-name;
-
-
-document
-.getElementById(
-"profileEmail"
-)
-.textContent =
-currentUser.email ||
-"-";
-
-
-document
-.getElementById(
-"profileRole"
-)
-.textContent =
-currentProfile.role ||
-"-";
-
-
-document
-.getElementById(
-"profileId"
-)
-.textContent =
-currentProfile.id ||
-"-";
-
-
-document
-.getElementById(
-"profileAvatar"
-)
-.textContent =
-initials(name);
-
-}
-
-
-/* =========================================================
-   STATS
-========================================================= */
-
-async function loadStats(){
-
-if(!currentProfile){
-
-return;
-
-}
-
-
-const {
-count:orderCount
-} =
-await supabaseClient
-.from("orders")
-.select(
-"id",
-{
-count:"exact",
-head:true
-}
-)
-.or(
-`buyer_id.eq.${currentProfile.id},seller_id.eq.${currentProfile.id}`
-);
-
-
-document
-.getElementById(
-"statOrders"
-)
-.textContent =
-orderCount || 0;
-
-
-if(
-currentProfile.role ===
-"FARMER"
-){
-
-const {
-count:productCount
-} =
-await supabaseClient
-.from("products")
-.select(
-"id",
-{
-count:"exact",
-head:true
-}
-)
-.eq(
-"seller_id",
-currentProfile.id
-);
-
-
-document
-.getElementById(
-"statProducts"
-)
-.textContent =
-productCount || 0;
-
-}else{
-
-document
-.getElementById(
-"statProducts"
-)
-.textContent =
-0;
-
-}
-
-
-const {
-count:conversationCount
-} =
-await supabaseClient
-.from("conversations")
-.select(
-"id",
-{
-count:"exact",
-head:true
-}
-)
-.or(
-`buyer_id.eq.${currentProfile.id},seller_id.eq.${currentProfile.id}`
-);
-
-
-document
-.getElementById(
-"statMessages"
-)
-.textContent =
-conversationCount || 0;
-
-}
-
-
-/* =========================================================
-   LOGOUT
-========================================================= */
+/* ================= LOGOUT ================= */
 
 async function logout(){
 
@@ -4804,61 +2684,39 @@ await supabaseClient
 messageChannel
 );
 
-messageChannel =
-null;
+messageChannel = null;
 
 }
-
 
 await supabaseClient
 .auth
 .signOut();
 
-
-currentUser =
-null;
-
-currentProfile =
-null;
-
-currentConversation =
-null;
-
+currentUser = null;
+currentProfile = null;
+currentConversation = null;
 
 document
-.getElementById(
-"app"
-)
-.classList
-.add("hidden");
-
+.getElementById("app")
+.classList.add("hidden");
 
 document
-.getElementById(
-"authScreen"
-)
-.classList
-.remove("hidden");
-
+.getElementById("authScreen")
+.classList.remove("hidden");
 
 showLogin();
 
 }
 
 
-/* =========================================================
-   SESSION
-========================================================= */
+/* ================= SESSION ================= */
 
 async function checkSession(){
 
-const {
-data
-} =
+const {data} =
 await supabaseClient
 .auth
 .getSession();
-
 
 if(
 data.session
