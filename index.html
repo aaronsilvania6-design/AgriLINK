@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -267,6 +268,20 @@ select:focus{
   align-items:center;
   margin-bottom:15px;
   gap:10px;
+}
+
+/* ================= MARKETPLACE FILTERS ================= */
+
+.marketplace-filters{
+  display:grid;
+  grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;
+  gap:10px;
+  margin-bottom:18px;
+}
+
+.marketplace-filters input,
+.marketplace-filters select{
+  min-width:0;
 }
 
 .products{
@@ -614,6 +629,11 @@ select:focus{
   .chat-layout{
     height:85vh;
   }
+
+  .marketplace-filters{
+    grid-template-columns:1fr 1fr;
+  }
+
 }
 
 @media(max-width:600px){
@@ -708,6 +728,11 @@ select:focus{
   .chat-bubble{
     max-width:85%;
   }
+
+  .marketplace-filters{
+    grid-template-columns:1fr;
+  }
+
 }
 
 @media(min-width:1400px){
@@ -895,7 +920,80 @@ Refresh
 
 </div>
 
-<div id="products" class="products"></div>
+
+<!-- ================= SEARCH & FILTER ================= -->
+
+<div class="marketplace-filters">
+
+<input
+id="searchProduct"
+type="text"
+placeholder="🔎 Search products..."
+oninput="filterProducts()">
+
+<input
+id="filterLocation"
+type="text"
+placeholder="📍 Location"
+oninput="filterProducts()">
+
+<input
+id="minPrice"
+type="number"
+min="0"
+placeholder="₱ Min Price"
+oninput="filterProducts()">
+
+<input
+id="maxPrice"
+type="number"
+min="0"
+placeholder="₱ Max Price"
+oninput="filterProducts()">
+
+<select
+id="filterUnit"
+onchange="filterProducts()">
+
+<option value="">
+All Units
+</option>
+
+<option value="kg">
+kg
+</option>
+
+<option value="piece">
+piece
+</option>
+
+<option value="sack">
+sack
+</option>
+
+<option value="box">
+box
+</option>
+
+<option value="dozen">
+dozen
+</option>
+
+</select>
+
+<button
+class="secondary-btn"
+onclick="clearFilters()">
+Clear
+</button>
+
+</div>
+
+
+<div
+id="products"
+class="products">
+</div>
 
 </section>
 
@@ -914,7 +1012,10 @@ Refresh
 
 </div>
 
-<div id="orders" class="orders"></div>
+<div
+id="orders"
+class="orders">
+</div>
 
 </section>
 
@@ -924,7 +1025,9 @@ Refresh
 
 <!-- ================= ADD PRODUCT ================= -->
 
-<div id="productModal" class="modal hidden">
+<div
+id="productModal"
+class="modal hidden">
 
 <div class="modal-card">
 
@@ -953,7 +1056,8 @@ placeholder="Fresh Tomatoes">
 
 <textarea
 id="productDescription"
-placeholder="Describe your product"></textarea>
+placeholder="Describe your product">
+</textarea>
 
 <label>Price</label>
 
@@ -976,11 +1080,27 @@ required>
 <label>Unit</label>
 
 <select id="productUnit">
-<option value="kg">kg</option>
-<option value="piece">piece</option>
-<option value="sack">sack</option>
-<option value="box">box</option>
-<option value="dozen">dozen</option>
+
+<option value="kg">
+kg
+</option>
+
+<option value="piece">
+piece
+</option>
+
+<option value="sack">
+sack
+</option>
+
+<option value="box">
+box
+</option>
+
+<option value="dozen">
+dozen
+</option>
+
 </select>
 
 <label>Location</label>
@@ -1010,7 +1130,9 @@ Publish Product
 
 <!-- ================= CHAT ================= -->
 
-<div id="chatModal" class="modal chat-modal hidden">
+<div
+id="chatModal"
+class="modal chat-modal hidden">
 
 <div class="modal-card">
 
@@ -1022,7 +1144,9 @@ Publish Product
 💬 Conversations
 </div>
 
-<div id="conversationList"></div>
+<div
+id="conversationList">
+</div>
 
 </div>
 
@@ -1033,7 +1157,9 @@ Publish Product
 
 <div>
 
-<div id="chatUserName" class="chat-user">
+<div
+id="chatUserName"
+class="chat-user">
 Select a conversation
 </div>
 
@@ -1052,7 +1178,9 @@ onclick="closeChat()">
 </div>
 
 
-<div id="chatMessages" class="chat-messages">
+<div
+id="chatMessages"
+class="chat-messages">
 
 <div class="chat-empty">
 Select a conversation to start chatting.
@@ -1061,7 +1189,9 @@ Select a conversation to start chatting.
 </div>
 
 
-<form id="chatForm" class="chat-input">
+<form
+id="chatForm"
+class="chat-input">
 
 <input
 id="chatInput"
@@ -1106,6 +1236,8 @@ let currentProfile = null;
 
 let currentConversation = null;
 let messageChannel = null;
+
+let allProducts = [];
 
 
 /* ================= HELPERS ================= */
@@ -1399,12 +1531,38 @@ return;
 
 }
 
+allProducts = data || [];
+
 if(!data || data.length === 0){
 
 container.innerHTML =
 `<div class="empty">
 <h3>No products yet</h3>
 <p>Be the first farmer to publish a product.</p>
+</div>`;
+
+return;
+
+}
+
+renderProducts(data);
+
+}
+
+
+/* ================= RENDER PRODUCTS ================= */
+
+function renderProducts(data){
+
+const container =
+document.getElementById("products");
+
+if(!data || data.length === 0){
+
+container.innerHTML =
+`<div class="empty">
+<h3>No products found</h3>
+<p>Try changing your search or filters.</p>
 </div>`;
 
 return;
@@ -1421,7 +1579,9 @@ product.image_url
 src="${escapeHtml(product.image_url)}"
 alt="${escapeHtml(product.name)}">`
 :
-`<div class="product-placeholder">🌱</div>`;
+`<div class="product-placeholder">
+🌱
+</div>`;
 
 return `
 
@@ -1478,6 +1638,131 @@ Buy
 `;
 
 }).join("");
+
+}
+
+
+/* ================= PRODUCT FILTER ================= */
+
+function filterProducts(){
+
+const search =
+document
+.getElementById("searchProduct")
+.value
+.trim()
+.toLowerCase();
+
+const location =
+document
+.getElementById("filterLocation")
+.value
+.trim()
+.toLowerCase();
+
+const minPriceValue =
+document
+.getElementById("minPrice")
+.value;
+
+const maxPriceValue =
+document
+.getElementById("maxPrice")
+.value;
+
+const minPrice =
+minPriceValue === ""
+?
+0
+:
+Number(minPriceValue);
+
+const maxPrice =
+maxPriceValue === ""
+?
+Infinity
+:
+Number(maxPriceValue);
+
+const unit =
+document
+.getElementById("filterUnit")
+.value;
+
+const filtered =
+allProducts.filter(product=>{
+
+const name =
+String(
+product.name || ""
+).toLowerCase();
+
+const productLocation =
+String(
+product.location || ""
+).toLowerCase();
+
+const price =
+Number(product.price) || 0;
+
+const matchesSearch =
+!search ||
+name.includes(search);
+
+const matchesLocation =
+!location ||
+productLocation.includes(location);
+
+const matchesMinPrice =
+price >= minPrice;
+
+const matchesMaxPrice =
+price <= maxPrice;
+
+const matchesUnit =
+!unit ||
+product.unit === unit;
+
+return (
+matchesSearch &&
+matchesLocation &&
+matchesMinPrice &&
+matchesMaxPrice &&
+matchesUnit
+);
+
+});
+
+renderProducts(filtered);
+
+}
+
+
+/* ================= CLEAR FILTERS ================= */
+
+function clearFilters(){
+
+document
+.getElementById("searchProduct")
+.value = "";
+
+document
+.getElementById("filterLocation")
+.value = "";
+
+document
+.getElementById("minPrice")
+.value = "";
+
+document
+.getElementById("maxPrice")
+.value = "";
+
+document
+.getElementById("filterUnit")
+.value = "";
+
+renderProducts(allProducts);
 
 }
 
@@ -1801,9 +2086,7 @@ Cancel Order
 }
 
 
-/* =========================================================
-   BUY PRODUCT
-   ========================================================= */
+/* ================= BUY PRODUCT ================= */
 
 async function buyProduct(productId){
 
@@ -1817,9 +2100,6 @@ return;
 
 }
 
-
-/* ================= GET PRODUCT ================= */
-
 const {data:product,error} =
 await supabaseClient
 .from("products")
@@ -1829,8 +2109,6 @@ await supabaseClient
 
 if(error || !product){
 
-console.error(error);
-
 alert(
 "Product could not be found."
 );
@@ -1838,9 +2116,6 @@ alert(
 return;
 
 }
-
-
-/* ================= OWN PRODUCT CHECK ================= */
 
 if(product.seller_id === currentProfile.id){
 
@@ -1851,9 +2126,6 @@ alert(
 return;
 
 }
-
-
-/* ================= QUANTITY ================= */
 
 const quantityText =
 prompt(
@@ -1900,108 +2172,7 @@ const total =
 Number(product.price) *
 quantity;
 
-
-/* =========================================================
-   CREATE / GET CONVERSATION BEFORE ORDER
-   ========================================================= */
-
-let conversation = null;
-
-const {
-data:existingConversation,
-error:conversationFindError
-} =
-await supabaseClient
-.from("conversations")
-.select("*")
-.eq(
-"buyer_id",
-currentProfile.id
-)
-.eq(
-"seller_id",
-product.seller_id
-)
-.eq(
-"product_id",
-product.id
-)
-.maybeSingle();
-
-if(conversationFindError){
-
-console.error(
-"Conversation lookup error:",
-conversationFindError
-);
-
-alert(
-"Could not prepare the chat conversation.\n\n" +
-conversationFindError.message
-);
-
-return;
-
-}
-
-if(existingConversation){
-
-conversation =
-existingConversation;
-
-}else{
-
-const {
-data:newConversation,
-error:conversationCreateError
-} =
-await supabaseClient
-.from("conversations")
-.insert({
-
-buyer_id:
-currentProfile.id,
-
-seller_id:
-product.seller_id,
-
-product_id:
-product.id
-
-})
-.select()
-.single();
-
-if(conversationCreateError){
-
-console.error(
-"Conversation creation error:",
-conversationCreateError
-);
-
-alert(
-"Could not create the seller conversation.\n\n" +
-conversationCreateError.message
-);
-
-return;
-
-}
-
-conversation =
-newConversation;
-
-}
-
-
-/* =========================================================
-   CREATE ORDER
-   ========================================================= */
-
-const {
-data:order,
-error:orderError
-} =
+const {error:orderError} =
 await supabaseClient
 .from("orders")
 .insert({
@@ -2027,9 +2198,7 @@ total,
 status:
 "PENDING"
 
-})
-.select()
-.single();
+});
 
 if(orderError){
 
@@ -2042,11 +2211,6 @@ orderError.message
 return;
 
 }
-
-
-/* =========================================================
-   UPDATE PRODUCT QUANTITY
-   ========================================================= */
 
 const remaining =
 Number(product.quantity) -
@@ -2075,82 +2239,12 @@ product.id
 
 if(updateError){
 
-console.error(
-"Product update error:",
-updateError
-);
+console.error(updateError);
 
 }
-
-
-/* =========================================================
-   AUTOMATIC INITIAL MESSAGE
-   ========================================================= */
-
-const {
-data:existingMessages,
-error:messageCheckError
-} =
-await supabaseClient
-.from("messages")
-.select("id")
-.eq(
-"conversation_id",
-conversation.id
-)
-.limit(1);
-
-if(messageCheckError){
-
-console.error(
-"Message check error:",
-messageCheckError
-);
-
-}
-else if(
-!existingMessages ||
-existingMessages.length === 0
-){
-
-const {
-error:initialMessageError
-} =
-await supabaseClient
-.from("messages")
-.insert({
-
-conversation_id:
-conversation.id,
-
-sender_id:
-currentProfile.id,
-
-content:
-`Hi! I just placed an order for your ${product.name}.`
-
-});
-
-if(initialMessageError){
-
-console.error(
-"Initial message error:",
-initialMessageError
-);
-
-}
-
-}
-
-
-/* =========================================================
-   SUCCESS
-   ========================================================= */
 
 alert(
-"Order created successfully!\n\n" +
-"The seller conversation has also been saved. " +
-"You can open it from 💬 Chat without pressing Chat on the product."
+"Order created successfully!"
 );
 
 await loadProducts();
@@ -2261,10 +2355,7 @@ return;
 
 }
 
-const {
-data:existing,
-error:findError
-} =
+const {data:existing,error:findError} =
 await supabaseClient
 .from("conversations")
 .select("*")
@@ -2299,10 +2390,7 @@ existing;
 
 if(!conversation){
 
-const {
-data:newConversation,
-error
-} =
+const {data:newConversation,error} =
 await supabaseClient
 .from("conversations")
 .insert({
@@ -2354,12 +2442,6 @@ conversation
 
 async function loadConversations(){
 
-if(!currentProfile){
-
-return;
-
-}
-
 const list =
 document.getElementById(
 "conversationList"
@@ -2370,10 +2452,7 @@ list.innerHTML =
 Loading...
 </div>`;
 
-const {
-data,
-error
-} =
+const {data,error} =
 await supabaseClient
 .from("conversations")
 .select("*")
@@ -2384,8 +2463,7 @@ await supabaseClient
 "created_at",
 {
 ascending:false
-}
-);
+});
 
 if(error){
 
@@ -2542,10 +2620,7 @@ messagesBox.innerHTML =
 Loading messages...
 </div>`;
 
-const {
-data,
-error
-} =
+const {data,error} =
 await supabaseClient
 .from("messages")
 .select("*")
@@ -2803,9 +2878,7 @@ return;
 
 input.disabled = true;
 
-const {
-error
-} =
+const {error} =
 await supabaseClient
 .from("messages")
 .insert({
@@ -2902,6 +2975,7 @@ await supabaseClient
 currentUser = null;
 currentProfile = null;
 currentConversation = null;
+allProducts = [];
 
 document
 .getElementById("app")
@@ -2944,3 +3018,4 @@ checkSession();
 
 </body>
 </html>
+```
