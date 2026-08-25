@@ -36,7 +36,9 @@
       display: none !important;
     }
 
-    /* AUTH */
+    /* =========================
+       AUTH
+    ========================= */
 
     .auth-container {
       min-height: 100vh;
@@ -52,7 +54,7 @@
       background: white;
       padding: 30px;
       border-radius: 22px;
-      box-shadow: 0 15px 40px rgba(0,0,0,.1);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, .1);
     }
 
     .logo {
@@ -117,6 +119,7 @@
       border-radius: 10px;
       padding: 13px;
       outline: none;
+      background: white;
     }
 
     textarea {
@@ -130,6 +133,11 @@
       border-color: #c62828;
     }
 
+    input[type="file"] {
+      padding: 10px;
+      background: #fafafa;
+    }
+
     .primary-btn {
       width: 100%;
       border: none;
@@ -139,6 +147,10 @@
       border-radius: 11px;
       font-weight: bold;
       margin-top: 20px;
+    }
+
+    .primary-btn:hover {
+      background: #a91f1f;
     }
 
     .secondary-btn {
@@ -173,7 +185,9 @@
       color: #b71c1c;
     }
 
-    /* APP */
+    /* =========================
+       APPLICATION
+    ========================= */
 
     .app {
       min-height: 100vh;
@@ -238,7 +252,7 @@
     .role-badge {
       display: inline-block;
       margin-top: 10px;
-      background: rgba(255,255,255,.18);
+      background: rgba(255, 255, 255, .18);
       padding: 7px 12px;
       border-radius: 20px;
       font-size: 13px;
@@ -262,15 +276,28 @@
       border-radius: 17px;
       overflow: hidden;
       border: 1px solid #eee;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, .04);
     }
 
     .product-image {
-      height: 150px;
+      width: 100%;
+      height: 180px;
       background: #eee;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 45px;
+      overflow: hidden;
+    }
+
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .product-placeholder {
+      font-size: 50px;
     }
 
     .product-content {
@@ -285,12 +312,26 @@
       color: #c62828;
       font-size: 19px;
       font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .quantity {
+      font-size: 13px;
+      color: #555;
+      margin-top: 8px;
+    }
+
+    .product-description {
+      color: #555;
+      font-size: 14px;
+      line-height: 1.4;
+      margin-top: 8px;
     }
 
     .product-location {
       color: #777;
       font-size: 13px;
-      margin-top: 7px;
+      margin-top: 10px;
     }
 
     .empty {
@@ -300,14 +341,17 @@
       border-radius: 16px;
       text-align: center;
       color: #777;
+      grid-column: 1 / -1;
     }
 
-    /* MODAL */
+    /* =========================
+       MODAL
+    ========================= */
 
     .modal {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,.5);
+      background: rgba(0, 0, 0, .5);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -341,7 +385,35 @@
       font-size: 18px;
     }
 
-    @media (max-width: 600px) {
+    .preview {
+      width: 100%;
+      height: 200px;
+      background: #f1f1f1;
+      border-radius: 12px;
+      margin-top: 10px;
+      overflow: hidden;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .upload-info {
+      font-size: 12px;
+      color: #777;
+      margin-top: 6px;
+    }
+
+    /* =========================
+       MOBILE / TABLET
+    ========================= */
+
+    @media (max-width: 700px) {
 
       .navbar {
         padding: 12px;
@@ -351,25 +423,73 @@
         padding: 18px 12px;
       }
 
-      .nav-actions span {
-        display: none;
+      .nav-actions {
+        gap: 5px;
       }
 
       .products {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
       }
 
       .product-image {
-        height: 120px;
+        height: 135px;
       }
 
+      .product-content {
+        padding: 12px;
+      }
+
+      .product-content h3 {
+        font-size: 15px;
+      }
+
+      .price {
+        font-size: 16px;
+      }
+
+      .welcome {
+        padding: 20px;
+      }
+    }
+
+    @media (max-width: 450px) {
+
+      .nav-brand {
+        font-size: 15px;
+      }
+
+      .nav-logo {
+        width: 32px;
+        height: 32px;
+      }
+
+      .secondary-btn,
+      .danger-btn {
+        padding: 9px 10px;
+        font-size: 12px;
+      }
+
+      .products {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .modal {
+        padding: 10px;
+      }
+
+      .modal-card {
+        padding: 20px;
+      }
     }
   </style>
 </head>
 
 <body>
 
-<!-- AUTH -->
+<!-- =========================
+     AUTH SCREEN
+========================= -->
 
 <div id="authScreen" class="auth-container">
 
@@ -388,6 +508,7 @@
       <button
         id="loginTab"
         class="tab active"
+        type="button"
         onclick="showLogin()">
         Login
       </button>
@@ -395,6 +516,7 @@
       <button
         id="signupTab"
         class="tab"
+        type="button"
         onclick="showSignup()">
         Sign Up
       </button>
@@ -411,6 +533,7 @@
         id="loginEmail"
         type="email"
         required
+        autocomplete="email"
         placeholder="you@example.com">
 
       <label>Password</label>
@@ -419,13 +542,17 @@
         id="loginPassword"
         type="password"
         required
+        autocomplete="current-password"
         placeholder="Your password">
 
-      <button class="primary-btn">
+      <button
+        class="primary-btn"
+        type="submit">
         Login
       </button>
 
     </form>
+
 
     <!-- SIGNUP -->
 
@@ -436,6 +563,7 @@
       <input
         id="signupName"
         required
+        autocomplete="name"
         placeholder="Juan Dela Cruz">
 
       <label>Email</label>
@@ -444,6 +572,7 @@
         id="signupEmail"
         type="email"
         required
+        autocomplete="email"
         placeholder="you@example.com">
 
       <label>Password</label>
@@ -453,6 +582,7 @@
         type="password"
         minlength="8"
         required
+        autocomplete="new-password"
         placeholder="Minimum 8 characters">
 
       <label>Account Type</label>
@@ -473,7 +603,9 @@
 
       </select>
 
-      <button class="primary-btn">
+      <button
+        class="primary-btn"
+        type="submit">
         Create Account
       </button>
 
@@ -486,7 +618,9 @@
 </div>
 
 
-<!-- APPLICATION -->
+<!-- =========================
+     APPLICATION
+========================= -->
 
 <div id="app" class="app hidden">
 
@@ -504,6 +638,7 @@
 
       <button
         class="secondary-btn"
+        type="button"
         onclick="openAddProduct()"
         id="addProductButton">
         + Add Product
@@ -511,6 +646,7 @@
 
       <button
         class="danger-btn"
+        type="button"
         onclick="logout()">
         Logout
       </button>
@@ -548,12 +684,12 @@
 
         <button
           class="secondary-btn"
+          type="button"
           onclick="loadProducts()">
           Refresh
         </button>
 
       </div>
-
 
       <div
         id="products"
@@ -567,7 +703,9 @@
 </div>
 
 
-<!-- ADD PRODUCT MODAL -->
+<!-- =========================
+     ADD PRODUCT MODAL
+========================= -->
 
 <div
   id="productModal"
@@ -581,13 +719,42 @@
 
       <button
         class="close"
+        type="button"
         onclick="closeAddProduct()">
         ×
       </button>
 
     </div>
 
+
     <form id="productForm">
+
+      <!-- PRODUCT PHOTO -->
+
+      <label>Product Photo</label>
+
+      <input
+        id="productImage"
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        required>
+
+      <div class="upload-info">
+        JPG, PNG, or WEBP • Maximum 5MB
+      </div>
+
+      <div
+        id="imagePreview"
+        class="preview">
+
+        <img
+          id="previewImage"
+          alt="Product preview">
+
+      </div>
+
+
+      <!-- PRODUCT NAME -->
 
       <label>Product Name</label>
 
@@ -596,12 +763,17 @@
         required
         placeholder="Fresh Tomatoes">
 
+
+      <!-- DESCRIPTION -->
+
       <label>Description</label>
 
       <textarea
         id="productDescription"
-        placeholder="Describe your product">
-      </textarea>
+        placeholder="Describe your product"></textarea>
+
+
+      <!-- PRICE -->
 
       <label>Price</label>
 
@@ -613,6 +785,9 @@
         required
         placeholder="80">
 
+
+      <!-- QUANTITY -->
+
       <label>Quantity</label>
 
       <input
@@ -623,17 +798,35 @@
         required
         placeholder="50">
 
+
+      <!-- UNIT -->
+
       <label>Unit</label>
 
       <select id="productUnit">
 
         <option value="kg">kg</option>
-        <option value="piece">piece</option>
-        <option value="sack">sack</option>
-        <option value="box">box</option>
-        <option value="dozen">dozen</option>
+
+        <option value="piece">
+          piece
+        </option>
+
+        <option value="sack">
+          sack
+        </option>
+
+        <option value="box">
+          box
+        </option>
+
+        <option value="dozen">
+          dozen
+        </option>
 
       </select>
+
+
+      <!-- LOCATION -->
 
       <label>Location</label>
 
@@ -641,7 +834,10 @@
         id="productLocation"
         placeholder="Municipality / Province">
 
-      <button class="primary-btn">
+
+      <button
+        class="primary-btn"
+        type="submit">
         Publish Product
       </button>
 
@@ -655,6 +851,10 @@
 
 
 <script>
+
+/* =========================
+   SUPABASE CONFIG
+========================= */
 
 const SUPABASE_URL =
   "https://ivbqudztsmsylnodydce.supabase.co";
@@ -670,11 +870,18 @@ const supabaseClient =
   );
 
 
+/* =========================
+   GLOBAL VARIABLES
+========================= */
+
 let currentUser = null;
+
 let currentProfile = null;
 
 
-/* AUTH TABS */
+/* =========================
+   AUTH TABS
+========================= */
 
 function showLogin() {
 
@@ -718,7 +925,9 @@ function showSignup() {
 }
 
 
-/* MESSAGE */
+/* =========================
+   AUTH MESSAGE
+========================= */
 
 function showAuthMessage(text, type) {
 
@@ -733,127 +942,159 @@ function showAuthMessage(text, type) {
 }
 
 
-/* LOGIN */
+/* =========================
+   LOGIN
+========================= */
 
 document
   .getElementById("loginForm")
-  .addEventListener("submit", async (event) => {
+  .addEventListener(
+    "submit",
+    async (event) => {
 
-    event.preventDefault();
+      event.preventDefault();
 
-    const email =
-      document
-        .getElementById("loginEmail")
-        .value
-        .trim();
+      const email =
+        document
+          .getElementById("loginEmail")
+          .value
+          .trim();
 
-    const password =
-      document
-        .getElementById("loginPassword")
-        .value;
-
-
-    const {
-      data,
-      error
-    } =
-      await supabaseClient.auth.signInWithPassword({
-        email,
-        password
-      });
+      const password =
+        document
+          .getElementById("loginPassword")
+          .value;
 
 
-    if (error) {
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .auth
+          .signInWithPassword({
 
-      showAuthMessage(
-        error.message,
-        "error"
+            email,
+            password
+
+          });
+
+
+      if (error) {
+
+        showAuthMessage(
+          error.message,
+          "error"
+        );
+
+        return;
+      }
+
+
+      await initializeApp(
+        data.user
       );
 
-      return;
     }
+  );
 
 
-    await initializeApp(data.user);
-
-  });
-
-
-/* SIGNUP */
+/* =========================
+   SIGN UP
+========================= */
 
 document
   .getElementById("signupForm")
-  .addEventListener("submit", async (event) => {
+  .addEventListener(
+    "submit",
+    async (event) => {
 
-    event.preventDefault();
-
-    const fullName =
-      document
-        .getElementById("signupName")
-        .value
-        .trim();
-
-    const email =
-      document
-        .getElementById("signupEmail")
-        .value
-        .trim();
-
-    const password =
-      document
-        .getElementById("signupPassword")
-        .value;
-
-    const role =
-      document
-        .getElementById("signupRole")
-        .value;
+      event.preventDefault();
 
 
-    const {
-      data,
-      error
-    } =
-      await supabaseClient.auth.signUp({
-
-        email,
-        password,
-
-        options: {
-          data: {
-            full_name: fullName,
-            role
-          }
-        }
-
-      });
+      const fullName =
+        document
+          .getElementById("signupName")
+          .value
+          .trim();
 
 
-    if (error) {
+      const email =
+        document
+          .getElementById("signupEmail")
+          .value
+          .trim();
+
+
+      const password =
+        document
+          .getElementById("signupPassword")
+          .value;
+
+
+      const role =
+        document
+          .getElementById("signupRole")
+          .value;
+
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .auth
+          .signUp({
+
+            email,
+
+            password,
+
+            options: {
+
+              data: {
+
+                full_name:
+                  fullName,
+
+                role:
+                  role
+
+              }
+
+            }
+
+          });
+
+
+      if (error) {
+
+        showAuthMessage(
+          error.message,
+          "error"
+        );
+
+        return;
+      }
+
 
       showAuthMessage(
-        error.message,
-        "error"
+        "Account created successfully. You can now log in.",
+        "success"
       );
 
-      return;
+
+      document
+        .getElementById("signupForm")
+        .reset();
+
     }
+  );
 
 
-    showAuthMessage(
-      "Account created successfully. You can now log in.",
-      "success"
-    );
-
-
-    document
-      .getElementById("signupForm")
-      .reset();
-
-  });
-
-
-/* INITIALIZE APP */
+/* =========================
+   INITIALIZE APP
+========================= */
 
 async function initializeApp(user) {
 
@@ -890,6 +1131,7 @@ async function initializeApp(user) {
     .getElementById("authScreen")
     .classList.add("hidden");
 
+
   document
     .getElementById("app")
     .classList.remove("hidden");
@@ -908,16 +1150,23 @@ async function initializeApp(user) {
 
 
   const addButton =
-    document.getElementById("addProductButton");
+    document
+      .getElementById("addProductButton");
 
 
-  if (profile.role !== "FARMER") {
+  if (
+    profile.role !== "FARMER"
+  ) {
 
-    addButton.classList.add("hidden");
+    addButton
+      .classList
+      .add("hidden");
 
   } else {
 
-    addButton.classList.remove("hidden");
+    addButton
+      .classList
+      .remove("hidden");
 
   }
 
@@ -927,18 +1176,22 @@ async function initializeApp(user) {
 }
 
 
-/* PRODUCTS */
+/* =========================
+   LOAD PRODUCTS
+========================= */
 
 async function loadProducts() {
 
   const container =
-    document.getElementById("products");
+    document
+      .getElementById("products");
 
 
-  container.innerHTML =
-    `<div class="empty">
+  container.innerHTML = `
+    <div class="empty">
       Loading products...
-    </div>`;
+    </div>
+  `;
 
 
   const {
@@ -959,33 +1212,46 @@ async function loadProducts() {
         status
       `)
       .eq("status", "ACTIVE")
-      .order("created_at", {
-        ascending: false
-      });
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      );
 
 
   if (error) {
 
     console.error(error);
 
-    container.innerHTML =
-      `<div class="empty">
+    container.innerHTML = `
+      <div class="empty">
         Unable to load products.
-      </div>`;
+      </div>
+    `;
 
     return;
   }
 
 
-  if (!data || data.length === 0) {
+  if (
+    !data ||
+    data.length === 0
+  ) {
 
-    container.innerHTML =
-      `<div class="empty">
-        <h3>No products yet</h3>
+    container.innerHTML = `
+      <div class="empty">
+
+        <h3>
+          No products yet
+        </h3>
+
         <p>
           Be the first farmer to publish a product.
         </p>
-      </div>`;
+
+      </div>
+    `;
 
     return;
   }
@@ -993,55 +1259,126 @@ async function loadProducts() {
 
   container.innerHTML =
     data
-      .map(product => `
+      .map(product => {
 
-        <div class="product-card">
+        const image =
+          product.image_url
+            ? `
+              <img
+                src="${escapeHtml(product.image_url)}"
+                alt="${escapeHtml(product.name)}"
+                loading="lazy">
+            `
+            : `
+              <div class="product-placeholder">
+                🌱
+              </div>
+            `;
 
-          <div class="product-image">
-            🌱
-          </div>
 
-          <div class="product-content">
+        return `
 
-            <h3>
-              ${escapeHtml(product.name)}
-            </h3>
+          <div class="product-card">
 
-            <div class="price">
-              ₱${Number(product.price).toLocaleString()}
-              /${escapeHtml(product.unit)}
+            <div class="product-image">
+
+              ${image}
+
             </div>
 
-            <p>
-              ${escapeHtml(
-                product.description || "No description"
-              )}
-            </p>
 
-            <div class="product-location">
-              📍
-              ${escapeHtml(
-                product.location || "Location not specified"
-              )}
+            <div class="product-content">
+
+              <h3>
+                ${escapeHtml(
+                  product.name
+                )}
+              </h3>
+
+
+              <div class="price">
+
+                ₱${Number(
+                  product.price
+                ).toLocaleString()}
+
+                /
+                ${escapeHtml(
+                  product.unit
+                )}
+
+              </div>
+
+
+              <div class="quantity">
+
+                Available:
+                ${Number(
+                  product.quantity
+                ).toLocaleString()}
+
+                ${escapeHtml(
+                  product.unit
+                )}
+
+              </div>
+
+
+              <p class="product-description">
+
+                ${escapeHtml(
+                  product.description ||
+                  "No description"
+                )}
+
+              </p>
+
+
+              <div class="product-location">
+
+                📍
+                ${escapeHtml(
+                  product.location ||
+                  "Location not specified"
+                )}
+
+              </div>
+
             </div>
 
           </div>
 
-        </div>
+        `;
 
-      `)
+      })
       .join("");
 
 }
 
 
-/* ADD PRODUCT */
+/* =========================
+   ADD PRODUCT MODAL
+========================= */
 
 function openAddProduct() {
 
+  if (
+    !currentProfile ||
+    currentProfile.role !== "FARMER"
+  ) {
+
+    alert(
+      "Only farmer accounts can publish products."
+    );
+
+    return;
+  }
+
+
   document
     .getElementById("productModal")
-    .classList.remove("hidden");
+    .classList
+    .remove("hidden");
 
 }
 
@@ -1050,177 +1387,516 @@ function closeAddProduct() {
 
   document
     .getElementById("productModal")
-    .classList.add("hidden");
+    .classList
+    .add("hidden");
 
 }
 
 
+/* =========================
+   IMAGE PREVIEW
+========================= */
+
+document
+  .getElementById("productImage")
+  .addEventListener(
+    "change",
+    function () {
+
+      const file =
+        this.files[0];
+
+      const preview =
+        document
+          .getElementById("imagePreview");
+
+      const previewImage =
+        document
+          .getElementById("previewImage");
+
+
+      if (!file) {
+
+        preview.style.display =
+          "none";
+
+        previewImage.src =
+          "";
+
+        return;
+      }
+
+
+      const allowedTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/webp"
+      ];
+
+
+      if (
+        !allowedTypes.includes(
+          file.type
+        )
+      ) {
+
+        alert(
+          "Please select a JPG, PNG, or WEBP image."
+        );
+
+        this.value = "";
+
+        preview.style.display =
+          "none";
+
+        return;
+      }
+
+
+      if (
+        file.size >
+        5 * 1024 * 1024
+      ) {
+
+        alert(
+          "Image must be smaller than 5MB."
+        );
+
+        this.value = "";
+
+        preview.style.display =
+          "none";
+
+        return;
+      }
+
+
+      const imageUrl =
+        URL.createObjectURL(file);
+
+
+      previewImage.src =
+        imageUrl;
+
+
+      preview.style.display =
+        "flex";
+
+    }
+  );
+
+
+/* =========================
+   CREATE PRODUCT
+========================= */
+
 document
   .getElementById("productForm")
-  .addEventListener("submit", async (event) => {
+  .addEventListener(
+    "submit",
+    async (event) => {
 
-    event.preventDefault();
+      event.preventDefault();
 
 
-    if (
-      !currentUser ||
-      !currentProfile ||
-      currentProfile.role !== "FARMER"
-    ) {
+      if (
+        !currentUser ||
+        !currentProfile ||
+        currentProfile.role !== "FARMER"
+      ) {
 
-      alert(
-        "Only farmer accounts can publish products."
+        alert(
+          "Only farmer accounts can publish products."
+        );
+
+        return;
+      }
+
+
+      const imageFile =
+        document
+          .getElementById("productImage")
+          .files[0];
+
+
+      if (!imageFile) {
+
+        alert(
+          "Please select a product photo."
+        );
+
+        return;
+      }
+
+
+      const allowedTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/webp"
+      ];
+
+
+      if (
+        !allowedTypes.includes(
+          imageFile.type
+        )
+      ) {
+
+        alert(
+          "Please upload JPG, PNG, or WEBP."
+        );
+
+        return;
+      }
+
+
+      if (
+        imageFile.size >
+        5 * 1024 * 1024
+      ) {
+
+        alert(
+          "Image must be smaller than 5MB."
+        );
+
+        return;
+      }
+
+
+      const message =
+        document
+          .getElementById("productMessage");
+
+
+      message.innerHTML = `
+        <div class="message">
+          Uploading product photo...
+        </div>
+      `;
+
+
+      /* =========================
+         FILE NAME
+      ========================= */
+
+      const fileExtension =
+        imageFile.name
+          .split(".")
+          .pop()
+          .toLowerCase();
+
+
+      const fileName =
+        `${crypto.randomUUID()}.${fileExtension}`;
+
+
+      const filePath =
+        `${currentUser.id}/${fileName}`;
+
+
+      /* =========================
+         UPLOAD IMAGE
+      ========================= */
+
+      const {
+        error: uploadError
+      } =
+        await supabaseClient
+          .storage
+          .from("product-images")
+          .upload(
+            filePath,
+            imageFile,
+            {
+              contentType:
+                imageFile.type,
+
+              upsert:
+                false
+            }
+          );
+
+
+      if (uploadError) {
+
+        console.error(
+          uploadError
+        );
+
+        message.innerHTML = `
+          <div class="message error">
+            Image upload failed:
+            ${escapeHtml(
+              uploadError.message
+            )}
+          </div>
+        `;
+
+        return;
+      }
+
+
+      /* =========================
+         GET PUBLIC URL
+      ========================= */
+
+      const {
+        data: imageData
+      } =
+        supabaseClient
+          .storage
+          .from("product-images")
+          .getPublicUrl(
+            filePath
+          );
+
+
+      const imageUrl =
+        imageData.publicUrl;
+
+
+      /* =========================
+         PRODUCT DATA
+      ========================= */
+
+      const product = {
+
+        seller_id:
+          currentProfile.id,
+
+        name:
+          document
+            .getElementById(
+              "productName"
+            )
+            .value
+            .trim(),
+
+        description:
+          document
+            .getElementById(
+              "productDescription"
+            )
+            .value
+            .trim(),
+
+        price:
+          Number(
+            document
+              .getElementById(
+                "productPrice"
+              )
+              .value
+          ),
+
+        quantity:
+          Number(
+            document
+              .getElementById(
+                "productQuantity"
+              )
+              .value
+          ),
+
+        unit:
+          document
+            .getElementById(
+              "productUnit"
+            )
+            .value,
+
+        location:
+          document
+            .getElementById(
+              "productLocation"
+            )
+            .value
+            .trim(),
+
+        image_url:
+          imageUrl,
+
+        status:
+          "ACTIVE"
+
+      };
+
+
+      /* =========================
+         INSERT PRODUCT
+      ========================= */
+
+      message.innerHTML = `
+        <div class="message">
+          Saving product...
+        </div>
+      `;
+
+
+      const {
+        error
+      } =
+        await supabaseClient
+          .from("products")
+          .insert(product);
+
+
+      if (error) {
+
+        console.error(error);
+
+        message.innerHTML = `
+          <div class="message error">
+
+            Product could not be saved:
+
+            ${escapeHtml(
+              error.message
+            )}
+
+          </div>
+        `;
+
+        return;
+      }
+
+
+      /* =========================
+         SUCCESS
+      ========================= */
+
+      message.innerHTML = `
+        <div class="message success">
+
+          Product published successfully!
+
+        </div>
+      `;
+
+
+      document
+        .getElementById(
+          "productForm"
+        )
+        .reset();
+
+
+      document
+        .getElementById(
+          "imagePreview"
+        )
+        .style
+        .display = "none";
+
+
+      await loadProducts();
+
+
+      setTimeout(
+        () => {
+
+          closeAddProduct();
+
+          message.innerHTML =
+            "";
+
+        },
+        1000
       );
 
-      return;
     }
+  );
 
 
-    const product = {
-
-      seller_id: currentProfile.id,
-
-      name:
-        document
-          .getElementById("productName")
-          .value
-          .trim(),
-
-      description:
-        document
-          .getElementById("productDescription")
-          .value
-          .trim(),
-
-      price:
-        Number(
-          document
-            .getElementById("productPrice")
-            .value
-        ),
-
-      quantity:
-        Number(
-          document
-            .getElementById("productQuantity")
-            .value
-        ),
-
-      unit:
-        document
-          .getElementById("productUnit")
-          .value,
-
-      location:
-        document
-          .getElementById("productLocation")
-          .value
-          .trim(),
-
-      status: "ACTIVE"
-
-    };
-
-
-    const {
-      error
-    } =
-      await supabaseClient
-        .from("products")
-        .insert(product);
-
-
-    if (error) {
-
-      console.error(error);
-
-      document
-        .getElementById("productMessage")
-        .innerHTML =
-          `<div class="message error">
-            ${escapeHtml(error.message)}
-          </div>`;
-
-      return;
-    }
-
-
-    document
-      .getElementById("productMessage")
-      .innerHTML =
-        `<div class="message success">
-          Product published successfully!
-        </div>`;
-
-
-    document
-      .getElementById("productForm")
-      .reset();
-
-
-    await loadProducts();
-
-
-    setTimeout(() => {
-
-      closeAddProduct();
-
-      document
-        .getElementById("productMessage")
-        .innerHTML = "";
-
-    }, 1000);
-
-  });
-
-
-/* LOGOUT */
+/* =========================
+   LOGOUT
+========================= */
 
 async function logout() {
 
-  await supabaseClient.auth.signOut();
+  await supabaseClient
+    .auth
+    .signOut();
 
-  currentUser = null;
-  currentProfile = null;
+
+  currentUser =
+    null;
+
+  currentProfile =
+    null;
+
 
   document
     .getElementById("app")
-    .classList.add("hidden");
+    .classList
+    .add("hidden");
+
 
   document
     .getElementById("authScreen")
-    .classList.remove("hidden");
+    .classList
+    .remove("hidden");
+
 
   showLogin();
 
 }
 
 
-/* SECURITY */
+/* =========================
+   HTML SECURITY
+========================= */
 
 function escapeHtml(value) {
 
   return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
 
 }
 
 
-/* SESSION CHECK */
+/* =========================
+   SESSION CHECK
+========================= */
 
 async function checkSession() {
 
   const {
     data
   } =
-    await supabaseClient.auth.getSession();
+    await supabaseClient
+      .auth
+      .getSession();
 
 
-  if (data.session) {
+  if (
+    data &&
+    data.session
+  ) {
 
     await initializeApp(
       data.session.user
@@ -1230,6 +1906,10 @@ async function checkSession() {
 
 }
 
+
+/* =========================
+   START APP
+========================= */
 
 checkSession();
 
