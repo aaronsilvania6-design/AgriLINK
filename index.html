@@ -23,6 +23,7 @@
   --text:#202124;
   --muted:#777;
   --green:#2e7d32;
+  --blue:#1976d2;
   --shadow:0 10px 30px rgba(0,0,0,.08);
 }
 
@@ -809,11 +810,9 @@ placeholder="Minimum 8 characters">
 <label>Account Type</label>
 
 <select id="signupRole">
-
 <option value="BUYER">Buyer</option>
 <option value="FARMER">Farmer</option>
 <option value="ORGANIZATION">Organization</option>
-
 </select>
 
 <button class="primary-btn">
@@ -877,9 +876,7 @@ Welcome, <span id="userName">User</span>!
 Your agricultural marketplace.
 </p>
 
-<div id="roleBadge"
-class="role-badge">
-</div>
+<div id="roleBadge" class="role-badge"></div>
 
 </section>
 
@@ -898,9 +895,7 @@ Refresh
 
 </div>
 
-<div id="products"
-class="products">
-</div>
+<div id="products" class="products"></div>
 
 </section>
 
@@ -919,9 +914,7 @@ Refresh
 
 </div>
 
-<div id="orders"
-class="orders">
-</div>
+<div id="orders" class="orders"></div>
 
 </section>
 
@@ -931,9 +924,7 @@ class="orders">
 
 <!-- ================= ADD PRODUCT ================= -->
 
-<div
-id="productModal"
-class="modal hidden">
+<div id="productModal" class="modal hidden">
 
 <div class="modal-card">
 
@@ -962,8 +953,7 @@ placeholder="Fresh Tomatoes">
 
 <textarea
 id="productDescription"
-placeholder="Describe your product">
-</textarea>
+placeholder="Describe your product"></textarea>
 
 <label>Price</label>
 
@@ -1020,9 +1010,7 @@ Publish Product
 
 <!-- ================= CHAT ================= -->
 
-<div
-id="chatModal"
-class="modal chat-modal hidden">
+<div id="chatModal" class="modal chat-modal hidden">
 
 <div class="modal-card">
 
@@ -1044,14 +1032,15 @@ class="modal chat-modal hidden">
 <div class="chat-header">
 
 <div>
-<div id="chatUserName"
-class="chat-user">
+
+<div id="chatUserName" class="chat-user">
 Select a conversation
 </div>
 
 <div class="online">
 ● AgriLink Chat
 </div>
+
 </div>
 
 <button
@@ -1063,9 +1052,7 @@ onclick="closeChat()">
 </div>
 
 
-<div
-id="chatMessages"
-class="chat-messages">
+<div id="chatMessages" class="chat-messages">
 
 <div class="chat-empty">
 Select a conversation to start chatting.
@@ -1074,9 +1061,7 @@ Select a conversation to start chatting.
 </div>
 
 
-<form
-id="chatForm"
-class="chat-input">
+<form id="chatForm" class="chat-input">
 
 <input
 id="chatInput"
@@ -1116,11 +1101,11 @@ SUPABASE_KEY
 
 /* ================= GLOBALS ================= */
 
-let currentUser=null;
-let currentProfile=null;
+let currentUser = null;
+let currentProfile = null;
 
-let currentConversation=null;
-let messageChannel=null;
+let currentConversation = null;
+let messageChannel = null;
 
 
 /* ================= HELPERS ================= */
@@ -1181,17 +1166,17 @@ document
 }
 
 
-/* ================= MESSAGE ================= */
+/* ================= AUTH MESSAGE ================= */
 
 function showAuthMessage(text,type){
 
-const box=
+const box =
 document.getElementById("authMessage");
 
-box.className=
-"message "+type;
+box.className =
+"message " + type;
 
-box.textContent=text;
+box.textContent = text;
 
 }
 
@@ -1204,17 +1189,18 @@ document
 
 e.preventDefault();
 
-const email=
+const email =
 document
 .getElementById("loginEmail")
-.value.trim();
+.value
+.trim();
 
-const password=
+const password =
 document
 .getElementById("loginPassword")
 .value;
 
-const {data,error}=
+const {data,error} =
 await supabaseClient.auth.signInWithPassword({
 email,
 password
@@ -1222,7 +1208,11 @@ password
 
 if(error){
 
-showAuthMessage(error.message,"error");
+showAuthMessage(
+error.message,
+"error"
+);
+
 return;
 
 }
@@ -1240,27 +1230,29 @@ document
 
 e.preventDefault();
 
-const fullName=
+const fullName =
 document
 .getElementById("signupName")
-.value.trim();
+.value
+.trim();
 
-const email=
+const email =
 document
 .getElementById("signupEmail")
-.value.trim();
+.value
+.trim();
 
-const password=
+const password =
 document
 .getElementById("signupPassword")
 .value;
 
-const role=
+const role =
 document
 .getElementById("signupRole")
 .value;
 
-const {data,error}=
+const {data,error} =
 await supabaseClient.auth.signUp({
 
 email,
@@ -1277,7 +1269,11 @@ role:role
 
 if(error){
 
-showAuthMessage(error.message,"error");
+showAuthMessage(
+error.message,
+"error"
+);
+
 return;
 
 }
@@ -1298,9 +1294,9 @@ document
 
 async function initializeApp(user){
 
-currentUser=user;
+currentUser = user;
 
-const {data:profile,error}=
+const {data:profile,error} =
 await supabaseClient
 .from("users")
 .select("*")
@@ -1319,7 +1315,7 @@ return;
 
 }
 
-currentProfile=profile;
+currentProfile = profile;
 
 document
 .getElementById("authScreen")
@@ -1331,19 +1327,18 @@ document
 
 document
 .getElementById("userName")
-.textContent=
+.textContent =
 profile.full_name;
 
 document
 .getElementById("roleBadge")
-.textContent=
+.textContent =
 profile.role;
 
-
-const addButton=
+const addButton =
 document.getElementById("addProductButton");
 
-if(profile.role!=="FARMER"){
+if(profile.role !== "FARMER"){
 
 addButton.classList.add("hidden");
 
@@ -1363,13 +1358,15 @@ await loadOrders();
 
 async function loadProducts(){
 
-const container=
+const container =
 document.getElementById("products");
 
-container.innerHTML=
-`<div class="empty">Loading products...</div>`;
+container.innerHTML =
+`<div class="empty">
+Loading products...
+</div>`;
 
-const {data,error}=
+const {data,error} =
 await supabaseClient
 .from("products")
 .select(`
@@ -1392,7 +1389,7 @@ if(error){
 
 console.error(error);
 
-container.innerHTML=
+container.innerHTML =
 `<div class="empty">
 Unable to load products.<br>
 ${escapeHtml(error.message)}
@@ -1402,9 +1399,9 @@ return;
 
 }
 
-if(!data || data.length===0){
+if(!data || data.length === 0){
 
-container.innerHTML=
+container.innerHTML =
 `<div class="empty">
 <h3>No products yet</h3>
 <p>Be the first farmer to publish a product.</p>
@@ -1414,14 +1411,15 @@ return;
 
 }
 
-
-container.innerHTML=
+container.innerHTML =
 data.map(product=>{
 
-const image=
+const image =
 product.image_url
 ?
-`<img src="${escapeHtml(product.image_url)}" alt="${escapeHtml(product.name)}">`
+`<img
+src="${escapeHtml(product.image_url)}"
+alt="${escapeHtml(product.name)}">`
 :
 `<div class="product-placeholder">🌱</div>`;
 
@@ -1446,11 +1444,16 @@ ${escapeHtml(product.unit)}
 </div>
 
 <div class="product-description">
-${escapeHtml(product.description || "No description")}
+${escapeHtml(
+product.description || "No description"
+)}
 </div>
 
 <div class="product-location">
-📍 ${escapeHtml(product.location || "Location not specified")}
+📍
+${escapeHtml(
+product.location || "Location not specified"
+)}
 </div>
 
 <div class="product-actions">
@@ -1507,43 +1510,54 @@ e.preventDefault();
 
 if(
 !currentProfile ||
-currentProfile.role!=="FARMER"
+currentProfile.role !== "FARMER"
 ){
 
-alert("Only farmers can publish products.");
+alert(
+"Only farmers can publish products."
+);
+
 return;
 
 }
 
-
-const message=
+const message =
 document.getElementById("productMessage");
 
-message.innerHTML=
-`<div class="message">Publishing...</div>`;
+message.innerHTML =
+`<div class="message">
+Publishing...
+</div>`;
 
+const file =
+document
+.getElementById("productImage")
+.files[0];
 
-const file=
-document.getElementById("productImage").files[0];
-
-let imageUrl=null;
-
+let imageUrl = null;
 
 if(file){
 
-const fileName=
-`${currentUser.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,"_")}`;
+const fileName =
+`${currentUser.id}/${Date.now()}-${file.name.replace(
+/[^a-zA-Z0-9._-]/g,
+"_"
+)}`;
 
-const {error:uploadError}=
+const {error:uploadError} =
 await supabaseClient.storage
 .from("product-images")
-.upload(fileName,file,{
+.upload(
+fileName,
+file,
+{
 upsert:false
-});
+}
+);
 
 if(uploadError){
 
-message.innerHTML=
+message.innerHTML =
 `<div class="message error">
 ${escapeHtml(uploadError.message)}
 </div>`;
@@ -1552,47 +1566,66 @@ return;
 
 }
 
-
-const {data:urlData}=
+const {data:urlData} =
 supabaseClient.storage
 .from("product-images")
 .getPublicUrl(fileName);
 
-imageUrl=urlData.publicUrl;
+imageUrl =
+urlData.publicUrl;
 
 }
 
+const product = {
 
-const product={
-
-seller_id:currentProfile.id,
+seller_id:
+currentProfile.id,
 
 name:
-document.getElementById("productName").value.trim(),
+document
+.getElementById("productName")
+.value
+.trim(),
 
 description:
-document.getElementById("productDescription").value.trim(),
+document
+.getElementById("productDescription")
+.value
+.trim(),
 
 price:
-Number(document.getElementById("productPrice").value),
+Number(
+document
+.getElementById("productPrice")
+.value
+),
 
 quantity:
-Number(document.getElementById("productQuantity").value),
+Number(
+document
+.getElementById("productQuantity")
+.value
+),
 
 unit:
-document.getElementById("productUnit").value,
+document
+.getElementById("productUnit")
+.value,
 
 location:
-document.getElementById("productLocation").value.trim(),
+document
+.getElementById("productLocation")
+.value
+.trim(),
 
-image_url:imageUrl,
+image_url:
+imageUrl,
 
 status:"ACTIVE"
 
 };
 
-
-const {error}=
+const {error} =
 await supabaseClient
 .from("products")
 .insert(product);
@@ -1601,7 +1634,7 @@ if(error){
 
 console.error(error);
 
-message.innerHTML=
+message.innerHTML =
 `<div class="message error">
 ${escapeHtml(error.message)}
 </div>`;
@@ -1610,8 +1643,7 @@ return;
 
 }
 
-
-message.innerHTML=
+message.innerHTML =
 `<div class="message success">
 Product published successfully!
 </div>`;
@@ -1626,7 +1658,7 @@ setTimeout(()=>{
 
 closeAddProduct();
 
-message.innerHTML="";
+message.innerHTML = "";
 
 },1000);
 
@@ -1637,14 +1669,21 @@ message.innerHTML="";
 
 async function loadOrders(){
 
-const container=
+const container =
 document.getElementById("orders");
 
-container.innerHTML=
-`<div class="empty">Loading orders...</div>`;
+container.innerHTML =
+`<div class="empty">
+Loading orders...
+</div>`;
 
+if(!currentProfile){
 
-const {data,error}=
+return;
+
+}
+
+const {data,error} =
 await supabaseClient
 .from("orders")
 .select(`
@@ -1659,16 +1698,20 @@ status,
 created_at
 `)
 .or(
-`buyer_id.eq.${currentProfile?.id},seller_id.eq.${currentProfile?.id}`
+`buyer_id.eq.${currentProfile.id},seller_id.eq.${currentProfile.id}`
 )
-.order("created_at",{ascending:false});
-
+.order(
+"created_at",
+{
+ascending:false
+}
+);
 
 if(error){
 
 console.error(error);
 
-container.innerHTML=
+container.innerHTML =
 `<div class="empty">
 Unable to load orders.<br>
 ${escapeHtml(error.message)}
@@ -1678,10 +1721,9 @@ return;
 
 }
 
+if(!data || data.length === 0){
 
-if(!data || data.length===0){
-
-container.innerHTML=
+container.innerHTML =
 `<div class="empty">
 <h3>No orders yet</h3>
 <p>Your orders will appear here.</p>
@@ -1691,8 +1733,7 @@ return;
 
 }
 
-
-container.innerHTML=
+container.innerHTML =
 data.map(order=>{
 
 return `
@@ -1706,7 +1747,9 @@ Order #${escapeHtml(order.id).slice(0,8)}
 </strong>
 
 <span class="order-status">
-${escapeHtml(order.status || "PENDING")}
+${escapeHtml(
+order.status || "PENDING"
+)}
 </span>
 
 </div>
@@ -1714,14 +1757,20 @@ ${escapeHtml(order.status || "PENDING")}
 <div class="order-info">
 
 Quantity:
-${escapeHtml(order.quantity)}<br>
+${escapeHtml(order.quantity)}
+<br>
 
 Unit Price:
-₱${Number(order.unit_price || 0).toLocaleString()}<br>
+₱${Number(
+order.unit_price || 0
+).toLocaleString()}
+<br>
 
 Total:
 <strong>
-₱${Number(order.total_price || 0).toLocaleString()}
+₱${Number(
+order.total_price || 0
+).toLocaleString()}
 </strong>
 
 </div>
@@ -1731,10 +1780,12 @@ Total:
 ${
 ["PENDING","CONFIRMED"].includes(order.status)
 ?
-`<button
+`
+<button
 onclick="cancelOrder('${order.id}')">
 Cancel Order
-</button>`
+</button>
+`
 :
 ""
 }
@@ -1756,12 +1807,15 @@ async function buyProduct(productId){
 
 if(!currentUser){
 
-alert("Please login first.");
+alert(
+"Please login first."
+);
+
 return;
 
 }
 
-const {data:product,error}=
+const {data:product,error} =
 await supabaseClient
 .from("products")
 .select("*")
@@ -1770,102 +1824,143 @@ await supabaseClient
 
 if(error || !product){
 
-alert("Product could not be found.");
+alert(
+"Product could not be found."
+);
+
 return;
 
 }
 
+if(product.seller_id === currentProfile.id){
 
-if(product.seller_id===currentProfile.id){
+alert(
+"You cannot buy your own product."
+);
 
-alert("You cannot buy your own product.");
 return;
 
 }
 
-
-const quantityText=
+const quantityText =
 prompt(
 `How many ${product.unit} do you want to buy?`,
 "1"
 );
 
-if(quantityText===null)return;
+if(quantityText === null){
 
-const quantity=Number(quantityText);
+return;
+
+}
+
+const quantity =
+Number(quantityText);
 
 if(
 !Number.isFinite(quantity) ||
-quantity<=0
+quantity <= 0
 ){
 
-alert("Please enter a valid quantity.");
+alert(
+"Please enter a valid quantity."
+);
+
 return;
 
 }
 
-if(quantity>Number(product.quantity)){
+if(
+quantity >
+Number(product.quantity)
+){
 
-alert("Not enough quantity available.");
+alert(
+"Not enough quantity available."
+);
+
 return;
 
 }
 
+const total =
+Number(product.price) *
+quantity;
 
-const total=
-Number(product.price)*quantity;
-
-
-const {error:orderError}=
+const {error:orderError} =
 await supabaseClient
 .from("orders")
 .insert({
 
-product_id:product.id,
+product_id:
+product.id,
 
-buyer_id:currentProfile.id,
+buyer_id:
+currentProfile.id,
 
-seller_id:product.seller_id,
+seller_id:
+product.seller_id,
 
-quantity:quantity,
+quantity:
+quantity,
 
-unit_price:Number(product.price),
+unit_price:
+Number(product.price),
 
-total_price:total,
+total_price:
+total,
 
-status:"PENDING"
+status:
+"PENDING"
 
 });
-
 
 if(orderError){
 
 console.error(orderError);
 
-alert(orderError.message);
+alert(
+orderError.message
+);
 
 return;
 
 }
 
+const remaining =
+Number(product.quantity) -
+quantity;
 
-const remaining=
-Number(product.quantity)-quantity;
-
-
+const {error:updateError} =
 await supabaseClient
 .from("products")
 .update({
 
-quantity:remaining,
+quantity:
+remaining,
 
-status:remaining<=0 ? "SOLD" : "ACTIVE"
+status:
+remaining <= 0
+?
+"SOLD"
+:
+"ACTIVE"
 
 })
-.eq("id",product.id);
+.eq(
+"id",
+product.id
+);
 
+if(updateError){
 
-alert("Order created successfully!");
+console.error(updateError);
+
+}
+
+alert(
+"Order created successfully!"
+);
 
 await loadProducts();
 await loadOrders();
@@ -1877,20 +1972,33 @@ await loadOrders();
 
 async function cancelOrder(orderId){
 
-if(!confirm("Cancel this order?"))return;
+if(
+!confirm(
+"Cancel this order?"
+)
+){
 
-const {error}=
+return;
+
+}
+
+const {error} =
 await supabaseClient
 .from("orders")
 .update({
 status:"CANCELLED"
 })
-.eq("id",orderId);
-
+.eq(
+"id",
+orderId
+);
 
 if(error){
 
-alert(error.message);
+alert(
+error.message
+);
+
 return;
 
 }
@@ -1922,120 +2030,161 @@ document
 if(messageChannel){
 
 supabaseClient
-.removeChannel(messageChannel);
+.removeChannel(
+messageChannel
+);
 
-messageChannel=null;
-
-}
-
-currentConversation=null;
+messageChannel = null;
 
 }
 
+currentConversation = null;
 
-async function startChat(sellerId,productId){
+}
+
+
+async function startChat(
+sellerId,
+productId
+){
 
 if(!currentUser){
 
-alert("Please login first.");
+alert(
+"Please login first."
+);
+
 return;
 
 }
 
-if(sellerId===currentProfile.id){
+if(
+sellerId === currentProfile.id
+){
 
-alert("You cannot chat with yourself.");
+alert(
+"You cannot chat with yourself."
+);
+
 return;
 
 }
 
-
-const {data:existing,error:findError}=
+const {data:existing,error:findError} =
 await supabaseClient
 .from("conversations")
 .select("*")
-.eq("buyer_id",currentProfile.id)
-.eq("seller_id",sellerId)
-.eq("product_id",productId)
+.eq(
+"buyer_id",
+currentProfile.id
+)
+.eq(
+"seller_id",
+sellerId
+)
+.eq(
+"product_id",
+productId
+)
 .maybeSingle();
-
 
 if(findError){
 
 console.error(findError);
-alert(findError.message);
+
+alert(
+findError.message
+);
+
 return;
 
 }
 
-
-let conversation=existing;
-
+let conversation =
+existing;
 
 if(!conversation){
 
-const {data:newConversation,error}=
+const {data:newConversation,error} =
 await supabaseClient
 .from("conversations")
 .insert({
 
-buyer_id:currentProfile.id,
-seller_id:sellerId,
-product_id:productId
+buyer_id:
+currentProfile.id,
+
+seller_id:
+sellerId,
+
+product_id:
+productId
 
 })
 .select()
 .single();
 
-
 if(error){
 
 console.error(error);
-alert(error.message);
+
+alert(
+error.message
+);
+
 return;
 
 }
 
-conversation=newConversation;
+conversation =
+newConversation;
 
 }
-
 
 openChat();
 
 setTimeout(()=>{
 
-selectConversation(conversation);
+selectConversation(
+conversation
+);
 
 },300);
 
 }
 
 
+/* ================= LOAD CONVERSATIONS ================= */
+
 async function loadConversations(){
 
-const list=
-document.getElementById("conversationList");
+const list =
+document.getElementById(
+"conversationList"
+);
 
-list.innerHTML=
-`<div class="chat-empty">Loading...</div>`;
+list.innerHTML =
+`<div class="chat-empty">
+Loading...
+</div>`;
 
-
-const {data,error}=
+const {data,error} =
 await supabaseClient
 .from("conversations")
 .select("*")
 .or(
 `buyer_id.eq.${currentProfile.id},seller_id.eq.${currentProfile.id}`
 )
-.order("id",{ascending:false});
-
+.order(
+"created_at",
+{
+ascending:false
+});
 
 if(error){
 
 console.error(error);
 
-list.innerHTML=
+list.innerHTML =
 `<div class="chat-empty">
 ${escapeHtml(error.message)}
 </div>`;
@@ -2044,10 +2193,12 @@ return;
 
 }
 
+if(
+!data ||
+data.length === 0
+){
 
-if(!data || data.length===0){
-
-list.innerHTML=
+list.innerHTML =
 `<div class="chat-empty">
 No conversations yet.
 </div>`;
@@ -2056,82 +2207,106 @@ return;
 
 }
 
+list.innerHTML = "";
 
-list.innerHTML="";
+for(
+const conversation of data
+){
 
-
-for(const conversation of data){
-
-const otherUserId=
-conversation.buyer_id===currentProfile.id
+const otherUserId =
+conversation.buyer_id === currentProfile.id
 ?
 conversation.seller_id
 :
 conversation.buyer_id;
 
-
-const {data:user}=
+const {data:user} =
 await supabaseClient
 .from("users")
-.select("id,full_name,role")
-.eq("id",otherUserId)
+.select(
+"id,full_name,role"
+)
+.eq(
+"id",
+otherUserId
+)
 .single();
 
+const item =
+document.createElement(
+"div"
+);
 
-const item=
-document.createElement("div");
+item.className =
+"conversation-item";
 
-item.className="conversation-item";
-
-item.innerHTML=`
+item.innerHTML = `
 
 <div class="conversation-name">
-${escapeHtml(user?.full_name || "User")}
+${escapeHtml(
+user?.full_name ||
+"User"
+)}
 </div>
 
 <div class="conversation-preview">
-${escapeHtml(user?.role || "")}
+${escapeHtml(
+user?.role || ""
+)}
 </div>
 
 `;
 
-item.onclick=()=>{
-selectConversation(conversation);
+item.onclick = () => {
+
+selectConversation(
+conversation
+);
+
 };
 
-list.appendChild(item);
+list.appendChild(
+item
+);
 
 }
 
 }
 
 
-async function selectConversation(conversation){
+/* ================= SELECT CONVERSATION ================= */
 
-currentConversation=conversation;
+async function selectConversation(
+conversation
+){
 
+currentConversation =
+conversation;
 
-const otherUserId=
-conversation.buyer_id===currentProfile.id
+const otherUserId =
+conversation.buyer_id === currentProfile.id
 ?
 conversation.seller_id
 :
 conversation.buyer_id;
 
-
-const {data:user}=
+const {data:user} =
 await supabaseClient
 .from("users")
-.select("full_name,role")
-.eq("id",otherUserId)
+.select(
+"full_name,role"
+)
+.eq(
+"id",
+otherUserId
+)
 .single();
-
 
 document
 .getElementById("chatUserName")
-.textContent=
-user?.full_name || "User";
-
+.textContent =
+user?.full_name ||
+"User";
 
 await loadMessages();
 
@@ -2140,21 +2315,27 @@ subscribeToMessages();
 }
 
 
+/* ================= LOAD MESSAGES ================= */
+
 async function loadMessages(){
 
-if(!currentConversation)return;
+if(!currentConversation){
 
+return;
 
-const messagesBox=
-document.getElementById("chatMessages");
+}
 
-messagesBox.innerHTML=
+const messagesBox =
+document.getElementById(
+"chatMessages"
+);
+
+messagesBox.innerHTML =
 `<div class="chat-empty">
 Loading messages...
 </div>`;
 
-
-const {data,error}=
+const {data,error} =
 await supabaseClient
 .from("messages")
 .select("*")
@@ -2162,14 +2343,18 @@ await supabaseClient
 "conversation_id",
 currentConversation.id
 )
-.order("created_at",{ascending:true});
-
+.order(
+"created_at",
+{
+ascending:true
+}
+);
 
 if(error){
 
 console.error(error);
 
-messagesBox.innerHTML=
+messagesBox.innerHTML =
 `<div class="chat-empty">
 ${escapeHtml(error.message)}
 </div>`;
@@ -2178,10 +2363,12 @@ return;
 
 }
 
+if(
+!data ||
+data.length === 0
+){
 
-if(!data || data.length===0){
-
-messagesBox.innerHTML=
+messagesBox.innerHTML =
 `<div class="chat-empty">
 No messages yet.<br>
 Say hello 👋
@@ -2191,40 +2378,52 @@ return;
 
 }
 
+messagesBox.innerHTML =
+data
+.map(renderMessage)
+.join("");
 
-messagesBox.innerHTML=
-data.map(renderMessage).join("");
-
-messagesBox.scrollTop=
+messagesBox.scrollTop =
 messagesBox.scrollHeight;
 
 }
 
 
+/* ================= RENDER MESSAGE ================= */
+
 function renderMessage(message){
 
-const mine=
-message.sender_id===currentProfile.id;
+const mine =
+message.sender_id ===
+currentProfile.id;
 
-
-const time=
-new Date(message.created_at)
-.toLocaleTimeString([],{
+const time =
+message.created_at
+?
+new Date(
+message.created_at
+).toLocaleTimeString(
+[],
+{
 hour:"2-digit",
 minute:"2-digit"
-});
-
+}
+)
+:
+"";
 
 return `
 
 <div
-class="message-row ${mine?"mine":""}"
+class="message-row ${mine ? "mine" : ""}"
 id="message-${message.id}">
 
 <div class="chat-bubble">
 
 <div>
-${escapeHtml(message.message)}
+${escapeHtml(
+message.content
+)}
 </div>
 
 <div class="chat-time">
@@ -2234,11 +2433,13 @@ ${time}
 ${
 mine
 ?
-`<button
+`
+<button
 class="message-delete"
 onclick="deleteMessage('${message.id}')">
 Delete
-</button>`
+</button>
+`
 :
 ""
 }
@@ -2254,20 +2455,26 @@ Delete
 }
 
 
+/* ================= REALTIME CHAT ================= */
+
 function subscribeToMessages(){
 
 if(messageChannel){
 
 supabaseClient
-.removeChannel(messageChannel);
+.removeChannel(
+messageChannel
+);
 
 }
 
-messageChannel=
+messageChannel =
 supabaseClient
 .channel(
-"conversation-"+currentConversation.id
+"conversation-" +
+currentConversation.id
 )
+
 .on(
 "postgres_changes",
 {
@@ -2279,26 +2486,44 @@ filter:
 },
 payload=>{
 
-const box=
-document.getElementById("chatMessages");
+const box =
+document.getElementById(
+"chatMessages"
+);
 
-const empty=
-box.querySelector(".chat-empty");
+const empty =
+box.querySelector(
+".chat-empty"
+);
 
 if(empty){
-box.innerHTML="";
+
+box.innerHTML = "";
+
 }
+
+if(
+!document.getElementById(
+"message-" +
+payload.new.id
+)
+){
 
 box.insertAdjacentHTML(
 "beforeend",
-renderMessage(payload.new)
+renderMessage(
+payload.new
+)
 );
 
-box.scrollTop=
+}
+
+box.scrollTop =
 box.scrollHeight;
 
 }
 )
+
 .on(
 "postgres_changes",
 {
@@ -2310,17 +2535,21 @@ filter:
 },
 payload=>{
 
-const element=
+const element =
 document.getElementById(
-"message-"+payload.old.id
+"message-" +
+payload.old.id
 );
 
 if(element){
+
 element.remove();
+
 }
 
 }
 )
+
 .subscribe();
 
 }
@@ -2330,39 +2559,41 @@ element.remove();
 
 document
 .getElementById("chatForm")
-.addEventListener("submit",async e=>{
+.addEventListener(
+"submit",
+async e=>{
 
 e.preventDefault();
 
-if(!currentConversation){
+if(
+!currentConversation
+){
 
-alert("Please select a conversation first.");
+alert(
+"Please select a conversation first."
+);
 
 return;
 
 }
 
-const input=
-document.getElementById("chatInput");
+const input =
+document.getElementById(
+"chatInput"
+);
 
-const text=
+const text =
 input.value.trim();
 
-if(!text)return;
+if(!text){
 
-input.disabled=true;
+return;
 
+}
 
-/*
-  messages table requires:
-  conversation_id
-  sender_id
-  message
-  is_read
-  created_at
-*/
+input.disabled = true;
 
-const {error}=
+const {error} =
 await supabaseClient
 .from("messages")
 .insert({
@@ -2373,55 +2604,69 @@ currentConversation.id,
 sender_id:
 currentProfile.id,
 
-message:
-text,
-
-is_read:
-false,
-
-created_at:
-new Date().toISOString()
+/*
+IMPORTANT:
+Your database uses "content",
+not "message".
+*/
+content:
+text
 
 });
 
-
-input.disabled=false;
-
+input.disabled = false;
 
 if(error){
 
 console.error(error);
 
-alert(error.message);
+alert(
+error.message
+);
 
 return;
 
 }
 
-
-input.value="";
+input.value = "";
 
 });
 
 
 /* ================= DELETE MESSAGE ================= */
 
-async function deleteMessage(messageId){
+async function deleteMessage(
+messageId
+){
 
-if(!confirm("Delete this message?"))return;
+if(
+!confirm(
+"Delete this message?"
+)
+){
 
+return;
 
-const {error}=
+}
+
+const {error} =
 await supabaseClient
 .from("messages")
 .delete()
-.eq("id",messageId)
-.eq("sender_id",currentProfile.id);
-
+.eq(
+"id",
+messageId
+)
+.eq(
+"sender_id",
+currentProfile.id
+);
 
 if(error){
 
-alert(error.message);
+alert(
+error.message
+);
 
 }
 
@@ -2435,16 +2680,21 @@ async function logout(){
 if(messageChannel){
 
 await supabaseClient
-.removeChannel(messageChannel);
+.removeChannel(
+messageChannel
+);
 
-messageChannel=null;
+messageChannel = null;
 
 }
 
-await supabaseClient.auth.signOut();
+await supabaseClient
+.auth
+.signOut();
 
-currentUser=null;
-currentProfile=null;
+currentUser = null;
+currentProfile = null;
+currentConversation = null;
 
 document
 .getElementById("app")
@@ -2463,10 +2713,14 @@ showLogin();
 
 async function checkSession(){
 
-const {data}=
-await supabaseClient.auth.getSession();
+const {data} =
+await supabaseClient
+.auth
+.getSession();
 
-if(data.session){
+if(
+data.session
+){
 
 await initializeApp(
 data.session.user
