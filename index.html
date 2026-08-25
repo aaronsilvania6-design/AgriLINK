@@ -1,494 +1,698 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>AgriLink AI</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: Arial, sans-serif;
-      background: #f6f6f6;
-      color: #222;
-    }
-
-    button,
-    input,
-    textarea,
-    select {
-      font: inherit;
-    }
-
-    button {
-      cursor: pointer;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    /* =========================
-       AUTH
-    ========================= */
-
-    .auth-container {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .auth-card {
-      width: 100%;
-      max-width: 430px;
-      background: white;
-      padding: 30px;
-      border-radius: 22px;
-      box-shadow: 0 15px 40px rgba(0, 0, 0, .1);
-    }
-
-    .logo {
-      width: 65px;
-      height: 65px;
-      border-radius: 18px;
-      background: #c62828;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 32px;
-      margin: auto;
-    }
-
-    .brand {
-      text-align: center;
-      color: #c62828;
-      margin-top: 12px;
-    }
-
-    .subtitle {
-      text-align: center;
-      color: #777;
-      margin: 6px 0 25px;
-    }
-
-    .tabs {
-      display: flex;
-      background: #f1f1f1;
-      padding: 4px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-    }
-
-    .tab {
-      flex: 1;
-      border: none;
-      padding: 11px;
-      border-radius: 9px;
-      background: transparent;
-      font-weight: bold;
-    }
-
-    .tab.active {
-      background: white;
-      color: #c62828;
-    }
-
-    label {
-      display: block;
-      margin: 14px 0 6px;
-      font-size: 13px;
-      font-weight: bold;
-    }
-
-    input,
-    textarea,
-    select {
-      width: 100%;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 13px;
-      outline: none;
-      background: white;
-    }
-
-    textarea {
-      min-height: 100px;
-      resize: vertical;
-    }
-
-    input:focus,
-    textarea:focus,
-    select:focus {
-      border-color: #c62828;
-    }
-
-    input[type="file"] {
-      padding: 10px;
-      background: #fafafa;
-    }
-
-    .primary-btn {
-      width: 100%;
-      border: none;
-      background: #c62828;
-      color: white;
-      padding: 14px;
-      border-radius: 11px;
-      font-weight: bold;
-      margin-top: 20px;
-    }
-
-    .primary-btn:hover {
-      background: #a91f1f;
-    }
-
-    .secondary-btn {
-      border: none;
-      background: #eee;
-      padding: 11px 15px;
-      border-radius: 10px;
-    }
-
-    .danger-btn {
-      border: none;
-      background: #222;
-      color: white;
-      padding: 11px 15px;
-      border-radius: 10px;
-    }
-
-    .message {
-      padding: 12px;
-      border-radius: 10px;
-      margin-top: 15px;
-      font-size: 14px;
-    }
-
-    .success {
-      background: #e8f5e9;
-      color: #1b5e20;
-    }
-
-    .error {
-      background: #ffebee;
-      color: #b71c1c;
-    }
-
-    /* =========================
-       APPLICATION
-    ========================= */
-
-    .app {
-      min-height: 100vh;
-    }
-
-    .navbar {
-      background: white;
-      border-bottom: 1px solid #eee;
-      padding: 15px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    .nav-brand {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      font-weight: bold;
-      color: #c62828;
-      font-size: 18px;
-    }
-
-    .nav-logo {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
-      background: #c62828;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .nav-actions {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .container {
-      max-width: 1100px;
-      margin: auto;
-      padding: 25px 20px;
-    }
-
-    .welcome {
-      background: #c62828;
-      color: white;
-      padding: 25px;
-      border-radius: 20px;
-      margin-bottom: 25px;
-    }
-
-    .welcome h1 {
-      margin-bottom: 7px;
-    }
-
-    .role-badge {
-      display: inline-block;
-      margin-top: 10px;
-      background: rgba(255, 255, 255, .18);
-      padding: 7px 12px;
-      border-radius: 20px;
-      font-size: 13px;
-    }
-
-    .section-title {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-    }
-
-    .products {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 16px;
-    }
-
-    .product-card {
-      background: white;
-      border-radius: 17px;
-      overflow: hidden;
-      border: 1px solid #eee;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, .04);
-    }
-
-    .product-image {
-      width: 100%;
-      height: 180px;
-      background: #eee;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
-    }
-
-    .product-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .product-placeholder {
-      font-size: 50px;
-    }
-
-    .product-content {
-      padding: 16px;
-    }
-
-    .product-content h3 {
-      margin-bottom: 8px;
-    }
-
-    .price {
-      color: #c62828;
-      font-size: 19px;
-      font-weight: bold;
-      margin-bottom: 8px;
-    }
-
-    .quantity {
-      font-size: 13px;
-      color: #555;
-      margin-top: 8px;
-    }
-
-    .product-description {
-      color: #555;
-      font-size: 14px;
-      line-height: 1.4;
-      margin-top: 8px;
-    }
-
-    .product-location {
-      color: #777;
-      font-size: 13px;
-      margin-top: 10px;
-    }
-
-    .empty {
-      background: white;
-      border: 1px dashed #ccc;
-      padding: 40px 20px;
-      border-radius: 16px;
-      text-align: center;
-      color: #777;
-      grid-column: 1 / -1;
-    }
-
-    /* =========================
-       MODAL
-    ========================= */
-
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, .5);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      z-index: 100;
-    }
-
-    .modal-card {
-      width: 100%;
-      max-width: 500px;
-      background: white;
-      border-radius: 20px;
-      padding: 25px;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .close {
-      border: none;
-      background: #eee;
-      width: 35px;
-      height: 35px;
-      border-radius: 50%;
-      font-size: 18px;
-    }
-
-    .preview {
-      width: 100%;
-      height: 200px;
-      background: #f1f1f1;
-      border-radius: 12px;
-      margin-top: 10px;
-      overflow: hidden;
-      display: none;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .preview img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .upload-info {
-      font-size: 12px;
-      color: #777;
-      margin-top: 6px;
-    }
-
-    /* =========================
-       MOBILE / TABLET
-    ========================= */
-
-    @media (max-width: 700px) {
-
-      .navbar {
-        padding: 12px;
-      }
-
-      .container {
-        padding: 18px 12px;
-      }
-
-      .nav-actions {
-        gap: 5px;
-      }
-
-      .products {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
-      }
-
-      .product-image {
-        height: 135px;
-      }
-
-      .product-content {
-        padding: 12px;
-      }
-
-      .product-content h3 {
-        font-size: 15px;
-      }
-
-      .price {
-        font-size: 16px;
-      }
-
-      .welcome {
-        padding: 20px;
-      }
-    }
-
-    @media (max-width: 450px) {
-
-      .nav-brand {
-        font-size: 15px;
-      }
-
-      .nav-logo {
-        width: 32px;
-        height: 32px;
-      }
-
-      .secondary-btn,
-      .danger-btn {
-        padding: 9px 10px;
-        font-size: 12px;
-      }
-
-      .products {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .modal {
-        padding: 10px;
-      }
-
-      .modal-card {
-        padding: 20px;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AgriLink AI</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+:root{
+  --red:#c62828;
+  --red2:#d32f2f;
+  --light:#f7f7f7;
+  --border:#e8e8e8;
+  --text:#222;
+  --muted:#777;
+  --green:#2e7d32;
+}
+
+body{
+  font-family:Arial,Helvetica,sans-serif;
+  background:var(--light);
+  color:var(--text);
+}
+
+button,input,textarea,select{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+.hidden{
+  display:none!important;
+}
+
+/* =========================
+   AUTH
+========================= */
+
+.auth-container{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:
+    radial-gradient(circle at top,#fff 0%,#f7f7f7 55%,#eeeeee 100%);
+}
+
+.auth-card{
+  width:100%;
+  max-width:430px;
+  background:#fff;
+  padding:30px;
+  border-radius:24px;
+  box-shadow:0 18px 50px rgba(0,0,0,.10);
+}
+
+.logo{
+  width:68px;
+  height:68px;
+  border-radius:19px;
+  background:var(--red);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  font-size:33px;
+  margin:auto;
+}
+
+.brand{
+  text-align:center;
+  color:var(--red);
+  margin-top:12px;
+}
+
+.subtitle{
+  text-align:center;
+  color:var(--muted);
+  margin:7px 0 25px;
+}
+
+.tabs{
+  display:flex;
+  background:#f1f1f1;
+  padding:4px;
+  border-radius:12px;
+  margin-bottom:20px;
+}
+
+.tab{
+  flex:1;
+  border:0;
+  padding:11px;
+  border-radius:9px;
+  background:transparent;
+  font-weight:bold;
+}
+
+.tab.active{
+  background:#fff;
+  color:var(--red);
+  box-shadow:0 2px 7px rgba(0,0,0,.06);
+}
+
+label{
+  display:block;
+  margin:14px 0 6px;
+  font-size:13px;
+  font-weight:bold;
+}
+
+input,
+textarea,
+select{
+  width:100%;
+  border:1px solid #ddd;
+  border-radius:11px;
+  padding:13px;
+  outline:none;
+  background:#fff;
+}
+
+input:focus,
+textarea:focus,
+select:focus{
+  border-color:var(--red);
+  box-shadow:0 0 0 3px rgba(198,40,40,.08);
+}
+
+textarea{
+  min-height:100px;
+  resize:vertical;
+}
+
+.primary-btn{
+  width:100%;
+  border:0;
+  background:var(--red);
+  color:#fff;
+  padding:14px;
+  border-radius:11px;
+  font-weight:bold;
+  margin-top:20px;
+}
+
+.primary-btn:hover,
+.buy-btn:hover{
+  background:var(--red2);
+}
+
+.secondary-btn{
+  border:0;
+  background:#eee;
+  padding:11px 15px;
+  border-radius:10px;
+}
+
+.danger-btn{
+  border:0;
+  background:#222;
+  color:#fff;
+  padding:11px 15px;
+  border-radius:10px;
+}
+
+.message{
+  padding:12px;
+  border-radius:10px;
+  margin-top:15px;
+  font-size:14px;
+}
+
+.success{
+  background:#e8f5e9;
+  color:#1b5e20;
+}
+
+.error{
+  background:#ffebee;
+  color:#b71c1c;
+}
+
+/* =========================
+   NAVBAR
+========================= */
+
+.navbar{
+  background:#fff;
+  border-bottom:1px solid var(--border);
+  padding:13px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  position:sticky;
+  top:0;
+  z-index:50;
+}
+
+.nav-brand{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  font-weight:bold;
+  color:var(--red);
+  font-size:18px;
+}
+
+.nav-logo{
+  width:38px;
+  height:38px;
+  border-radius:10px;
+  background:var(--red);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.nav-actions{
+  display:flex;
+  gap:7px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+/* =========================
+   MAIN
+========================= */
+
+.container{
+  max-width:1150px;
+  margin:auto;
+  padding:25px 20px 50px;
+}
+
+.welcome{
+  background:linear-gradient(135deg,#c62828,#d32f2f);
+  color:#fff;
+  padding:27px;
+  border-radius:21px;
+  margin-bottom:25px;
+  box-shadow:0 10px 25px rgba(198,40,40,.18);
+}
+
+.welcome h1{
+  margin-bottom:7px;
+}
+
+.role-badge{
+  display:inline-block;
+  margin-top:10px;
+  background:rgba(255,255,255,.18);
+  padding:7px 12px;
+  border-radius:20px;
+  font-size:13px;
+}
+
+.section{
+  margin-top:25px;
+}
+
+.section-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px;
+}
+
+/* =========================
+   PRODUCTS
+========================= */
+
+.products{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:17px;
+}
+
+.product-card{
+  background:#fff;
+  border-radius:17px;
+  overflow:hidden;
+  border:1px solid var(--border);
+  box-shadow:0 4px 15px rgba(0,0,0,.035);
+  transition:.2s;
+}
+
+.product-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 22px rgba(0,0,0,.07);
+}
+
+.product-image{
+  width:100%;
+  height:175px;
+  background:#eee;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  font-size:45px;
+}
+
+.product-image img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.product-content{
+  padding:16px;
+}
+
+.product-content h3{
+  margin-bottom:8px;
+}
+
+.price{
+  color:var(--red);
+  font-size:19px;
+  font-weight:bold;
+  margin-bottom:8px;
+}
+
+.product-description{
+  color:#555;
+  line-height:1.4;
+  font-size:14px;
+}
+
+.product-location,
+.product-quantity{
+  color:#777;
+  font-size:13px;
+  margin-top:7px;
+}
+
+.buy-btn{
+  width:100%;
+  border:0;
+  background:var(--red);
+  color:#fff;
+  padding:12px;
+  border-radius:10px;
+  margin-top:12px;
+  font-weight:bold;
+}
+
+.delete-btn{
+  width:100%;
+  border:0;
+  background:#222;
+  color:#fff;
+  padding:11px;
+  border-radius:10px;
+  margin-top:12px;
+}
+
+.empty{
+  background:#fff;
+  border:1px dashed #ccc;
+  padding:40px 20px;
+  border-radius:16px;
+  text-align:center;
+  color:#777;
+}
+
+/* =========================
+   ORDERS
+========================= */
+
+.orders{
+  display:grid;
+  gap:14px;
+}
+
+.order-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:17px;
+}
+
+.order-top{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:flex-start;
+}
+
+.order-title{
+  font-size:17px;
+  font-weight:bold;
+}
+
+.order-info{
+  color:#666;
+  font-size:14px;
+  margin-top:7px;
+}
+
+.order-total{
+  margin-top:10px;
+  font-size:17px;
+  font-weight:bold;
+  color:var(--red);
+}
+
+.order-status{
+  display:inline-block;
+  padding:6px 10px;
+  border-radius:20px;
+  background:#eee;
+  font-size:12px;
+  font-weight:bold;
+  margin-top:10px;
+}
+
+.status-pending{
+  background:#fff3cd;
+  color:#856404;
+}
+
+.status-accepted{
+  background:#e8f5e9;
+  color:#1b5e20;
+}
+
+.status-rejected,
+.status-cancelled{
+  background:#ffebee;
+  color:#b71c1c;
+}
+
+.status-completed{
+  background:#e3f2fd;
+  color:#1565c0;
+}
+
+.order-actions{
+  display:flex;
+  gap:8px;
+  margin-top:14px;
+  flex-wrap:wrap;
+}
+
+.order-actions button{
+  border:0;
+  padding:10px 13px;
+  border-radius:9px;
+  font-weight:bold;
+}
+
+.accept-btn{
+  background:#2e7d32;
+  color:white;
+}
+
+.reject-btn{
+  background:#ffebee;
+  color:#b71c1c;
+}
+
+.cancel-order-btn{
+  background:#eee;
+  color:#222;
+}
+
+.complete-btn{
+  background:#1565c0;
+  color:white;
+}
+
+/* =========================
+   MODAL
+========================= */
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.52);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+  z-index:100;
+}
+
+.modal-card{
+  width:100%;
+  max-width:520px;
+  background:#fff;
+  border-radius:20px;
+  padding:25px;
+  max-height:90vh;
+  overflow-y:auto;
+}
+
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+}
+
+.close{
+  border:0;
+  background:#eee;
+  width:35px;
+  height:35px;
+  border-radius:50%;
+  font-size:18px;
+}
+
+.preview{
+  width:100%;
+  height:200px;
+  margin-top:10px;
+  border-radius:12px;
+  overflow:hidden;
+  background:#eee;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:40px;
+}
+
+.preview img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+/* =========================
+   AI BUTTON
+========================= */
+
+.ai-fab{
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  width:58px;
+  height:58px;
+  border:0;
+  border-radius:50%;
+  background:var(--red);
+  color:white;
+  font-size:25px;
+  box-shadow:0 8px 25px rgba(0,0,0,.2);
+  z-index:60;
+}
+
+.ai-panel{
+  position:fixed;
+  right:20px;
+  bottom:90px;
+  width:340px;
+  max-width:calc(100vw - 30px);
+  height:470px;
+  background:white;
+  border-radius:20px;
+  box-shadow:0 15px 50px rgba(0,0,0,.2);
+  z-index:60;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+
+.ai-header{
+  background:var(--red);
+  color:white;
+  padding:15px;
+  display:flex;
+  justify-content:space-between;
+}
+
+.ai-messages{
+  flex:1;
+  padding:14px;
+  overflow-y:auto;
+  background:#fafafa;
+}
+
+.ai-message{
+  padding:10px 12px;
+  border-radius:13px;
+  margin-bottom:9px;
+  max-width:85%;
+  font-size:14px;
+  line-height:1.4;
+}
+
+.ai-user{
+  margin-left:auto;
+  background:#c62828;
+  color:white;
+}
+
+.ai-bot{
+  background:#eee;
+  color:#222;
+}
+
+.ai-input{
+  display:flex;
+  gap:7px;
+  padding:10px;
+  border-top:1px solid #eee;
+}
+
+.ai-input input{
+  flex:1;
+}
+
+.ai-input button{
+  border:0;
+  background:var(--red);
+  color:white;
+  padding:10px 13px;
+  border-radius:9px;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:700px){
+
+  .navbar{
+    padding:11px;
+    align-items:flex-start;
+  }
+
+  .nav-actions{
+    justify-content:flex-end;
+  }
+
+  .nav-actions .secondary-btn,
+  .nav-actions .danger-btn{
+    padding:9px;
+    font-size:12px;
+  }
+
+  .container{
+    padding:18px 12px 40px;
+  }
+
+  .products{
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+  }
+
+  .product-image{
+    height:120px;
+  }
+
+  .product-content{
+    padding:12px;
+  }
+
+  .product-content h3{
+    font-size:15px;
+  }
+
+  .price{
+    font-size:16px;
+  }
+
+  .ai-panel{
+    right:10px;
+    bottom:80px;
+    width:calc(100vw - 20px);
+  }
+
+}
+
+</style>
 </head>
 
 <body>
 
 <!-- =========================
-     AUTH SCREEN
+     AUTH
 ========================= -->
 
 <div id="authScreen" class="auth-container">
@@ -508,7 +712,6 @@
       <button
         id="loginTab"
         class="tab active"
-        type="button"
         onclick="showLogin()">
         Login
       </button>
@@ -516,14 +719,11 @@
       <button
         id="signupTab"
         class="tab"
-        type="button"
         onclick="showSignup()">
         Sign Up
       </button>
 
     </div>
-
-    <!-- LOGIN -->
 
     <form id="loginForm">
 
@@ -533,7 +733,6 @@
         id="loginEmail"
         type="email"
         required
-        autocomplete="email"
         placeholder="you@example.com">
 
       <label>Password</label>
@@ -542,19 +741,13 @@
         id="loginPassword"
         type="password"
         required
-        autocomplete="current-password"
         placeholder="Your password">
 
-      <button
-        class="primary-btn"
-        type="submit">
+      <button class="primary-btn">
         Login
       </button>
 
     </form>
-
-
-    <!-- SIGNUP -->
 
     <form id="signupForm" class="hidden">
 
@@ -563,7 +756,6 @@
       <input
         id="signupName"
         required
-        autocomplete="name"
         placeholder="Juan Dela Cruz">
 
       <label>Email</label>
@@ -572,7 +764,6 @@
         id="signupEmail"
         type="email"
         required
-        autocomplete="email"
         placeholder="you@example.com">
 
       <label>Password</label>
@@ -582,7 +773,6 @@
         type="password"
         minlength="8"
         required
-        autocomplete="new-password"
         placeholder="Minimum 8 characters">
 
       <label>Account Type</label>
@@ -603,9 +793,7 @@
 
       </select>
 
-      <button
-        class="primary-btn"
-        type="submit">
+      <button class="primary-btn">
         Create Account
       </button>
 
@@ -619,7 +807,7 @@
 
 
 <!-- =========================
-     APPLICATION
+     APP
 ========================= -->
 
 <div id="app" class="app hidden">
@@ -638,15 +826,25 @@
 
       <button
         class="secondary-btn"
-        type="button"
-        onclick="openAddProduct()"
-        id="addProductButton">
+        onclick="showMarketplace()">
+        Marketplace
+      </button>
+
+      <button
+        class="secondary-btn"
+        onclick="showOrders()">
+        My Orders
+      </button>
+
+      <button
+        id="addProductButton"
+        class="secondary-btn"
+        onclick="openAddProduct()">
         + Add Product
       </button>
 
       <button
         class="danger-btn"
-        type="button"
         onclick="logout()">
         Logout
       </button>
@@ -676,7 +874,9 @@
     </section>
 
 
-    <section>
+    <!-- MARKETPLACE -->
+
+    <section id="marketplaceSection">
 
       <div class="section-title">
 
@@ -684,7 +884,6 @@
 
         <button
           class="secondary-btn"
-          type="button"
           onclick="loadProducts()">
           Refresh
         </button>
@@ -694,6 +893,32 @@
       <div
         id="products"
         class="products">
+      </div>
+
+    </section>
+
+
+    <!-- ORDERS -->
+
+    <section
+      id="ordersSection"
+      class="hidden">
+
+      <div class="section-title">
+
+        <h2>My Orders</h2>
+
+        <button
+          class="secondary-btn"
+          onclick="loadOrders()">
+          Refresh
+        </button>
+
+      </div>
+
+      <div
+        id="orders"
+        class="orders">
       </div>
 
     </section>
@@ -719,42 +944,13 @@
 
       <button
         class="close"
-        type="button"
         onclick="closeAddProduct()">
         ×
       </button>
 
     </div>
 
-
     <form id="productForm">
-
-      <!-- PRODUCT PHOTO -->
-
-      <label>Product Photo</label>
-
-      <input
-        id="productImage"
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-        required>
-
-      <div class="upload-info">
-        JPG, PNG, or WEBP • Maximum 5MB
-      </div>
-
-      <div
-        id="imagePreview"
-        class="preview">
-
-        <img
-          id="previewImage"
-          alt="Product preview">
-
-      </div>
-
-
-      <!-- PRODUCT NAME -->
 
       <label>Product Name</label>
 
@@ -763,17 +959,26 @@
         required
         placeholder="Fresh Tomatoes">
 
-
-      <!-- DESCRIPTION -->
-
       <label>Description</label>
 
       <textarea
         id="productDescription"
-        placeholder="Describe your product"></textarea>
+        placeholder="Describe your product">
+      </textarea>
 
+      <label>Product Image</label>
 
-      <!-- PRICE -->
+      <input
+        id="productImage"
+        type="file"
+        accept="image/png,image/jpeg,image/webp"
+        required>
+
+      <div
+        id="imagePreview"
+        class="preview">
+        🌱
+      </div>
 
       <label>Price</label>
 
@@ -785,9 +990,6 @@
         required
         placeholder="80">
 
-
-      <!-- QUANTITY -->
-
       <label>Quantity</label>
 
       <input
@@ -798,35 +1000,17 @@
         required
         placeholder="50">
 
-
-      <!-- UNIT -->
-
       <label>Unit</label>
 
       <select id="productUnit">
 
         <option value="kg">kg</option>
-
-        <option value="piece">
-          piece
-        </option>
-
-        <option value="sack">
-          sack
-        </option>
-
-        <option value="box">
-          box
-        </option>
-
-        <option value="dozen">
-          dozen
-        </option>
+        <option value="piece">piece</option>
+        <option value="sack">sack</option>
+        <option value="box">box</option>
+        <option value="dozen">dozen</option>
 
       </select>
-
-
-      <!-- LOCATION -->
 
       <label>Location</label>
 
@@ -834,10 +1018,7 @@
         id="productLocation"
         placeholder="Municipality / Province">
 
-
-      <button
-        class="primary-btn"
-        type="submit">
+      <button class="primary-btn">
         Publish Product
       </button>
 
@@ -850,269 +1031,336 @@
 </div>
 
 
+<!-- =========================
+     BUY MODAL
+========================= -->
+
+<div
+  id="buyModal"
+  class="modal hidden">
+
+  <div class="modal-card">
+
+    <div class="modal-header">
+
+      <h2>Buy Product</h2>
+
+      <button
+        class="close"
+        onclick="closeBuyModal()">
+        ×
+      </button>
+
+    </div>
+
+    <div id="buyProductInfo"></div>
+
+    <label>Quantity</label>
+
+    <input
+      id="buyQuantity"
+      type="number"
+      min="0.01"
+      step="0.01"
+      value="1">
+
+    <div
+      id="buyTotal"
+      style="margin-top:15px;font-size:18px;font-weight:bold;color:#c62828;">
+      Total: ₱0
+    </div>
+
+    <button
+      class="primary-btn"
+      onclick="confirmOrder()">
+      Confirm Order
+    </button>
+
+    <div id="buyMessage"></div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================
+     AI CHAT
+========================= -->
+
+<button
+  id="aiButton"
+  class="ai-fab hidden"
+  onclick="toggleAI()">
+  🤖
+</button>
+
+<div
+  id="aiPanel"
+  class="ai-panel hidden">
+
+  <div class="ai-header">
+
+    <strong>AgriBot AI</strong>
+
+    <button
+      onclick="toggleAI()"
+      style="border:0;background:transparent;color:white;font-size:20px;">
+      ×
+    </button>
+
+  </div>
+
+  <div
+    id="aiMessages"
+    class="ai-messages">
+
+    <div class="ai-message ai-bot">
+      Hi! I'm AgriBot 🌾 Ask me about farming, products, pricing, or AgriLink.
+    </div>
+
+  </div>
+
+  <div class="ai-input">
+
+    <input
+      id="aiInput"
+      placeholder="Ask AgriBot..."
+      onkeydown="if(event.key==='Enter')sendAI()">
+
+    <button onclick="sendAI()">
+      Send
+    </button>
+
+  </div>
+
+</div>
+
+
 <script>
 
-/* =========================
-   SUPABASE CONFIG
-========================= */
+/* =====================================================
+   SUPABASE
+===================================================== */
 
 const SUPABASE_URL =
-  "https://ivbqudztsmsylnodydce.supabase.co";
+"https://ivbqudztsmsylnodydce.supabase.co";
 
 const SUPABASE_KEY =
-  "sb_publishable_J6ofqkb71svrAJr1-mvFIA_hy3RKHrM";
-
+"sb_publishable_J6ofqkb71svrAJr1-mvFIA_hy3RKHrM";
 
 const supabaseClient =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
-
-/* =========================
-   GLOBAL VARIABLES
-========================= */
 
 let currentUser = null;
-
 let currentProfile = null;
+let selectedProduct = null;
 
 
-/* =========================
+/* =====================================================
    AUTH TABS
-========================= */
+===================================================== */
 
-function showLogin() {
-
-  document
-    .getElementById("loginForm")
-    .classList.remove("hidden");
+function showLogin(){
 
   document
-    .getElementById("signupForm")
-    .classList.add("hidden");
+  .getElementById("loginForm")
+  .classList.remove("hidden");
 
   document
-    .getElementById("loginTab")
-    .classList.add("active");
+  .getElementById("signupForm")
+  .classList.add("hidden");
 
   document
-    .getElementById("signupTab")
-    .classList.remove("active");
+  .getElementById("loginTab")
+  .classList.add("active");
+
+  document
+  .getElementById("signupTab")
+  .classList.remove("active");
 
 }
 
 
-function showSignup() {
+function showSignup(){
 
   document
-    .getElementById("loginForm")
-    .classList.add("hidden");
+  .getElementById("loginForm")
+  .classList.add("hidden");
 
   document
-    .getElementById("signupForm")
-    .classList.remove("hidden");
+  .getElementById("signupForm")
+  .classList.remove("hidden");
 
   document
-    .getElementById("signupTab")
-    .classList.add("active");
+  .getElementById("signupTab")
+  .classList.add("active");
 
   document
-    .getElementById("loginTab")
-    .classList.remove("active");
+  .getElementById("loginTab")
+  .classList.remove("active");
 
 }
 
 
-/* =========================
+/* =====================================================
    AUTH MESSAGE
-========================= */
+===================================================== */
 
-function showAuthMessage(text, type) {
+function showAuthMessage(text,type){
 
   const box =
-    document.getElementById("authMessage");
+  document.getElementById("authMessage");
 
   box.className =
-    "message " + type;
+  "message " + type;
 
-  box.textContent = text;
+  box.textContent =
+  text;
 
 }
 
 
-/* =========================
+/* =====================================================
    LOGIN
-========================= */
+===================================================== */
 
 document
-  .getElementById("loginForm")
-  .addEventListener(
-    "submit",
-    async (event) => {
+.getElementById("loginForm")
+.addEventListener("submit",async(event)=>{
 
-      event.preventDefault();
+  event.preventDefault();
 
-      const email =
-        document
-          .getElementById("loginEmail")
-          .value
-          .trim();
+  const email =
+  document
+  .getElementById("loginEmail")
+  .value
+  .trim();
 
-      const password =
-        document
-          .getElementById("loginPassword")
-          .value;
-
-
-      const {
-        data,
-        error
-      } =
-        await supabaseClient
-          .auth
-          .signInWithPassword({
-
-            email,
-            password
-
-          });
-
-
-      if (error) {
-
-        showAuthMessage(
-          error.message,
-          "error"
-        );
-
-        return;
-      }
-
-
-      await initializeApp(
-        data.user
-      );
-
-    }
-  );
-
-
-/* =========================
-   SIGN UP
-========================= */
-
-document
-  .getElementById("signupForm")
-  .addEventListener(
-    "submit",
-    async (event) => {
-
-      event.preventDefault();
-
-
-      const fullName =
-        document
-          .getElementById("signupName")
-          .value
-          .trim();
-
-
-      const email =
-        document
-          .getElementById("signupEmail")
-          .value
-          .trim();
-
-
-      const password =
-        document
-          .getElementById("signupPassword")
-          .value;
-
-
-      const role =
-        document
-          .getElementById("signupRole")
-          .value;
-
-
-      const {
-        data,
-        error
-      } =
-        await supabaseClient
-          .auth
-          .signUp({
-
-            email,
-
-            password,
-
-            options: {
-
-              data: {
-
-                full_name:
-                  fullName,
-
-                role:
-                  role
-
-              }
-
-            }
-
-          });
-
-
-      if (error) {
-
-        showAuthMessage(
-          error.message,
-          "error"
-        );
-
-        return;
-      }
-
-
-      showAuthMessage(
-        "Account created successfully. You can now log in.",
-        "success"
-      );
-
-
-      document
-        .getElementById("signupForm")
-        .reset();
-
-    }
-  );
-
-
-/* =========================
-   INITIALIZE APP
-========================= */
-
-async function initializeApp(user) {
-
-  currentUser = user;
-
+  const password =
+  document
+  .getElementById("loginPassword")
+  .value;
 
   const {
-    data: profile,
+    data,
     error
   } =
-    await supabaseClient
-      .from("users")
-      .select("*")
-      .eq("auth_user_id", user.id)
-      .single();
+  await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if(error){
+
+    showAuthMessage(
+      error.message,
+      "error"
+    );
+
+    return;
+  }
+
+  await initializeApp(data.user);
+
+});
 
 
-  if (error) {
+/* =====================================================
+   SIGN UP
+===================================================== */
+
+document
+.getElementById("signupForm")
+.addEventListener("submit",async(event)=>{
+
+  event.preventDefault();
+
+  const fullName =
+  document
+  .getElementById("signupName")
+  .value
+  .trim();
+
+  const email =
+  document
+  .getElementById("signupEmail")
+  .value
+  .trim();
+
+  const password =
+  document
+  .getElementById("signupPassword")
+  .value;
+
+  const role =
+  document
+  .getElementById("signupRole")
+  .value;
+
+  const {
+    data,
+    error
+  } =
+  await supabaseClient.auth.signUp({
+
+    email,
+    password,
+
+    options:{
+      data:{
+        full_name:fullName,
+        role:role
+      }
+    }
+
+  });
+
+  if(error){
+
+    showAuthMessage(
+      error.message,
+      "error"
+    );
+
+    return;
+  }
+
+  showAuthMessage(
+    "Account created successfully. You can now log in.",
+    "success"
+  );
+
+  document
+  .getElementById("signupForm")
+  .reset();
+
+});
+
+
+/* =====================================================
+   INITIALIZE APP
+===================================================== */
+
+async function initializeApp(user){
+
+  currentUser =
+  user;
+
+  const {
+    data:profile,
+    error
+  } =
+  await supabaseClient
+  .from("users")
+  .select("*")
+  .eq("auth_user_id",user.id)
+  .single();
+
+  if(error){
 
     console.error(error);
 
@@ -1123,249 +1371,346 @@ async function initializeApp(user) {
     return;
   }
 
-
-  currentProfile = profile;
-
-
-  document
-    .getElementById("authScreen")
-    .classList.add("hidden");
-
+  currentProfile =
+  profile;
 
   document
-    .getElementById("app")
-    .classList.remove("hidden");
-
-
-  document
-    .getElementById("userName")
-    .textContent =
-      profile.full_name;
-
+  .getElementById("authScreen")
+  .classList.add("hidden");
 
   document
-    .getElementById("roleBadge")
-    .textContent =
-      profile.role;
+  .getElementById("app")
+  .classList.remove("hidden");
 
+  document
+  .getElementById("userName")
+  .textContent =
+  profile.full_name;
+
+  document
+  .getElementById("roleBadge")
+  .textContent =
+  profile.role;
 
   const addButton =
-    document
-      .getElementById("addProductButton");
+  document.getElementById("addProductButton");
 
+  if(profile.role !== "FARMER"){
 
-  if (
-    profile.role !== "FARMER"
-  ) {
+    addButton.classList.add("hidden");
 
-    addButton
-      .classList
-      .add("hidden");
+  }else{
 
-  } else {
-
-    addButton
-      .classList
-      .remove("hidden");
+    addButton.classList.remove("hidden");
 
   }
 
+  document
+  .getElementById("aiButton")
+  .classList.remove("hidden");
 
-  await loadProducts();
+  showMarketplace();
 
 }
 
 
-/* =========================
-   LOAD PRODUCTS
-========================= */
+/* =====================================================
+   MARKETPLACE
+===================================================== */
 
-async function loadProducts() {
+function showMarketplace(){
+
+  document
+  .getElementById("marketplaceSection")
+  .classList.remove("hidden");
+
+  document
+  .getElementById("ordersSection")
+  .classList.add("hidden");
+
+  loadProducts();
+
+}
+
+
+/* =====================================================
+   LOAD PRODUCTS
+===================================================== */
+
+async function loadProducts(){
 
   const container =
-    document
-      .getElementById("products");
+  document.getElementById("products");
 
-
-  container.innerHTML = `
-    <div class="empty">
-      Loading products...
-    </div>
+  container.innerHTML =
+  `
+  <div class="empty">
+    Loading products...
+  </div>
   `;
-
 
   const {
     data,
     error
   } =
-    await supabaseClient
-      .from("products")
-      .select(`
-        id,
-        name,
-        description,
-        price,
-        quantity,
-        unit,
-        location,
-        image_url,
-        status
-      `)
-      .eq("status", "ACTIVE")
-      .order(
-        "created_at",
-        {
-          ascending: false
-        }
-      );
+  await supabaseClient
+  .from("products")
+  .select(`
+    id,
+    seller_id,
+    name,
+    description,
+    price,
+    quantity,
+    unit,
+    location,
+    image_url,
+    status,
+    created_at
+  `)
+  .eq("status","ACTIVE")
+  .gt("quantity",0)
+  .order("created_at",{
+    ascending:false
+  });
 
-
-  if (error) {
+  if(error){
 
     console.error(error);
 
-    container.innerHTML = `
-      <div class="empty">
-        Unable to load products.
-      </div>
+    container.innerHTML =
+    `
+    <div class="empty">
+      Unable to load products.
+      <br><br>
+      ${escapeHtml(error.message)}
+    </div>
     `;
 
     return;
   }
 
+  if(!data || data.length === 0){
 
-  if (
-    !data ||
-    data.length === 0
-  ) {
-
-    container.innerHTML = `
-      <div class="empty">
-
-        <h3>
-          No products yet
-        </h3>
-
-        <p>
-          Be the first farmer to publish a product.
-        </p>
-
-      </div>
+    container.innerHTML =
+    `
+    <div class="empty">
+      <h3>No products yet</h3>
+      <p style="margin-top:8px;">
+        Be the first farmer to publish a product.
+      </p>
+    </div>
     `;
 
     return;
   }
-
 
   container.innerHTML =
-    data
-      .map(product => {
+  data.map(product=>{
 
-        const image =
-          product.image_url
-            ? `
-              <img
-                src="${escapeHtml(product.image_url)}"
-                alt="${escapeHtml(product.name)}"
-                loading="lazy">
-            `
-            : `
-              <div class="product-placeholder">
-                🌱
-              </div>
-            `;
+    const image =
+    product.image_url
+    ?
+    `
+    <img
+      src="${escapeHtml(product.image_url)}"
+      alt="${escapeHtml(product.name)}">
+    `
+    :
+    `🌱`;
 
+    const isOwner =
+    currentProfile &&
+    product.seller_id === currentProfile.id;
 
-        return `
+    const canBuy =
+    currentProfile &&
+    currentProfile.role !== "FARMER" &&
+    !isOwner;
 
-          <div class="product-card">
+    return `
+    
+    <div class="product-card">
 
-            <div class="product-image">
+      <div class="product-image">
+        ${image}
+      </div>
 
-              ${image}
+      <div class="product-content">
 
-            </div>
+        <h3>
+          ${escapeHtml(product.name)}
+        </h3>
 
+        <div class="price">
+          ₱${Number(product.price).toLocaleString()}
+          / ${escapeHtml(product.unit)}
+        </div>
 
-            <div class="product-content">
+        <p class="product-description">
+          ${escapeHtml(
+            product.description || "No description"
+          )}
+        </p>
 
-              <h3>
-                ${escapeHtml(
-                  product.name
-                )}
-              </h3>
+        <div class="product-quantity">
+          📦 Available:
+          ${Number(product.quantity).toLocaleString()}
+          ${escapeHtml(product.unit)}
+        </div>
 
+        <div class="product-location">
+          📍
+          ${escapeHtml(
+            product.location ||
+            "Location not specified"
+          )}
+        </div>
 
-              <div class="price">
+        ${
+          canBuy
+          ?
+          `
+          <button
+            class="buy-btn"
+            onclick="openBuyModal('${product.id}')">
+            🛒 Buy Now
+          </button>
+          `
+          :
+          ""
+        }
 
-                ₱${Number(
-                  product.price
-                ).toLocaleString()}
+        ${
+          isOwner
+          ?
+          `
+          <button
+            class="delete-btn"
+            onclick="deleteProduct('${product.id}')">
+            Delete Product
+          </button>
+          `
+          :
+          ""
+        }
 
-                /
-                ${escapeHtml(
-                  product.unit
-                )}
+      </div>
 
-              </div>
+    </div>
 
+    `;
 
-              <div class="quantity">
-
-                Available:
-                ${Number(
-                  product.quantity
-                ).toLocaleString()}
-
-                ${escapeHtml(
-                  product.unit
-                )}
-
-              </div>
-
-
-              <p class="product-description">
-
-                ${escapeHtml(
-                  product.description ||
-                  "No description"
-                )}
-
-              </p>
-
-
-              <div class="product-location">
-
-                📍
-                ${escapeHtml(
-                  product.location ||
-                  "Location not specified"
-                )}
-
-              </div>
-
-            </div>
-
-          </div>
-
-        `;
-
-      })
-      .join("");
+  }).join("");
 
 }
 
 
-/* =========================
-   ADD PRODUCT MODAL
-========================= */
+/* =====================================================
+   ADD PRODUCT
+===================================================== */
 
-function openAddProduct() {
+function openAddProduct(){
 
-  if (
+  document
+  .getElementById("productModal")
+  .classList.remove("hidden");
+
+}
+
+
+function closeAddProduct(){
+
+  document
+  .getElementById("productModal")
+  .classList.add("hidden");
+
+  document
+  .getElementById("productForm")
+  .reset();
+
+  document
+  .getElementById("imagePreview")
+  .innerHTML =
+  "🌱";
+
+  document
+  .getElementById("productMessage")
+  .innerHTML =
+  "";
+
+}
+
+
+/* =====================================================
+   IMAGE PREVIEW
+===================================================== */
+
+document
+.getElementById("productImage")
+.addEventListener("change",(event)=>{
+
+  const file =
+  event.target.files[0];
+
+  if(!file){
+
+    document
+    .getElementById("imagePreview")
+    .innerHTML =
+    "🌱";
+
+    return;
+  }
+
+  if(file.size > 5 * 1024 * 1024){
+
+    alert(
+      "Image must be 5MB or smaller."
+    );
+
+    event.target.value =
+    "";
+
+    return;
+  }
+
+  const reader =
+  new FileReader();
+
+  reader.onload = ()=>{
+
+    document
+    .getElementById("imagePreview")
+    .innerHTML =
+    `
+    <img
+      src="${reader.result}"
+      alt="Preview">
+    `;
+
+  };
+
+  reader.readAsDataURL(file);
+
+});
+
+
+/* =====================================================
+   CREATE PRODUCT
+===================================================== */
+
+document
+.getElementById("productForm")
+.addEventListener("submit",async(event)=>{
+
+  event.preventDefault();
+
+  if(
+    !currentUser ||
     !currentProfile ||
     currentProfile.role !== "FARMER"
-  ) {
+  ){
 
     alert(
       "Only farmer accounts can publish products."
@@ -1374,529 +1719,1292 @@ function openAddProduct() {
     return;
   }
 
-
+  const file =
   document
-    .getElementById("productModal")
-    .classList
-    .remove("hidden");
-
-}
-
-
-function closeAddProduct() {
-
-  document
-    .getElementById("productModal")
-    .classList
-    .add("hidden");
-
-}
-
-
-/* =========================
-   IMAGE PREVIEW
-========================= */
-
-document
   .getElementById("productImage")
-  .addEventListener(
-    "change",
-    function () {
+  .files[0];
 
-      const file =
-        this.files[0];
+  if(!file){
 
-      const preview =
-        document
-          .getElementById("imagePreview");
+    alert(
+      "Please select a product image."
+    );
 
-      const previewImage =
-        document
-          .getElementById("previewImage");
+    return;
+  }
 
+  const productName =
+  document
+  .getElementById("productName")
+  .value
+  .trim();
 
-      if (!file) {
+  const description =
+  document
+  .getElementById("productDescription")
+  .value
+  .trim();
 
-        preview.style.display =
-          "none";
+  const price =
+  Number(
+    document
+    .getElementById("productPrice")
+    .value
+  );
 
-        previewImage.src =
-          "";
+  const quantity =
+  Number(
+    document
+    .getElementById("productQuantity")
+    .value
+  );
 
-        return;
-      }
+  const unit =
+  document
+  .getElementById("productUnit")
+  .value;
 
+  const location =
+  document
+  .getElementById("productLocation")
+  .value
+  .trim();
 
-      const allowedTypes = [
-        "image/jpeg",
-        "image/png",
-        "image/webp"
-      ];
+  if(price <= 0 || quantity <= 0){
 
+    alert(
+      "Price and quantity must be greater than zero."
+    );
 
-      if (
-        !allowedTypes.includes(
-          file.type
-        )
-      ) {
+    return;
+  }
 
-        alert(
-          "Please select a JPG, PNG, or WEBP image."
-        );
+  const extension =
+  file.name
+  .split(".")
+  .pop()
+  .toLowerCase();
 
-        this.value = "";
+  const fileName =
+  `${currentUser.id}/${crypto.randomUUID()}.${extension}`;
 
-        preview.style.display =
-          "none";
-
-        return;
-      }
-
-
-      if (
-        file.size >
-        5 * 1024 * 1024
-      ) {
-
-        alert(
-          "Image must be smaller than 5MB."
-        );
-
-        this.value = "";
-
-        preview.style.display =
-          "none";
-
-        return;
-      }
-
-
-      const imageUrl =
-        URL.createObjectURL(file);
-
-
-      previewImage.src =
-        imageUrl;
-
-
-      preview.style.display =
-        "flex";
-
+  const {
+    error:uploadError
+  } =
+  await supabaseClient
+  .storage
+  .from("product-images")
+  .upload(
+    fileName,
+    file,
+    {
+      contentType:file.type,
+      upsert:false
     }
   );
 
+  if(uploadError){
 
-/* =========================
-   CREATE PRODUCT
-========================= */
+    console.error(uploadError);
+
+    document
+    .getElementById("productMessage")
+    .innerHTML =
+    `
+    <div class="message error">
+      Image upload failed:
+      ${escapeHtml(uploadError.message)}
+    </div>
+    `;
+
+    return;
+  }
+
+  const {
+    data:urlData
+  } =
+  supabaseClient
+  .storage
+  .from("product-images")
+  .getPublicUrl(fileName);
+
+  const imageUrl =
+  urlData.publicUrl;
+
+  const {
+    error
+  } =
+  await supabaseClient
+  .from("products")
+  .insert({
+
+    seller_id:
+    currentProfile.id,
+
+    name:
+    productName,
+
+    description:
+    description,
+
+    price:
+    price,
+
+    quantity:
+    quantity,
+
+    unit:
+    unit,
+
+    location:
+    location,
+
+    image_url:
+    imageUrl,
+
+    status:
+    "ACTIVE"
+
+  });
+
+  if(error){
+
+    console.error(error);
+
+    document
+    .getElementById("productMessage")
+    .innerHTML =
+    `
+    <div class="message error">
+      ${escapeHtml(error.message)}
+    </div>
+    `;
+
+    return;
+  }
+
+  document
+  .getElementById("productMessage")
+  .innerHTML =
+  `
+  <div class="message success">
+    Product published successfully! 🌱
+  </div>
+  `;
+
+  await loadProducts();
+
+  setTimeout(()=>{
+    closeAddProduct();
+  },1000);
+
+});
+
+
+/* =====================================================
+   BUY MODAL
+===================================================== */
+
+async function openBuyModal(productId){
+
+  const {
+    data,
+    error
+  } =
+  await supabaseClient
+  .from("products")
+  .select("*")
+  .eq("id",productId)
+  .single();
+
+  if(error){
+
+    alert(error.message);
+
+    return;
+  }
+
+  if(!data){
+
+    alert(
+      "Product not found."
+    );
+
+    return;
+  }
+
+  if(Number(data.quantity) <= 0){
+
+    alert(
+      "This product is already sold out."
+    );
+
+    await loadProducts();
+
+    return;
+  }
+
+  if(
+    currentProfile &&
+    data.seller_id === currentProfile.id
+  ){
+
+    alert(
+      "You cannot buy your own product."
+    );
+
+    return;
+  }
+
+  selectedProduct =
+  data;
+
+  document
+  .getElementById("buyProductInfo")
+  .innerHTML =
+  `
+  <h3>
+    ${escapeHtml(data.name)}
+  </h3>
+
+  <p style="margin-top:8px;color:#777;">
+    ₱${Number(data.price).toLocaleString()}
+    / ${escapeHtml(data.unit)}
+  </p>
+
+  <p style="margin-top:8px;">
+    Available:
+    ${Number(data.quantity).toLocaleString()}
+    ${escapeHtml(data.unit)}
+  </p>
+  `;
+
+  const quantityInput =
+  document
+  .getElementById("buyQuantity");
+
+  quantityInput.max =
+  data.quantity;
+
+  quantityInput.value =
+  1;
+
+  updateBuyTotal();
+
+  document
+  .getElementById("buyMessage")
+  .innerHTML =
+  "";
+
+  document
+  .getElementById("buyModal")
+  .classList.remove("hidden");
+
+}
+
+
+function closeBuyModal(){
+
+  document
+  .getElementById("buyModal")
+  .classList.add("hidden");
+
+  selectedProduct =
+  null;
+
+  document
+  .getElementById("buyMessage")
+  .innerHTML =
+  "";
+
+}
+
 
 document
-  .getElementById("productForm")
-  .addEventListener(
-    "submit",
-    async (event) => {
+.getElementById("buyQuantity")
+.addEventListener(
+  "input",
+  updateBuyTotal
+);
+
+
+function updateBuyTotal(){
 
-      event.preventDefault();
+  if(!selectedProduct){
+
+    return;
+  }
+
+  const quantity =
+  Number(
+    document
+    .getElementById("buyQuantity")
+    .value
+  );
 
+  const total =
+  quantity *
+  Number(selectedProduct.price);
 
-      if (
-        !currentUser ||
-        !currentProfile ||
-        currentProfile.role !== "FARMER"
-      ) {
+  document
+  .getElementById("buyTotal")
+  .textContent =
+  `Total: ₱${total.toLocaleString()}`;
 
-        alert(
-          "Only farmer accounts can publish products."
-        );
+}
 
-        return;
-      }
 
+/* =====================================================
+   CREATE ORDER
+===================================================== */
 
-      const imageFile =
-        document
-          .getElementById("productImage")
-          .files[0];
+async function confirmOrder(){
 
+  if(
+    !currentUser ||
+    !currentProfile ||
+    !selectedProduct
+  ){
 
-      if (!imageFile) {
+    return;
+  }
 
-        alert(
-          "Please select a product photo."
-        );
+  if(
+    currentProfile.role === "FARMER"
+  ){
 
-        return;
-      }
+    alert(
+      "Farmer accounts cannot purchase products."
+    );
 
+    return;
+  }
 
-      const allowedTypes = [
-        "image/jpeg",
-        "image/png",
-        "image/webp"
-      ];
+  const quantity =
+  Number(
+    document
+    .getElementById("buyQuantity")
+    .value
+  );
 
+  if(
+    !quantity ||
+    quantity <= 0
+  ){
 
-      if (
-        !allowedTypes.includes(
-          imageFile.type
-        )
-      ) {
+    alert(
+      "Enter a valid quantity."
+    );
 
-        alert(
-          "Please upload JPG, PNG, or WEBP."
-        );
+    return;
+  }
 
-        return;
-      }
+  if(
+    quantity >
+    Number(selectedProduct.quantity)
+  ){
+
+    alert(
+      "Not enough stock available."
+    );
+
+    return;
+  }
 
+  const total =
+  quantity *
+  Number(selectedProduct.price);
+
+  /*
+    IMPORTANT:
+    The database should calculate/validate
+    the final amount server-side in a
+    production version.
+  */
+
+  const {
+    error:orderError
+  } =
+  await supabaseClient
+  .from("orders")
+  .insert({
+
+    product_id:
+    selectedProduct.id,
+
+    buyer_id:
+    currentProfile.id,
+
+    seller_id:
+    selectedProduct.seller_id,
+
+    quantity:
+    quantity,
 
-      if (
-        imageFile.size >
-        5 * 1024 * 1024
-      ) {
+    unit_price:
+    selectedProduct.price,
 
-        alert(
-          "Image must be smaller than 5MB."
-        );
+    total_price:
+    total,
 
-        return;
-      }
+    status:
+    "PENDING"
 
+  });
 
-      const message =
-        document
-          .getElementById("productMessage");
+  if(orderError){
 
+    console.error(orderError);
 
-      message.innerHTML = `
-        <div class="message">
-          Uploading product photo...
-        </div>
-      `;
+    document
+    .getElementById("buyMessage")
+    .innerHTML =
+    `
+    <div class="message error">
+      ${escapeHtml(orderError.message)}
+    </div>
+    `;
 
+    return;
+  }
 
-      /* =========================
-         FILE NAME
-      ========================= */
+  /*
+    Reduce inventory.
+  */
 
-      const fileExtension =
-        imageFile.name
-          .split(".")
-          .pop()
-          .toLowerCase();
+  const remaining =
+  Number(selectedProduct.quantity) -
+  quantity;
 
+  const newStatus =
+  remaining <= 0
+  ?
+  "SOLD"
+  :
+  "ACTIVE";
 
-      const fileName =
-        `${crypto.randomUUID()}.${fileExtension}`;
+  const {
+    error:updateError
+  } =
+  await supabaseClient
+  .from("products")
+  .update({
 
+    quantity:
+    remaining,
 
-      const filePath =
-        `${currentUser.id}/${fileName}`;
-
-
-      /* =========================
-         UPLOAD IMAGE
-      ========================= */
-
-      const {
-        error: uploadError
-      } =
-        await supabaseClient
-          .storage
-          .from("product-images")
-          .upload(
-            filePath,
-            imageFile,
-            {
-              contentType:
-                imageFile.type,
-
-              upsert:
-                false
-            }
-          );
-
-
-      if (uploadError) {
-
-        console.error(
-          uploadError
-        );
-
-        message.innerHTML = `
-          <div class="message error">
-            Image upload failed:
-            ${escapeHtml(
-              uploadError.message
-            )}
-          </div>
-        `;
-
-        return;
-      }
-
-
-      /* =========================
-         GET PUBLIC URL
-      ========================= */
-
-      const {
-        data: imageData
-      } =
-        supabaseClient
-          .storage
-          .from("product-images")
-          .getPublicUrl(
-            filePath
-          );
-
-
-      const imageUrl =
-        imageData.publicUrl;
-
-
-      /* =========================
-         PRODUCT DATA
-      ========================= */
-
-      const product = {
-
-        seller_id:
-          currentProfile.id,
-
-        name:
-          document
-            .getElementById(
-              "productName"
-            )
-            .value
-            .trim(),
+    status:
+    newStatus
 
-        description:
-          document
-            .getElementById(
-              "productDescription"
-            )
-            .value
-            .trim(),
+  })
+  .eq(
+    "id",
+    selectedProduct.id
+  )
+  .eq(
+    "seller_id",
+    selectedProduct.seller_id
+  );
 
-        price:
-          Number(
-            document
-              .getElementById(
-                "productPrice"
-              )
-              .value
-          ),
-
-        quantity:
-          Number(
-            document
-              .getElementById(
-                "productQuantity"
-              )
-              .value
-          ),
-
-        unit:
-          document
-            .getElementById(
-              "productUnit"
-            )
-            .value,
-
-        location:
-          document
-            .getElementById(
-              "productLocation"
-            )
-            .value
-            .trim(),
-
-        image_url:
-          imageUrl,
-
-        status:
-          "ACTIVE"
-
-      };
-
-
-      /* =========================
-         INSERT PRODUCT
-      ========================= */
-
-      message.innerHTML = `
-        <div class="message">
-          Saving product...
-        </div>
-      `;
-
-
-      const {
-        error
-      } =
-        await supabaseClient
-          .from("products")
-          .insert(product);
-
-
-      if (error) {
-
-        console.error(error);
-
-        message.innerHTML = `
-          <div class="message error">
-
-            Product could not be saved:
-
-            ${escapeHtml(
-              error.message
-            )}
-
-          </div>
-        `;
-
-        return;
-      }
-
-
-      /* =========================
-         SUCCESS
-      ========================= */
-
-      message.innerHTML = `
-        <div class="message success">
-
-          Product published successfully!
-
-        </div>
-      `;
-
-
-      document
-        .getElementById(
-          "productForm"
-        )
-        .reset();
-
-
-      document
-        .getElementById(
-          "imagePreview"
-        )
-        .style
-        .display = "none";
-
-
-      await loadProducts();
-
-
-      setTimeout(
-        () => {
-
-          closeAddProduct();
-
-          message.innerHTML =
-            "";
-
-        },
-        1000
-      );
-
+  if(updateError){
+
+    console.error(updateError);
+
+    document
+    .getElementById("buyMessage")
+    .innerHTML =
+    `
+    <div class="message error">
+      Order created, but inventory update failed.
+      Please contact an administrator.
+    </div>
+    `;
+
+    return;
+  }
+
+  document
+  .getElementById("buyMessage")
+  .innerHTML =
+  `
+  <div class="message success">
+    Order placed successfully! 🛒
+  </div>
+  `;
+
+  await loadProducts();
+
+  setTimeout(()=>{
+
+    closeBuyModal();
+
+    showOrders();
+
+  },1000);
+
+}
+
+
+/* =====================================================
+   ORDERS
+===================================================== */
+
+function showOrders(){
+
+  document
+  .getElementById("marketplaceSection")
+  .classList.add("hidden");
+
+  document
+  .getElementById("ordersSection")
+  .classList.remove("hidden");
+
+  loadOrders();
+
+}
+
+
+async function loadOrders(){
+
+  const container =
+  document.getElementById("orders");
+
+  container.innerHTML =
+  `
+  <div class="empty">
+    Loading orders...
+  </div>
+  `;
+
+  if(!currentProfile){
+
+    return;
+  }
+
+  /*
+    We include buyer_id and seller_id
+    because the UI needs to know
+    whether this user is the buyer
+    or seller.
+  */
+
+  const {
+    data,
+    error
+  } =
+  await supabaseClient
+  .from("orders")
+  .select(`
+    id,
+    buyer_id,
+    seller_id,
+    product_id,
+    quantity,
+    unit_price,
+    total_price,
+    status,
+    created_at,
+    products(
+      name,
+      unit,
+      image_url
+    )
+  `)
+  .or(
+    `buyer_id.eq.${currentProfile.id},seller_id.eq.${currentProfile.id}`
+  )
+  .order(
+    "created_at",
+    {
+      ascending:false
     }
   );
 
+  if(error){
 
-/* =========================
-   LOGOUT
-========================= */
+    console.error(error);
 
-async function logout() {
+    container.innerHTML =
+    `
+    <div class="empty">
+      Unable to load orders.
+      <br><br>
+      ${escapeHtml(error.message)}
+    </div>
+    `;
+
+    return;
+  }
+
+  if(!data || data.length === 0){
+
+    container.innerHTML =
+    `
+    <div class="empty">
+
+      <h3>No orders yet</h3>
+
+      <p style="margin-top:8px;">
+        Your transactions will appear here.
+      </p>
+
+    </div>
+    `;
+
+    return;
+  }
+
+  container.innerHTML =
+  data.map(order=>{
+
+    const isBuyer =
+    order.buyer_id ===
+    currentProfile.id;
+
+    const product =
+    order.products;
+
+    const statusClass =
+    getStatusClass(order.status);
+
+    return `
+    
+    <div class="order-card">
+
+      <div class="order-top">
+
+        <div>
+
+          <div class="order-title">
+            ${escapeHtml(
+              product?.name ||
+              "Product"
+            )}
+          </div>
+
+          <div class="order-info">
+            ${
+              isBuyer
+              ?
+              "You are the buyer"
+              :
+              "You are the seller"
+            }
+          </div>
+
+        </div>
+
+        <div
+          class="order-status ${statusClass}">
+          ${escapeHtml(order.status)}
+        </div>
+
+      </div>
+
+      <div class="order-info">
+        Quantity:
+        ${Number(order.quantity)}
+        ${escapeHtml(product?.unit || "")}
+      </div>
+
+      <div class="order-info">
+        Unit Price:
+        ₱${Number(
+          order.unit_price
+        ).toLocaleString()}
+      </div>
+
+      <div class="order-total">
+        Total:
+        ₱${Number(
+          order.total_price
+        ).toLocaleString()}
+      </div>
+
+      <div class="order-info">
+        ${formatDate(order.created_at)}
+      </div>
+
+      <div class="order-actions">
+
+        ${
+          isBuyer &&
+          order.status === "PENDING"
+          ?
+          `
+          <button
+            class="cancel-order-btn"
+            onclick="cancelOrder('${order.id}')">
+            Cancel Order
+          </button>
+          `
+          :
+          ""
+        }
+
+        ${
+          !isBuyer &&
+          order.status === "PENDING"
+          ?
+          `
+          <button
+            class="accept-btn"
+            onclick="updateOrderStatus('${order.id}','ACCEPTED')">
+            Accept
+          </button>
+
+          <button
+            class="reject-btn"
+            onclick="updateOrderStatus('${order.id}','REJECTED')">
+            Reject
+          </button>
+          `
+          :
+          ""
+        }
+
+        ${
+          !isBuyer &&
+          order.status === "ACCEPTED"
+          ?
+          `
+          <button
+            class="complete-btn"
+            onclick="updateOrderStatus('${order.id}','COMPLETED')">
+            Mark Completed
+          </button>
+          `
+          :
+          ""
+        }
+
+      </div>
+
+    </div>
+
+    `;
+
+  }).join("");
+
+}
+
+
+/* =====================================================
+   ORDER STATUS
+===================================================== */
+
+function getStatusClass(status){
+
+  switch(status){
+
+    case "PENDING":
+      return "status-pending";
+
+    case "ACCEPTED":
+      return "status-accepted";
+
+    case "REJECTED":
+      return "status-rejected";
+
+    case "CANCELLED":
+      return "status-cancelled";
+
+    case "COMPLETED":
+      return "status-completed";
+
+    default:
+      return "";
+
+  }
+
+}
+
+
+/* =====================================================
+   UPDATE ORDER
+===================================================== */
+
+async function updateOrderStatus(
+  orderId,
+  newStatus
+){
+
+  const confirmed =
+  confirm(
+    `Change order status to ${newStatus}?`
+  );
+
+  if(!confirmed){
+
+    return;
+  }
+
+  const {
+    data:order,
+    error:orderFetchError
+  } =
+  await supabaseClient
+  .from("orders")
+  .select("*")
+  .eq("id",orderId)
+  .single();
+
+  if(orderFetchError){
+
+    alert(
+      orderFetchError.message
+    );
+
+    return;
+  }
+
+  /*
+    Only the seller should accept,
+    reject, or complete an order.
+  */
+
+  if(
+    order.seller_id !==
+    currentProfile.id
+  ){
+
+    alert(
+      "You are not authorized to update this order."
+    );
+
+    return;
+  }
+
+  const {
+    error
+  } =
+  await supabaseClient
+  .from("orders")
+  .update({
+    status:newStatus
+  })
+  .eq("id",orderId)
+  .eq(
+    "seller_id",
+    currentProfile.id
+  );
+
+  if(error){
+
+    alert(
+      error.message
+    );
+
+    return;
+  }
+
+  /*
+    If rejected, return stock.
+  */
+
+  if(
+    newStatus === "REJECTED"
+  ){
+
+    await restoreStock(
+      order.product_id,
+      order.quantity
+    );
+
+  }
+
+  alert(
+    `Order ${newStatus.toLowerCase()}.`
+  );
+
+  await loadOrders();
+
+}
+
+
+/* =====================================================
+   CANCEL ORDER
+===================================================== */
+
+async function cancelOrder(
+  orderId
+){
+
+  const confirmed =
+  confirm(
+    "Are you sure you want to cancel this order?"
+  );
+
+  if(!confirmed){
+
+    return;
+  }
+
+  const {
+    data:order,
+    error
+  } =
+  await supabaseClient
+  .from("orders")
+  .select("*")
+  .eq("id",orderId)
+  .single();
+
+  if(error){
+
+    alert(
+      error.message
+    );
+
+    return;
+  }
+
+  if(
+    order.buyer_id !==
+    currentProfile.id
+  ){
+
+    alert(
+      "You cannot cancel this order."
+    );
+
+    return;
+  }
+
+  if(
+    order.status !==
+    "PENDING"
+  ){
+
+    alert(
+      "This order can no longer be cancelled."
+    );
+
+    return;
+  }
+
+  const {
+    error:updateError
+  } =
+  await supabaseClient
+  .from("orders")
+  .update({
+    status:"CANCELLED"
+  })
+  .eq("id",orderId)
+  .eq(
+    "buyer_id",
+    currentProfile.id
+  );
+
+  if(updateError){
+
+    alert(
+      updateError.message
+    );
+
+    return;
+  }
+
+  await restoreStock(
+    order.product_id,
+    order.quantity
+  );
+
+  alert(
+    "Order cancelled successfully."
+  );
+
+  await loadOrders();
+
+}
+
+
+/* =====================================================
+   RESTORE STOCK
+===================================================== */
+
+async function restoreStock(
+  productId,
+  quantity
+){
+
+  const {
+    data:product,
+    error
+  } =
+  await supabaseClient
+  .from("products")
+  .select(
+    "quantity,status"
+  )
+  .eq("id",productId)
+  .single();
+
+  if(error || !product){
+
+    console.error(
+      "Unable to restore stock",
+      error
+    );
+
+    return;
+  }
+
+  const restoredQuantity =
+  Number(product.quantity) +
+  Number(quantity);
 
   await supabaseClient
-    .auth
-    .signOut();
+  .from("products")
+  .update({
 
+    quantity:
+    restoredQuantity,
+
+    status:
+    "ACTIVE"
+
+  })
+  .eq(
+    "id",
+    productId
+  );
+
+}
+
+
+/* =====================================================
+   DELETE PRODUCT
+===================================================== */
+
+async function deleteProduct(
+  productId
+){
+
+  const confirmed =
+  confirm(
+    "Delete this product?"
+  );
+
+  if(!confirmed){
+
+    return;
+  }
+
+  const {
+    error
+  } =
+  await supabaseClient
+  .from("products")
+  .delete()
+  .eq(
+    "id",
+    productId
+  )
+  .eq(
+    "seller_id",
+    currentProfile.id
+  );
+
+  if(error){
+
+    alert(
+      error.message
+    );
+
+    return;
+  }
+
+  alert(
+    "Product deleted successfully."
+  );
+
+  await loadProducts();
+
+}
+
+
+/* =====================================================
+   AGriBOT UI
+===================================================== */
+
+function toggleAI(){
+
+  document
+  .getElementById("aiPanel")
+  .classList.toggle("hidden");
+
+}
+
+
+function addAIMessage(
+  text,
+  type
+){
+
+  const container =
+  document
+  .getElementById("aiMessages");
+
+  const message =
+  document.createElement("div");
+
+  message.className =
+  "ai-message " +
+  (
+    type === "user"
+    ?
+    "ai-user"
+    :
+    "ai-bot"
+  );
+
+  message.textContent =
+  text;
+
+  container.appendChild(
+    message
+  );
+
+  container.scrollTop =
+  container.scrollHeight;
+
+}
+
+
+/*
+  This UI is ready for the real
+  OpenAI backend.
+
+  DO NOT put an OpenAI API key
+  inside this HTML file.
+*/
+
+async function sendAI(){
+
+  const input =
+  document
+  .getElementById("aiInput");
+
+  const text =
+  input.value.trim();
+
+  if(!text){
+
+    return;
+  }
+
+  addAIMessage(
+    text,
+    "user"
+  );
+
+  input.value="";
+
+  /*
+    Backend endpoint to be added later:
+
+    POST /api/ai/chat
+
+    The OpenAI API key must stay
+    on the cloud backend.
+  */
+
+  addAIMessage(
+    "AgriBot AI backend is ready to be connected. We will connect the secure OpenAI API through the cloud backend next. 🌾",
+    "bot"
+  );
+
+}
+
+
+/* =====================================================
+   LOGOUT
+===================================================== */
+
+async function logout(){
+
+  await supabaseClient
+  .auth
+  .signOut();
 
   currentUser =
-    null;
+  null;
 
   currentProfile =
-    null;
-
-
-  document
-    .getElementById("app")
-    .classList
-    .add("hidden");
-
+  null;
 
   document
-    .getElementById("authScreen")
-    .classList
-    .remove("hidden");
+  .getElementById("app")
+  .classList.add("hidden");
 
+  document
+  .getElementById("aiButton")
+  .classList.add("hidden");
+
+  document
+  .getElementById("authScreen")
+  .classList.remove("hidden");
 
   showLogin();
 
 }
 
 
-/* =========================
-   HTML SECURITY
-========================= */
+/* =====================================================
+   SECURITY HELPER
+===================================================== */
 
-function escapeHtml(value) {
+function escapeHtml(value){
 
-  return String(value)
-
-    .replaceAll(
-      "&",
-      "&amp;"
-    )
-
-    .replaceAll(
-      "<",
-      "&lt;"
-    )
-
-    .replaceAll(
-      ">",
-      "&gt;"
-    )
-
-    .replaceAll(
-      '"',
-      "&quot;"
-    )
-
-    .replaceAll(
-      "'",
-      "&#039;"
-    );
+  return String(value ?? "")
+  .replaceAll("&","&amp;")
+  .replaceAll("<","&lt;")
+  .replaceAll(">","&gt;")
+  .replaceAll('"',"&quot;")
+  .replaceAll("'","&#039;");
 
 }
 
 
-/* =========================
-   SESSION CHECK
-========================= */
+/* =====================================================
+   DATE
+===================================================== */
 
-async function checkSession() {
+function formatDate(
+  date
+){
+
+  if(!date){
+
+    return "";
+
+  }
+
+  return new Date(date)
+  .toLocaleString();
+
+}
+
+
+/* =====================================================
+   SESSION CHECK
+===================================================== */
+
+async function checkSession(){
 
   const {
     data
   } =
-    await supabaseClient
-      .auth
-      .getSession();
+  await supabaseClient
+  .auth
+  .getSession();
 
-
-  if (
+  if(
     data &&
     data.session
-  ) {
+  ){
 
     await initializeApp(
       data.session.user
@@ -1906,10 +3014,6 @@ async function checkSession() {
 
 }
 
-
-/* =========================
-   START APP
-========================= */
 
 checkSession();
 
