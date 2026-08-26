@@ -2462,6 +2462,23 @@ async function getOrCreateProfile(user){
   }
 
   if(profile){
+    // Older AgriLink profiles may have a NULL email because the first
+    // version did not save it. Backfill it from Supabase Auth.
+    if(!profile.email && user.email){
+      const {data:updatedProfile,error:updateProfileError}=
+        await supabaseClient
+          .from("users")
+          .update({email:user.email})
+          .eq("id",profile.id)
+          .select("*")
+          .single();
+
+      if(updateProfileError){
+        console.warn("Could not backfill profile email:",updateProfileError);
+      }else if(updatedProfile){
+        profile=updatedProfile;
+      }
+    }
     return profile;
   }
 
@@ -4429,131 +4446,109 @@ function closeChat(){
 }
 
 
-async function startChat(
-  sellerId,
-  productId
-){
+async function startChat(sellerId,productId){
 
   if(!currentProfile){
-
-    alert(
-      "Please login first."
-    );
-
+    alert("Please login first.");
     return;
   }
 
-  if(
-    sellerId ===
-    currentProfile.id
-  ){
-
-    alert(
-      "You cannot chat with yourself."
-    );
-
+  if(sellerId===currentProfile.id){
+    alert("You cannot chat with yourself.");
     return;
   }
 
-  if(
-    currentProfile.role !==
-    "BUYER"
-  ){
-
-    alert(
-      "Farmers can reply to conversations started by buyers."
-    );
-
+  if(currentProfile.role!=="BUYER"){
+    alert("Farmers can reply to conversations started by buyers.");
     return;
   }
 
-  let query =
-    supabaseClient
-      .from("conversations")
-      .select("*")
-      .eq(
-        "buyer_id",
-        currentProfile.id
-      )
-      .eq(
-        "seller_id",
-        sellerId
-      );
+  // One buyer ↔ farmer contact is reused even when the buyer opens
+  // another product from the same farmer. This prevents duplicate contacts.
+  let {data:conversation,error:findError}=await supabaseClient
+    .from("conversations")
+    .select("*")
+    .eq("buyer_id",currentProfile.id)
+    .eq("seller_id",sellerId)
+    .order("updated_at",{ascending:false})
+    .limit(1)
+    .maybeSingle();
 
-  if(productId){
-
-    query =
-      query.eq(
-        "product_id",
-        productId
-      );
-  }
-
-  const {
-    data:existing,
-    error
-  } =
-    await query.maybeSingle();
-
-  if(error){
-
-    alert(
-      error.message
-    );
-
+  if(findError){
+    console.error("Conversation lookup error:",findError);
+    alert(findError.message);
     return;
   }
-
-  let conversation =
-    existing;
 
   if(!conversation){
-
-    const {
-      data:newConversation,
-      error:createError
-    } =
-      await supabaseClient
-        .from("conversations")
-        .insert({
-
-          buyer_id:
-            currentProfile.id,
-
-          seller_id:
-            sellerId,
-
-          product_id:
-            productId || null
-
-        })
-        .select("*")
-        .single();
+    const {data:newConversation,error:createError}=await supabaseClient
+      .from("conversations")
+      .insert({
+        buyer_id:currentProfile.id,
+        seller_id:sellerId,
+        product_id:productId||null
+      })
+      .select("*")
+      .single();
 
     if(createError){
-
-      alert(
-        createError.message
-      );
-
+      console.error("Conversation create error:",createError);
+      alert(createError.message);
       return;
     }
 
-    conversation =
-      newConversation;
+    conversation=newConversation;
+  }else if(productId && !conversation.product_id){
+    // Keep the first contact, but attach the product if it was previously null.
+    const {data:updatedConversation}=await supabaseClient
+      .from("conversations")
+      .update({product_id:productId,updated_at:new Date().toISOString()})
+      .eq("id",conversation.id)
+      .select("*")
+      .single();
+
+    if(updatedConversation) conversation=updatedConversation;
+  }
+
+  // Create a notification for the farmer so the contact is visible even
+  // before the farmer opens Chat.
+  const {error:notificationError}=await supabaseClient
+    .from("notifications")
+    .insert({
+      user_id:sellerId,
+      title:"New buyer contact",
+      body:`${currentProfile.full_name||"A buyer"} opened a chat with you.`,
+      type:"MESSAGE",
+      reference_id:conversation.id
+    });
+
+  if(notificationError){
+    console.warn("Chat notification could not be created:",notificationError);
   }
 
   openChat();
-
   await loadConversations();
-
-  setTimeout(()=>{
-    selectConversation(
-      conversation
-    );
-  },200);
+  await selectConversationById(conversation.id);
 }
 
+async function selectConversationById(conversationId){
+  const {data,error}=await supabaseClient
+    .from("conversations")
+    .select(`
+      *,
+      buyer:buyer_id(id,full_name,role),
+      seller:seller_id(id,full_name,role)
+    `)
+    .eq("id",conversationId)
+    .single();
+
+  if(error){
+    console.error(error);
+    return;
+  }
+
+  await selectConversation(data);
+}
 
 async function loadConversations(){
 
@@ -4993,6 +4988,10 @@ document
   }
 
   input.value = "";
+
+  // Refresh the contact list immediately. Realtime is still enabled below,
+  // but this also works when Realtime has not yet been enabled on the table.
+  await loadConversations();
 
   await supabaseClient
     .from("conversations")
