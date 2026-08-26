@@ -3,1129 +3,1413 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#16833b">
 <title>AgriLink AI — Agricultural Marketplace</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0
+}
 
 :root{
---red:#c62828;
---red2:#e53935;
---red3:#ffebee;
---dark:#151515;
---text:#202124;
---muted:#737373;
---bg:#f6f7f8;
---white:#fff;
---border:#e7e7e7;
---green:#2e7d32;
---blue:#1976d2;
---orange:#ef6c00;
---shadow:0 18px 50px rgba(0,0,0,.08);
+  --green:#16833b;
+  --green2:#22a447;
+  --green3:#eaf8ef;
+  --green4:#d7f3df;
+  --dark:#12351f;
+  --text:#1e2922;
+  --muted:#718078;
+  --bg:#f5f8f5;
+  --white:#fff;
+  --border:#e1e9e3;
+  --red:#d93025;
+  --orange:#ed8b00;
+  --blue:#2878d4;
+  --shadow:0 18px 50px rgba(20,70,35,.09);
 }
 
-html{scroll-behavior:smooth}
+html{
+  scroll-behavior:smooth
+}
 
 body{
-font-family:Inter,Arial,Helvetica,sans-serif;
-background:var(--bg);
-color:var(--text);
+  font-family:Inter,Arial,Helvetica,sans-serif;
+  background:var(--bg);
+  color:var(--text);
 }
 
-button,input,textarea,select{font:inherit}
-button{cursor:pointer}
-.hidden{display:none!important}
+button,input,textarea,select{
+  font:inherit
+}
+
+button{
+  cursor:pointer
+}
 
 button:disabled{
-opacity:.55;
-cursor:not-allowed;
+  opacity:.55;
+  cursor:not-allowed
 }
 
-/* =========================
+.hidden{
+  display:none!important
+}
+
+.section{
+  margin-top:28px
+}
+
+/* =========================================================
 LANDING
-========================= */
+========================================================= */
 
 .landing{
-min-height:100vh;
-background:
-radial-gradient(circle at 90% 10%,rgba(198,40,40,.12),transparent 30%),
-linear-gradient(135deg,#fff 0%,#fff 45%,#fff7f7 100%);
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 90% 5%,rgba(34,164,71,.13),transparent 28%),
+    radial-gradient(circle at 10% 70%,rgba(22,131,59,.08),transparent 25%),
+    linear-gradient(135deg,#fff 0%,#fff 48%,#f1faf4 100%);
 }
 
 .landing-nav{
-height:76px;
-display:flex;
-align-items:center;
-justify-content:space-between;
-padding:0 6%;
-border-bottom:1px solid rgba(0,0,0,.05);
-background:rgba(255,255,255,.85);
-backdrop-filter:blur(15px);
-position:sticky;
-top:0;
-z-index:50;
+  height:76px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 6%;
+  border-bottom:1px solid rgba(0,0,0,.05);
+  background:rgba(255,255,255,.86);
+  backdrop-filter:blur(15px);
+  position:sticky;
+  top:0;
+  z-index:50;
 }
 
 .brand{
-display:flex;
-align-items:center;
-gap:11px;
-font-size:20px;
-font-weight:900;
-color:var(--red);
+  display:flex;
+  align-items:center;
+  gap:11px;
+  font-size:20px;
+  font-weight:900;
+  color:var(--green);
 }
 
 .brand-icon{
-width:43px;
-height:43px;
-border-radius:13px;
-display:grid;
-place-items:center;
-background:linear-gradient(135deg,var(--red),var(--red2));
-color:white;
-box-shadow:0 8px 20px rgba(198,40,40,.25);
+  width:43px;
+  height:43px;
+  border-radius:13px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,var(--green),var(--green2));
+  color:white;
+  box-shadow:0 8px 20px rgba(22,131,59,.25);
 }
 
 .landing-nav button{
-border:0;
-background:var(--dark);
-color:white;
-padding:11px 20px;
-border-radius:12px;
-font-weight:700;
+  border:0;
+  background:var(--dark);
+  color:white;
+  padding:11px 20px;
+  border-radius:12px;
+  font-weight:700;
 }
 
 .hero{
-max-width:1250px;
-margin:auto;
-min-height:calc(100vh - 76px);
-display:grid;
-grid-template-columns:1.05fr .95fr;
-align-items:center;
-gap:60px;
-padding:70px 25px;
+  max-width:1250px;
+  margin:auto;
+  min-height:calc(100vh - 76px);
+  display:grid;
+  grid-template-columns:1.05fr .95fr;
+  align-items:center;
+  gap:60px;
+  padding:70px 25px;
 }
 
 .hero-tag{
-display:inline-flex;
-align-items:center;
-gap:7px;
-padding:8px 13px;
-background:var(--red3);
-color:var(--red);
-border-radius:30px;
-font-size:13px;
-font-weight:800;
-margin-bottom:20px;
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:8px 13px;
+  background:var(--green3);
+  color:var(--green);
+  border-radius:30px;
+  font-size:13px;
+  font-weight:800;
+  margin-bottom:20px;
 }
 
 .hero h1{
-font-size:clamp(43px,6vw,76px);
-line-height:.98;
-letter-spacing:-3px;
-margin-bottom:25px;
+  font-size:clamp(43px,6vw,76px);
+  line-height:.98;
+  letter-spacing:-3px;
+  margin-bottom:25px;
 }
 
 .hero h1 span{
-color:var(--red);
+  color:var(--green)
 }
 
 .hero p{
-font-size:18px;
-line-height:1.7;
-color:var(--muted);
-max-width:620px;
+  font-size:18px;
+  line-height:1.7;
+  color:var(--muted);
+  max-width:620px;
 }
 
 .hero-buttons{
-display:flex;
-gap:12px;
-margin-top:30px;
-flex-wrap:wrap;
+  display:flex;
+  gap:12px;
+  margin-top:30px;
+  flex-wrap:wrap;
 }
 
 .hero-primary{
-border:0;
-background:var(--red);
-color:white;
-padding:15px 23px;
-border-radius:13px;
-font-weight:800;
-box-shadow:0 12px 25px rgba(198,40,40,.22);
+  border:0;
+  background:var(--green);
+  color:white;
+  padding:15px 23px;
+  border-radius:13px;
+  font-weight:800;
+  box-shadow:0 12px 25px rgba(22,131,59,.22);
+}
+
+.hero-primary:hover{
+  background:#116c30
 }
 
 .hero-secondary{
-border:1px solid var(--border);
-background:white;
-padding:15px 23px;
-border-radius:13px;
-font-weight:800;
+  border:1px solid var(--border);
+  background:white;
+  padding:15px 23px;
+  border-radius:13px;
+  font-weight:800;
 }
 
 .hero-visual{
-position:relative;
-min-height:480px;
-display:flex;
-align-items:center;
-justify-content:center;
+  position:relative;
+  min-height:480px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
 .farm-orb{
-width:min(430px,80vw);
-height:430px;
-border-radius:50%;
-background:
-linear-gradient(145deg,rgba(198,40,40,.12),rgba(255,255,255,.7));
-border:1px solid rgba(198,40,40,.12);
-display:grid;
-place-items:center;
-font-size:145px;
-box-shadow:0 30px 80px rgba(198,40,40,.12);
+  width:min(430px,80vw);
+  height:430px;
+  border-radius:50%;
+  background:
+    linear-gradient(145deg,rgba(34,164,71,.12),rgba(255,255,255,.7));
+  border:1px solid rgba(22,131,59,.12);
+  display:grid;
+  place-items:center;
+  font-size:145px;
+  box-shadow:0 30px 80px rgba(22,131,59,.12);
 }
 
 .floating-card{
-position:absolute;
-background:white;
-padding:18px;
-border-radius:17px;
-box-shadow:var(--shadow);
-border:1px solid var(--border);
+  position:absolute;
+  background:white;
+  padding:18px;
+  border-radius:17px;
+  box-shadow:var(--shadow);
+  border:1px solid var(--border);
 }
 
-.float-one{top:65px;left:10px}
-.float-two{bottom:55px;right:0}
-.float-three{top:45%;right:-20px}
+.float-one{
+  top:65px;
+  left:10px
+}
+
+.float-two{
+  bottom:55px;
+  right:0
+}
+
+.float-three{
+  top:45%;
+  right:-20px
+}
 
 .float-title{
-font-size:12px;
-color:var(--muted);
-margin-bottom:5px;
+  font-size:12px;
+  color:var(--muted);
+  margin-bottom:5px;
 }
 
 .float-value{
-font-weight:900;
-font-size:19px;
+  font-weight:900;
+  font-size:19px;
 }
 
 .features{
-max-width:1200px;
-margin:auto;
-padding:50px 20px 100px;
+  max-width:1200px;
+  margin:auto;
+  padding:50px 20px 100px;
 }
 
 .features h2{
-font-size:35px;
-margin-bottom:30px;
-text-align:center;
+  font-size:35px;
+  margin-bottom:30px;
+  text-align:center;
 }
 
 .feature-grid{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:18px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
 }
 
 .feature-card{
-background:white;
-border:1px solid var(--border);
-padding:27px;
-border-radius:20px;
-box-shadow:0 8px 30px rgba(0,0,0,.04);
+  background:white;
+  border:1px solid var(--border);
+  padding:27px;
+  border-radius:20px;
+  box-shadow:0 8px 30px rgba(0,0,0,.04);
 }
 
 .feature-icon{
-font-size:30px;
-margin-bottom:15px;
+  font-size:30px;
+  margin-bottom:15px;
 }
 
 .feature-card h3{
-margin-bottom:8px;
+  margin-bottom:8px;
 }
 
 .feature-card p{
-color:var(--muted);
-line-height:1.6;
-font-size:14px;
+  color:var(--muted);
+  line-height:1.6;
+  font-size:14px;
 }
 
-/* =========================
+/* =========================================================
 AUTH
-========================= */
+========================================================= */
 
 .auth-container{
-min-height:100vh;
-display:grid;
-grid-template-columns:1fr 460px;
-background:#fff;
+  min-height:100vh;
+  display:grid;
+  grid-template-columns:1fr 460px;
+  background:#fff;
 }
 
 .auth-showcase{
-background:
-linear-gradient(145deg,rgba(198,40,40,.96),rgba(117,20,20,.98));
-color:white;
-padding:60px;
-display:flex;
-align-items:center;
+  background:
+    linear-gradient(145deg,rgba(22,131,59,.97),rgba(8,76,31,.99));
+  color:white;
+  padding:60px;
+  display:flex;
+  align-items:center;
 }
 
 .auth-showcase-inner{
-max-width:600px;
-margin:auto;
+  max-width:600px;
+  margin:auto;
 }
 
 .auth-showcase h1{
-font-size:clamp(42px,5vw,65px);
-line-height:1;
-margin-bottom:20px;
+  font-size:clamp(42px,5vw,65px);
+  line-height:1;
+  margin-bottom:20px;
 }
 
 .auth-showcase p{
-line-height:1.7;
-opacity:.88;
-font-size:17px;
+  line-height:1.7;
+  opacity:.88;
+  font-size:17px;
 }
 
 .auth-points{
-display:grid;
-gap:12px;
-margin-top:30px;
+  display:grid;
+  gap:12px;
+  margin-top:30px;
 }
 
 .auth-point{
-display:flex;
-gap:10px;
-align-items:center;
-font-weight:700;
+  display:flex;
+  gap:10px;
+  align-items:center;
+  font-weight:700;
 }
 
 .auth-card{
-width:100%;
-max-width:430px;
-margin:auto;
-padding:35px;
+  width:100%;
+  max-width:430px;
+  margin:auto;
+  padding:35px;
 }
 
 .auth-logo{
-width:64px;
-height:64px;
-display:grid;
-place-items:center;
-background:var(--red);
-border-radius:18px;
-font-size:32px;
-color:white;
-margin-bottom:18px;
-box-shadow:0 12px 30px rgba(198,40,40,.22);
+  width:64px;
+  height:64px;
+  display:grid;
+  place-items:center;
+  background:var(--green);
+  border-radius:18px;
+  font-size:32px;
+  color:white;
+  margin-bottom:18px;
+  box-shadow:0 12px 30px rgba(22,131,59,.22);
 }
 
 .auth-card h2{
-font-size:30px;
-margin-bottom:7px;
+  font-size:30px;
+  margin-bottom:7px;
 }
 
 .auth-subtitle{
-color:var(--muted);
-margin-bottom:25px;
+  color:var(--muted);
+  margin-bottom:25px;
 }
 
 .tabs{
-display:flex;
-background:#f2f2f2;
-padding:4px;
-border-radius:12px;
-margin-bottom:20px;
+  display:flex;
+  background:#f1f5f2;
+  padding:4px;
+  border-radius:12px;
+  margin-bottom:20px;
 }
 
 .tab{
-flex:1;
-border:0;
-padding:11px;
-background:transparent;
-border-radius:9px;
-font-weight:800;
+  flex:1;
+  border:0;
+  padding:11px;
+  background:transparent;
+  border-radius:9px;
+  font-weight:800;
 }
 
 .tab.active{
-background:white;
-color:var(--red);
-box-shadow:0 3px 10px rgba(0,0,0,.05);
+  background:white;
+  color:var(--green);
+  box-shadow:0 3px 10px rgba(0,0,0,.05);
 }
 
 label{
-display:block;
-font-size:13px;
-font-weight:800;
-margin:14px 0 6px;
+  display:block;
+  font-size:13px;
+  font-weight:800;
+  margin:14px 0 6px;
 }
 
-input,textarea,select{
-width:100%;
-border:1px solid var(--border);
-background:white;
-padding:13px;
-border-radius:11px;
-outline:none;
-transition:.2s;
+input,
+textarea,
+select{
+  width:100%;
+  border:1px solid var(--border);
+  background:white;
+  padding:13px;
+  border-radius:11px;
+  outline:none;
+  transition:.2s;
 }
 
-input:focus,textarea:focus,select:focus{
-border-color:var(--red);
-box-shadow:0 0 0 3px rgba(198,40,40,.08);
+input:focus,
+textarea:focus,
+select:focus{
+  border-color:var(--green);
+  box-shadow:0 0 0 3px rgba(22,131,59,.08);
 }
 
 textarea{
-min-height:100px;
-resize:vertical;
+  min-height:100px;
+  resize:vertical;
 }
 
 .primary-btn{
-width:100%;
-border:0;
-background:linear-gradient(135deg,var(--red),var(--red2));
-color:white;
-padding:14px;
-border-radius:11px;
-font-weight:800;
-margin-top:20px;
+  width:100%;
+  border:0;
+  background:linear-gradient(135deg,var(--green),var(--green2));
+  color:white;
+  padding:14px;
+  border-radius:11px;
+  font-weight:800;
+  margin-top:20px;
 }
 
 .message{
-padding:12px;
-border-radius:11px;
-margin-top:14px;
-font-size:13px;
-line-height:1.5;
+  padding:12px;
+  border-radius:11px;
+  margin-top:14px;
+  font-size:13px;
+  line-height:1.5;
 }
 
-.success{background:#e8f5e9;color:#1b5e20}
-.error{background:#ffebee;color:#b71c1c}
+.success{
+  background:#e8f5e9;
+  color:#1b5e20
+}
 
-/* =========================
-APP NAV
-========================= */
+.error{
+  background:#ffebee;
+  color:#b71c1c
+}
+
+/* =========================================================
+NAVBAR
+========================================================= */
 
 .navbar{
-height:70px;
-background:rgba(255,255,255,.94);
-backdrop-filter:blur(15px);
-border-bottom:1px solid var(--border);
-display:flex;
-align-items:center;
-justify-content:space-between;
-padding:0 25px;
-position:sticky;
-top:0;
-z-index:40;
+  height:70px;
+  background:rgba(255,255,255,.94);
+  backdrop-filter:blur(15px);
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 25px;
+  position:sticky;
+  top:0;
+  z-index:40;
 }
 
 .nav-brand{
-display:flex;
-align-items:center;
-gap:10px;
-font-size:19px;
-font-weight:900;
-color:var(--red);
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:19px;
+  font-weight:900;
+  color:var(--green);
 }
 
 .nav-logo{
-width:39px;
-height:39px;
-display:grid;
-place-items:center;
-background:var(--red);
-border-radius:11px;
-color:white;
+  width:39px;
+  height:39px;
+  display:grid;
+  place-items:center;
+  background:var(--green);
+  border-radius:11px;
+  color:white;
 }
 
 .nav-actions{
-display:flex;
-gap:7px;
-align-items:center;
+  display:flex;
+  gap:7px;
+  align-items:center;
 }
 
 .secondary-btn,
 .danger-btn{
-border:1px solid var(--border);
-background:white;
-padding:10px 14px;
-border-radius:10px;
-font-weight:700;
+  border:1px solid var(--border);
+  background:white;
+  padding:10px 14px;
+  border-radius:10px;
+  font-weight:700;
+}
+
+.secondary-btn:hover{
+  background:var(--green3);
+  border-color:var(--green4);
 }
 
 .danger-btn{
-background:#191919;
-color:white;
-border-color:#191919;
+  background:#16351f;
+  color:white;
+  border-color:#16351f;
 }
 
-/* =========================
+/* =========================================================
 MAIN
-========================= */
+========================================================= */
 
 .container{
-max-width:1250px;
-margin:auto;
-padding:25px 20px 70px;
+  max-width:1250px;
+  margin:auto;
+  padding:25px 20px 70px;
 }
 
 .welcome{
-position:relative;
-overflow:hidden;
-background:linear-gradient(135deg,#9e1e1e,var(--red),#ef5350);
-color:white;
-padding:32px;
-border-radius:24px;
-margin-bottom:22px;
-box-shadow:0 20px 45px rgba(198,40,40,.18);
+  position:relative;
+  overflow:hidden;
+  background:
+    linear-gradient(135deg,#116d32,var(--green),#39b95c);
+  color:white;
+  padding:32px;
+  border-radius:24px;
+  margin-bottom:22px;
+  box-shadow:0 20px 45px rgba(22,131,59,.18);
 }
 
 .welcome:after{
-content:"🌾";
-position:absolute;
-right:35px;
-bottom:-25px;
-font-size:150px;
-opacity:.1;
+  content:"🌾";
+  position:absolute;
+  right:35px;
+  bottom:-25px;
+  font-size:150px;
+  opacity:.1;
 }
 
 .welcome h1{
-font-size:30px;
-margin-bottom:7px;
-position:relative;
-z-index:1;
+  font-size:30px;
+  margin-bottom:7px;
+  position:relative;
+  z-index:1;
 }
 
 .welcome p{
-opacity:.88;
-position:relative;
-z-index:1;
+  opacity:.88;
+  position:relative;
+  z-index:1;
 }
 
 .role-badge{
-display:inline-block;
-margin-top:13px;
-padding:7px 12px;
-background:rgba(255,255,255,.18);
-border:1px solid rgba(255,255,255,.25);
-border-radius:30px;
-font-size:12px;
-font-weight:800;
+  display:inline-block;
+  margin-top:13px;
+  padding:7px 12px;
+  background:rgba(255,255,255,.18);
+  border:1px solid rgba(255,255,255,.25);
+  border-radius:30px;
+  font-size:12px;
+  font-weight:800;
 }
 
-/* SEARCH */
+/* =========================================================
+SEARCH
+========================================================= */
 
 .search-box{
-background:white;
-padding:20px;
-border-radius:19px;
-border:1px solid var(--border);
-box-shadow:0 8px 25px rgba(0,0,0,.04);
-margin-bottom:25px;
+  background:white;
+  padding:20px;
+  border-radius:19px;
+  border:1px solid var(--border);
+  box-shadow:0 8px 25px rgba(0,0,0,.04);
+  margin-bottom:25px;
 }
 
 .section-title{
-display:flex;
-align-items:center;
-justify-content:space-between;
-gap:10px;
-margin-bottom:15px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:15px;
 }
 
 .search-grid{
-display:grid;
-grid-template-columns:2fr 2fr 1fr auto auto;
-gap:9px;
+  display:grid;
+  grid-template-columns:2fr 2fr 1fr auto auto;
+  gap:9px;
 }
 
-/* PRODUCTS */
+/* =========================================================
+PRODUCTS
+========================================================= */
 
 .products{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
-gap:17px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+  gap:17px;
 }
 
 .product-card{
-background:white;
-border:1px solid var(--border);
-border-radius:18px;
-overflow:hidden;
-transition:.25s;
-box-shadow:0 5px 18px rgba(0,0,0,.03);
+  background:white;
+  border:1px solid var(--border);
+  border-radius:18px;
+  overflow:hidden;
+  transition:.25s;
+  box-shadow:0 5px 18px rgba(0,0,0,.03);
 }
 
 .product-card:hover{
-transform:translateY(-4px);
-box-shadow:0 18px 35px rgba(0,0,0,.08);
+  transform:translateY(-4px);
+  box-shadow:0 18px 35px rgba(0,0,0,.08);
 }
 
 .product-image{
-height:175px;
-background:linear-gradient(135deg,#f1f1f1,#fafafa);
-display:grid;
-place-items:center;
-overflow:hidden;
+  height:175px;
+  background:linear-gradient(135deg,#edf7ef,#fafafa);
+  display:grid;
+  place-items:center;
+  overflow:hidden;
 }
 
 .product-image img{
-width:100%;
-height:100%;
-object-fit:cover;
+  width:100%;
+  height:100%;
+  object-fit:cover;
 }
 
 .product-placeholder{
-font-size:55px;
+  font-size:55px;
 }
 
 .product-content{
-padding:16px;
+  padding:16px;
 }
 
 .product-content h3{
-margin-bottom:7px;
+  margin-bottom:7px;
 }
 
 .price{
-color:var(--red);
-font-weight:900;
-font-size:18px;
-margin-bottom:7px;
+  color:var(--green);
+  font-weight:900;
+  font-size:18px;
+  margin-bottom:7px;
 }
 
 .product-description{
-font-size:13px;
-line-height:1.5;
-color:#555;
-min-height:38px;
-margin-bottom:9px;
+  font-size:13px;
+  line-height:1.5;
+  color:#555;
+  min-height:38px;
+  margin-bottom:9px;
 }
 
 .product-location,
 .product-seller{
-font-size:12px;
-color:var(--muted);
-margin-bottom:5px;
+  font-size:12px;
+  color:var(--muted);
+  margin-bottom:5px;
+}
+
+.product-seller{
+  cursor:pointer;
+}
+
+.product-seller:hover{
+  color:var(--green);
 }
 
 .product-actions{
-display:flex;
-gap:7px;
-margin-top:13px;
+  display:flex;
+  gap:7px;
+  margin-top:13px;
 }
 
 .product-actions button{
-flex:1;
-border:0;
-padding:10px;
-border-radius:9px;
-font-weight:800;
+  flex:1;
+  border:0;
+  padding:10px;
+  border-radius:9px;
+  font-weight:800;
 }
 
-.chat-btn{background:#eee}
-.buy-btn{background:var(--red);color:white}
-.delete-product{background:#222;color:white}
+.chat-btn{
+  background:#eef2ef
+}
 
-/* STATS */
+.buy-btn{
+  background:var(--green);
+  color:white
+}
+
+.delete-product{
+  background:#16351f;
+  color:white
+}
+
+/* =========================================================
+FARMER STATS
+========================================================= */
 
 .farmer-dashboard{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:12px;
-margin-bottom:25px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  margin-bottom:25px;
 }
 
 .stat-card{
-background:white;
-border:1px solid var(--border);
-border-radius:16px;
-padding:18px;
+  background:white;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:18px;
 }
 
 .stat-label{
-font-size:12px;
-color:var(--muted);
+  font-size:12px;
+  color:var(--muted);
 }
 
 .stat-value{
-font-size:28px;
-font-weight:900;
-margin-top:5px;
+  font-size:28px;
+  font-weight:900;
+  margin-top:5px;
+  color:var(--green);
 }
 
-/* ORDERS */
+/* =========================================================
+ORDERS
+========================================================= */
 
 .orders{
-display:grid;
-gap:12px;
+  display:grid;
+  gap:12px;
 }
 
 .order-card{
-background:white;
-border:1px solid var(--border);
-border-radius:16px;
-padding:18px;
+  background:white;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:18px;
 }
 
 .order-top{
-display:flex;
-justify-content:space-between;
-gap:10px;
-margin-bottom:10px;
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
 }
 
 .order-status{
-padding:5px 9px;
-border-radius:20px;
-font-size:11px;
-font-weight:900;
-background:#eee;
+  padding:5px 9px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:900;
+  background:#eee;
 }
 
-.status-PENDING{background:#fff3e0;color:#e65100}
-.status-CONFIRMED{background:#e3f2fd;color:#1565c0}
-.status-ONGOING{background:#e8f5e9;color:#2e7d32}
-.status-COMPLETED{background:#e8f5e9;color:#1b5e20}
-.status-CANCELLED,.status-REJECTED{background:#ffebee;color:#b71c1c}
+.status-PENDING{
+  background:#fff3e0;
+  color:#e65100
+}
+
+.status-CONFIRMED{
+  background:#e3f2fd;
+  color:#1565c0
+}
+
+.status-ONGOING{
+  background:#e8f5e9;
+  color:#2e7d32
+}
+
+.status-COMPLETED{
+  background:#e8f5e9;
+  color:#1b5e20
+}
+
+.status-CANCELLED,
+.status-REJECTED{
+  background:#ffebee;
+  color:#b71c1c
+}
 
 .order-info{
-font-size:13px;
-line-height:1.8;
-color:#666;
+  font-size:13px;
+  line-height:1.8;
+  color:#666;
 }
 
 .order-actions{
-display:flex;
-gap:7px;
-flex-wrap:wrap;
-margin-top:12px;
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+  margin-top:12px;
 }
 
 .order-actions button{
-border:0;
-padding:9px 12px;
-border-radius:9px;
-font-weight:700;
+  border:0;
+  padding:9px 12px;
+  border-radius:9px;
+  font-weight:700;
 }
 
-.accept-btn{background:var(--green);color:white}
-.reject-btn{background:#222;color:white}
-.complete-btn{background:var(--blue);color:white}
-.cancel-btn{background:#eee}
+.accept-btn{
+  background:var(--green);
+  color:white
+}
 
-/* EMPTY */
+.reject-btn{
+  background:#222;
+  color:white
+}
+
+.complete-btn{
+  background:var(--blue);
+  color:white
+}
+
+.cancel-btn{
+  background:#eee
+}
+
+/* =========================================================
+EMPTY
+========================================================= */
 
 .empty{
-background:white;
-border:1px dashed #d3d3d3;
-border-radius:16px;
-padding:38px 20px;
-text-align:center;
-color:var(--muted);
-grid-column:1/-1;
+  background:white;
+  border:1px dashed #cbd8cf;
+  border-radius:16px;
+  padding:38px 20px;
+  text-align:center;
+  color:var(--muted);
+  grid-column:1/-1;
 }
 
-/* MODAL */
+/* =========================================================
+FARMER PROFILE
+========================================================= */
+
+.profile-card{
+  background:white;
+  border:1px solid var(--border);
+  border-radius:22px;
+  overflow:hidden;
+  box-shadow:var(--shadow);
+}
+
+.profile-cover{
+  height:150px;
+  background:
+    linear-gradient(135deg,#0d612b,#16833b,#4fc56b);
+  position:relative;
+}
+
+.profile-cover:after{
+  content:"🌾";
+  position:absolute;
+  right:35px;
+  bottom:-35px;
+  font-size:120px;
+  opacity:.12;
+}
+
+.profile-main{
+  padding:0 25px 25px;
+  margin-top:-43px;
+  position:relative;
+}
+
+.profile-avatar{
+  width:86px;
+  height:86px;
+  border-radius:24px;
+  background:linear-gradient(135deg,#fff,#e7f7eb);
+  border:5px solid white;
+  display:grid;
+  place-items:center;
+  font-size:40px;
+  box-shadow:0 8px 25px rgba(0,0,0,.12);
+}
+
+.profile-name{
+  margin-top:13px;
+  font-size:27px;
+  font-weight:900;
+}
+
+.profile-role{
+  display:inline-block;
+  margin-top:6px;
+  padding:6px 10px;
+  background:var(--green3);
+  color:var(--green);
+  border-radius:20px;
+  font-size:11px;
+  font-weight:900;
+}
+
+.profile-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  color:var(--muted);
+  font-size:13px;
+  margin-top:13px;
+}
+
+.profile-bio{
+  margin-top:17px;
+  color:#58645d;
+  line-height:1.6;
+}
+
+/* =========================================================
+MODAL
+========================================================= */
 
 .modal{
-position:fixed;
-inset:0;
-background:rgba(0,0,0,.58);
-display:flex;
-align-items:center;
-justify-content:center;
-padding:20px;
-z-index:100;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.58);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  z-index:100;
 }
 
 .modal-card{
-width:100%;
-max-width:520px;
-max-height:90vh;
-overflow:auto;
-background:white;
-border-radius:22px;
-padding:25px;
+  width:100%;
+  max-width:520px;
+  max-height:90vh;
+  overflow:auto;
+  background:white;
+  border-radius:22px;
+  padding:25px;
 }
 
 .modal-header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
 }
 
 .close{
-border:0;
-background:#eee;
-width:35px;
-height:35px;
-border-radius:50%;
-font-size:20px;
+  border:0;
+  background:#eef2ef;
+  width:35px;
+  height:35px;
+  border-radius:50%;
+  font-size:20px;
 }
 
-/* CHAT */
+/* =========================================================
+PROFILE MODAL
+========================================================= */
+
+.profile-modal-card{
+  max-width:850px;
+  padding:0;
+  overflow:hidden;
+}
+
+.profile-modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:17px 20px;
+  border-bottom:1px solid var(--border);
+}
+
+.profile-modal-content{
+  padding:20px;
+}
+
+.profile-product-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
+  gap:12px;
+  margin-top:17px;
+}
+
+.mini-product{
+  border:1px solid var(--border);
+  border-radius:15px;
+  overflow:hidden;
+  background:white;
+}
+
+.mini-product-img{
+  height:120px;
+  background:#eef8f0;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+}
+
+.mini-product-img img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.mini-product-body{
+  padding:12px;
+}
+
+.mini-product-name{
+  font-weight:900;
+}
+
+.mini-product-price{
+  color:var(--green);
+  font-weight:900;
+  margin-top:5px;
+}
+
+/* =========================================================
+CHAT
+========================================================= */
 
 .chat-modal .modal-card{
-max-width:950px;
-padding:0;
-overflow:hidden;
+  max-width:950px;
+  padding:0;
+  overflow:hidden;
 }
 
 .chat-layout{
-display:grid;
-grid-template-columns:280px 1fr;
-height:75vh;
-min-height:500px;
+  display:grid;
+  grid-template-columns:280px 1fr;
+  height:75vh;
+  min-height:500px;
 }
 
 .conversation-list{
-border-right:1px solid var(--border);
-background:#fafafa;
-overflow:auto;
+  border-right:1px solid var(--border);
+  background:#fafcfb;
+  overflow:auto;
 }
 
 .chat-list-header{
-padding:17px;
-font-weight:900;
-border-bottom:1px solid var(--border);
+  padding:17px;
+  font-weight:900;
+  border-bottom:1px solid var(--border);
 }
 
 .conversation-item{
-padding:14px;
-border-bottom:1px solid var(--border);
-cursor:pointer;
+  padding:14px;
+  border-bottom:1px solid var(--border);
+  cursor:pointer;
 }
 
 .conversation-item:hover,
 .conversation-item.active{
-background:white;
+  background:white;
 }
 
-.conversation-name{font-weight:800}
+.conversation-name{
+  font-weight:800
+}
 
 .conversation-preview{
-font-size:12px;
-color:var(--muted);
-margin-top:4px;
+  font-size:12px;
+  color:var(--muted);
+  margin-top:4px;
 }
 
 .chat-window{
-display:flex;
-flex-direction:column;
-min-width:0;
+  display:flex;
+  flex-direction:column;
+  min-width:0;
 }
 
 .chat-header{
-padding:15px;
-border-bottom:1px solid var(--border);
-display:flex;
-justify-content:space-between;
-align-items:center;
+  padding:15px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
 
-.chat-user{font-weight:900}
+.chat-user{
+  font-weight:900
+}
 
 .online{
-font-size:11px;
-color:var(--green);
-margin-top:3px;
+  font-size:11px;
+  color:var(--green);
+  margin-top:3px;
 }
 
 .chat-messages{
-flex:1;
-padding:18px;
-overflow:auto;
-background:#f7f7f7;
-display:flex;
-flex-direction:column;
-gap:9px;
+  flex:1;
+  padding:18px;
+  overflow:auto;
+  background:#f7faf8;
+  display:flex;
+  flex-direction:column;
+  gap:9px;
 }
 
 .message-row{
-display:flex;
+  display:flex
 }
 
 .message-row.mine{
-justify-content:flex-end;
+  justify-content:flex-end
 }
 
 .chat-bubble{
-max-width:75%;
-padding:10px 13px;
-border-radius:15px;
-background:white;
-border:1px solid var(--border);
+  max-width:75%;
+  padding:10px 13px;
+  border-radius:15px;
+  background:white;
+  border:1px solid var(--border);
 }
 
 .message-row.mine .chat-bubble{
-background:#ffebee;
-border-color:#ffcdd2;
+  background:#e7f6eb;
+  border-color:#ccebd4;
 }
 
 .chat-time{
-font-size:10px;
-color:#999;
-margin-top:4px;
+  font-size:10px;
+  color:#999;
+  margin-top:4px;
 }
 
 .message-delete{
-border:0;
-background:transparent;
-color:#999;
-font-size:10px;
+  border:0;
+  background:transparent;
+  color:#999;
+  font-size:10px;
 }
 
 .chat-input{
-display:flex;
-gap:8px;
-padding:12px;
-border-top:1px solid var(--border);
-background:white;
+  display:flex;
+  gap:8px;
+  padding:12px;
+  border-top:1px solid var(--border);
+  background:white;
 }
 
 .chat-input input{
-flex:1;
+  flex:1
 }
 
 .chat-input button{
-border:0;
-background:var(--red);
-color:white;
-padding:0 18px;
-border-radius:10px;
-font-weight:800;
+  border:0;
+  background:var(--green);
+  color:white;
+  padding:0 18px;
+  border-radius:10px;
+  font-weight:800;
 }
 
-/* NOTIFICATIONS */
+/* =========================================================
+NOTIFICATIONS
+========================================================= */
 
 .notification-panel{
-position:fixed;
-right:20px;
-top:78px;
-width:340px;
-max-height:450px;
-overflow:auto;
-background:white;
-border:1px solid var(--border);
-box-shadow:var(--shadow);
-border-radius:16px;
-z-index:60;
+  position:fixed;
+  right:20px;
+  top:78px;
+  width:340px;
+  max-height:450px;
+  overflow:auto;
+  background:white;
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+  border-radius:16px;
+  z-index:60;
 }
 
 .notification-header{
-padding:15px;
-font-weight:900;
-border-bottom:1px solid var(--border);
+  padding:15px;
+  font-weight:900;
+  border-bottom:1px solid var(--border);
 }
 
 .notification-item{
-padding:13px;
-border-bottom:1px solid var(--border);
-cursor:pointer;
+  padding:13px;
+  border-bottom:1px solid var(--border);
+  cursor:pointer;
 }
 
 .notification-item.unread{
-background:#fff5f5;
+  background:#effaf2;
 }
 
 .notification-item small{
-display:block;
-color:#999;
-margin-top:5px;
+  display:block;
+  color:#999;
+  margin-top:5px;
 }
 
-/* RESPONSIVE */
+/* =========================================================
+RESPONSIVE
+========================================================= */
 
 @media(max-width:900px){
 
-.auth-container{
-grid-template-columns:1fr;
-}
+  .auth-container{
+    grid-template-columns:1fr;
+  }
 
-.auth-showcase{
-display:none;
-}
+  .auth-showcase{
+    display:none;
+  }
 
-.hero{
-grid-template-columns:1fr;
-text-align:center;
-}
+  .hero{
+    grid-template-columns:1fr;
+    text-align:center;
+  }
 
-.hero p{
-margin:auto;
-}
+  .hero p{
+    margin:auto;
+  }
 
-.hero-buttons{
-justify-content:center;
-}
+  .hero-buttons{
+    justify-content:center;
+  }
 
-.hero-visual{
-min-height:400px;
-}
+  .hero-visual{
+    min-height:400px;
+  }
 
-.feature-grid{
-grid-template-columns:1fr;
-}
+  .feature-grid{
+    grid-template-columns:1fr;
+  }
 
-.search-grid{
-grid-template-columns:1fr 1fr;
-}
+  .search-grid{
+    grid-template-columns:1fr 1fr;
+  }
 
-.farmer-dashboard{
-grid-template-columns:1fr 1fr;
-}
+  .farmer-dashboard{
+    grid-template-columns:1fr 1fr;
+  }
 
-.chat-layout{
-grid-template-columns:1fr;
-}
+  .chat-layout{
+    grid-template-columns:1fr;
+  }
 
-.conversation-list{
-display:none;
-}
-
+  .conversation-list{
+    display:none;
+  }
 }
 
 @media(max-width:600px){
 
-.landing-nav{
-padding:0 15px;
-}
+  .landing-nav{
+    padding:0 15px;
+  }
 
-.hero{
-padding:55px 17px;
-}
+  .hero{
+    padding:55px 17px;
+  }
 
-.hero h1{
-letter-spacing:-2px;
-}
+  .hero h1{
+    letter-spacing:-2px;
+  }
 
-.hero-visual{
-min-height:330px;
-}
+  .hero-visual{
+    min-height:330px;
+  }
 
-.farm-orb{
-width:280px;
-height:280px;
-font-size:95px;
-}
+  .farm-orb{
+    width:280px;
+    height:280px;
+    font-size:95px;
+  }
 
-.floating-card{
-padding:12px;
-}
+  .floating-card{
+    padding:12px;
+  }
 
-.float-one{left:-5px}
-.float-two{right:-5px}
-.float-three{right:-10px}
+  .float-one{
+    left:-5px
+  }
 
-.navbar{
-padding:0 10px;
-}
+  .float-two{
+    right:-5px
+  }
 
-.nav-brand{
-font-size:15px;
-}
+  .float-three{
+    right:-10px
+  }
 
-.nav-actions button{
-padding:9px;
-font-size:11px;
-}
+  .navbar{
+    padding:0 10px;
+  }
 
-.container{
-padding:17px 12px 50px;
-}
+  .nav-brand{
+    font-size:15px;
+  }
 
-.welcome{
-padding:24px;
-}
+  .nav-actions button{
+    padding:9px;
+    font-size:11px;
+  }
 
-.welcome h1{
-font-size:25px;
-}
+  .container{
+    padding:17px 12px 50px;
+  }
 
-.search-grid{
-grid-template-columns:1fr;
-}
+  .welcome{
+    padding:24px;
+  }
 
-.products{
-grid-template-columns:repeat(2,minmax(0,1fr));
-gap:9px;
-}
+  .welcome h1{
+    font-size:25px;
+  }
 
-.product-image{
-height:120px;
-}
+  .search-grid{
+    grid-template-columns:1fr;
+  }
 
-.product-content{
-padding:11px;
-}
+  .products{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:9px;
+  }
 
-.product-content h3{
-font-size:14px;
-}
+  .product-image{
+    height:120px;
+  }
 
-.price{
-font-size:15px;
-}
+  .product-content{
+    padding:11px;
+  }
 
-.product-actions{
-flex-direction:column;
-}
+  .product-content h3{
+    font-size:14px;
+  }
 
-.farmer-dashboard{
-grid-template-columns:1fr 1fr;
-}
+  .price{
+    font-size:15px;
+  }
 
-.modal{
-padding:8px;
-}
+  .product-actions{
+    flex-direction:column;
+  }
 
-.chat-modal{
-padding:0;
-}
+  .farmer-dashboard{
+    grid-template-columns:1fr 1fr;
+  }
 
-.chat-modal .modal-card{
-border-radius:0;
-height:100vh;
-max-height:100vh;
-}
+  .modal{
+    padding:8px;
+  }
 
-.chat-layout{
-height:100vh;
-}
+  .chat-modal{
+    padding:0;
+  }
 
-.chat-bubble{
-max-width:85%;
-}
+  .chat-modal .modal-card{
+    border-radius:0;
+    height:100vh;
+    max-height:100vh;
+  }
 
-.notification-panel{
-left:8px;
-right:8px;
-width:auto;
-}
+  .chat-layout{
+    height:100vh;
+  }
 
-.auth-card{
-padding:25px 20px;
-}
+  .chat-bubble{
+    max-width:85%;
+  }
 
+  .notification-panel{
+    left:8px;
+    right:8px;
+    width:auto;
+  }
+
+  .auth-card{
+    padding:25px 20px;
+  }
+
+  .profile-main{
+    padding:0 17px 20px;
+  }
+
+  .profile-product-grid{
+    grid-template-columns:1fr 1fr;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<!-- =========================
+<!-- =======================================================
 LANDING
-========================= -->
+======================================================= -->
 
 <div id="landingScreen" class="landing">
 
 <nav class="landing-nav">
 
 <div class="brand">
-<div class="brand-icon">🌾</div>
-AgriLink AI
+  <div class="brand-icon">🌾</div>
+  AgriLink AI
 </div>
 
 <button onclick="showAuth()">Get Started</button>
@@ -1146,7 +1430,9 @@ to opportunity.
 </h1>
 
 <p>
-AgriLink AI connects farmers and buyers through a trusted digital marketplace — making agricultural products easier to discover, negotiate, buy and sell.
+AgriLink AI connects farmers and buyers through a trusted digital
+marketplace — making agricultural products easier to discover,
+buy, sell and manage.
 </p>
 
 <div class="hero-buttons">
@@ -1155,7 +1441,9 @@ AgriLink AI connects farmers and buyers through a trusted digital marketplace �
 Start Trading →
 </button>
 
-<button class="hero-secondary" onclick="document.getElementById('features').scrollIntoView()">
+<button
+class="hero-secondary"
+onclick="document.getElementById('features').scrollIntoView()">
 Learn More
 </button>
 
@@ -1165,9 +1453,7 @@ Learn More
 
 <div class="hero-visual">
 
-<div class="farm-orb">
-🌾
-</div>
+<div class="farm-orb">🌾</div>
 
 <div class="floating-card float-one">
 <div class="float-title">Marketplace</div>
@@ -1198,7 +1484,8 @@ Learn More
 <div class="feature-icon">🌱</div>
 <h3>For Farmers</h3>
 <p>
-Publish products, manage available stock, receive orders and communicate directly with buyers.
+Publish products, manage stock, receive orders and build a
+farmer profile where buyers can discover your products.
 </p>
 </div>
 
@@ -1206,7 +1493,8 @@ Publish products, manage available stock, receive orders and communicate directl
 <div class="feature-icon">🛒</div>
 <h3>For Buyers</h3>
 <p>
-Discover agricultural products using smart search, contact sellers and place orders from one marketplace.
+Discover agricultural products, search by location and price,
+view farmer profiles and contact sellers.
 </p>
 </div>
 
@@ -1214,7 +1502,8 @@ Discover agricultural products using smart search, contact sellers and place ord
 <div class="feature-icon">🔐</div>
 <h3>Built for Trust</h3>
 <p>
-Authenticated accounts, transaction records, notifications and role-based marketplace access.
+Supabase authentication, database security, role-based access,
+transaction records and notifications.
 </p>
 </div>
 
@@ -1225,9 +1514,9 @@ Authenticated accounts, transaction records, notifications and role-based market
 </div>
 
 
-<!-- =========================
+<!-- =======================================================
 AUTH
-========================= -->
+======================================================= -->
 
 <div id="authScreen" class="auth-container hidden">
 
@@ -1237,9 +1526,7 @@ AUTH
 
 <div style="font-size:55px;margin-bottom:25px">🌾</div>
 
-<h1>
-Grow your marketplace.
-</h1>
+<h1>Grow your marketplace.</h1>
 
 <p>
 Join AgriLink AI and connect agricultural supply with real opportunities.
@@ -1248,22 +1535,19 @@ Join AgriLink AI and connect agricultural supply with real opportunities.
 <div class="auth-points">
 
 <div class="auth-point">✓ Discover agricultural products</div>
+<div class="auth-point">✓ Explore farmer profiles</div>
 <div class="auth-point">✓ Connect directly with sellers</div>
 <div class="auth-point">✓ Manage your transactions</div>
-<div class="auth-point">✓ Build a trusted marketplace</div>
 
 </div>
 
 </div>
 
 </div>
-
 
 <div class="auth-card">
 
-<div class="auth-logo">
-🌾
-</div>
+<div class="auth-logo">🌾</div>
 
 <h2>Welcome back.</h2>
 
@@ -1273,16 +1557,19 @@ Sign in to continue to AgriLink AI.
 
 <div class="tabs">
 
-<button id="loginTab" class="tab active" onclick="showLogin()">
+<button id="loginTab"
+class="tab active"
+onclick="showLogin()">
 Login
 </button>
 
-<button id="signupTab" class="tab" onclick="showSignup()">
+<button id="signupTab"
+class="tab"
+onclick="showSignup()">
 Create Account
 </button>
 
 </div>
-
 
 <form id="loginForm">
 
@@ -1309,7 +1596,6 @@ Login
 </button>
 
 </form>
-
 
 <form id="signupForm" class="hidden">
 
@@ -1340,10 +1626,8 @@ placeholder="Minimum 8 characters">
 <label>Account Type</label>
 
 <select id="signupRole">
-
 <option value="BUYER">Buyer</option>
 <option value="FARMER">Farmer</option>
-
 </select>
 
 <button class="primary-btn" type="submit">
@@ -1355,13 +1639,12 @@ Create Account
 <div id="authMessage"></div>
 
 </div>
-
 </div>
 
 
-<!-- =========================
+<!-- =======================================================
 APP
-========================= -->
+======================================================= -->
 
 <div id="app" class="hidden">
 
@@ -1376,11 +1659,15 @@ AgriLink AI
 
 <div class="nav-actions">
 
-<button class="secondary-btn" onclick="toggleNotifications()">
+<button
+class="secondary-btn"
+onclick="toggleNotifications()">
 🔔
 </button>
 
-<button class="secondary-btn" onclick="openChat()">
+<button
+class="secondary-btn"
+onclick="openChat()">
 💬 Chat
 </button>
 
@@ -1391,7 +1678,9 @@ onclick="openAddProduct()">
 + Product
 </button>
 
-<button class="danger-btn" onclick="logout()">
+<button
+class="danger-btn"
+onclick="logout()">
 Logout
 </button>
 
@@ -1400,7 +1689,8 @@ Logout
 </nav>
 
 
-<div id="notificationPanel" class="notification-panel hidden">
+<div id="notificationPanel"
+class="notification-panel hidden">
 
 <div class="notification-header">
 Notifications
@@ -1430,7 +1720,8 @@ Your agricultural marketplace starts here.
 </section>
 
 
-<section id="buyerSearchSection" class="search-box">
+<section id="buyerSearchSection"
+class="search-box">
 
 <div class="section-title">
 <h2>Find Products</h2>
@@ -1438,9 +1729,13 @@ Your agricultural marketplace starts here.
 
 <div class="search-grid">
 
-<input id="searchName" placeholder="Product name...">
+<input
+id="searchName"
+placeholder="Product name...">
 
-<input id="searchLocation" placeholder="Location...">
+<input
+id="searchLocation"
+placeholder="Location...">
 
 <input
 id="searchPrice"
@@ -1466,7 +1761,9 @@ Clear
 </section>
 
 
-<section id="farmerDashboard" class="farmer-dashboard hidden">
+<section
+id="farmerDashboard"
+class="farmer-dashboard hidden">
 
 <div class="stat-card">
 <div class="stat-label">Active Products</div>
@@ -1499,7 +1796,9 @@ Clear
 Marketplace
 </h2>
 
-<button class="secondary-btn" onclick="loadProducts()">
+<button
+class="secondary-btn"
+onclick="loadProducts()">
 Refresh
 </button>
 
@@ -1510,13 +1809,17 @@ Refresh
 </section>
 
 
-<section id="farmerTransactions" class="section hidden">
+<section
+id="farmerTransactions"
+class="section hidden">
 
 <div class="section-title">
 
 <h2>Transactions</h2>
 
-<button class="secondary-btn" onclick="loadOrders()">
+<button
+class="secondary-btn"
+onclick="loadOrders()">
 Refresh
 </button>
 
@@ -1527,13 +1830,17 @@ Refresh
 </section>
 
 
-<section id="buyerOrders" class="section">
+<section
+id="buyerOrders"
+class="section">
 
 <div class="section-title">
 
 <h2>My Orders</h2>
 
-<button class="secondary-btn" onclick="loadOrders()">
+<button
+class="secondary-btn"
+onclick="loadOrders()">
 Refresh
 </button>
 
@@ -1548,11 +1855,42 @@ Refresh
 </div>
 
 
-<!-- =========================
-ADD PRODUCT
-========================= -->
+<!-- =======================================================
+FARMER PROFILE MODAL
+======================================================= -->
 
-<div id="productModal" class="modal hidden">
+<div
+id="profileModal"
+class="modal hidden">
+
+<div class="modal-card profile-modal-card">
+
+<div class="profile-modal-header">
+
+<strong>Farmer Profile</strong>
+
+<button
+class="close"
+onclick="closeProfile()">
+×
+</button>
+
+</div>
+
+<div id="profileContent"></div>
+
+</div>
+
+</div>
+
+
+<!-- =======================================================
+ADD PRODUCT MODAL
+======================================================= -->
+
+<div
+id="productModal"
+class="modal hidden">
 
 <div class="modal-card">
 
@@ -1560,7 +1898,11 @@ ADD PRODUCT
 
 <h2>Add Product</h2>
 
-<button class="close" onclick="closeAddProduct()">×</button>
+<button
+class="close"
+onclick="closeAddProduct()">
+×
+</button>
 
 </div>
 
@@ -1602,13 +1944,11 @@ placeholder="Available quantity">
 <label>Unit</label>
 
 <select id="productUnit">
-
 <option value="kg">kg</option>
 <option value="piece">piece</option>
 <option value="sack">sack</option>
 <option value="box">box</option>
 <option value="dozen">dozen</option>
-
 </select>
 
 <label>Location</label>
@@ -1624,7 +1964,9 @@ id="productImage"
 type="file"
 accept="image/*">
 
-<button class="primary-btn">
+<button
+class="primary-btn"
+type="submit">
 Publish Product
 </button>
 
@@ -1633,15 +1975,16 @@ Publish Product
 </form>
 
 </div>
-
 </div>
 
 
-<!-- =========================
-BUY
-========================= -->
+<!-- =======================================================
+BUY MODAL
+======================================================= -->
 
-<div id="buyModal" class="modal hidden">
+<div
+id="buyModal"
+class="modal hidden">
 
 <div class="modal-card">
 
@@ -1649,7 +1992,11 @@ BUY
 
 <h2>Place Order</h2>
 
-<button class="close" onclick="closeBuyModal()">×</button>
+<button
+class="close"
+onclick="closeBuyModal()">
+×
+</button>
 
 </div>
 
@@ -1657,7 +2004,9 @@ BUY
 
 <form id="buyForm">
 
-<input id="buyProductId" type="hidden">
+<input
+id="buyProductId"
+type="hidden">
 
 <label>Quantity</label>
 
@@ -1670,14 +2019,15 @@ value="1"
 required
 oninput="updateBuyTotal()">
 
-<div id="buyTotalPreview"
+<div
+id="buyTotalPreview"
 style="
 margin-top:12px;
 padding:14px;
-background:#fff5f5;
+background:#effaf2;
 border-radius:12px;
 font-weight:800;
-color:#c62828;
+color:#16833b;
 ">
 Total: ₱0.00
 </div>
@@ -1693,13 +2043,26 @@ Total: ₱0.00
 
 </select>
 
+<div
+style="
+margin-top:10px;
+font-size:12px;
+color:#718078;
+line-height:1.5;">
+🔐 Payment information is recorded as a transaction status.
+Actual online payment processing should be connected to a
+secure payment provider/backend before accepting real money.
+</div>
+
 <label>Buyer Note</label>
 
 <textarea
 id="buyerNote"
 placeholder="Optional note for the farmer"></textarea>
 
-<button class="primary-btn">
+<button
+class="primary-btn"
+type="submit">
 Place Order
 </button>
 
@@ -1708,15 +2071,16 @@ Place Order
 </form>
 
 </div>
-
 </div>
 
 
-<!-- =========================
-CHAT
-========================= -->
+<!-- =======================================================
+CHAT MODAL
+======================================================= -->
 
-<div id="chatModal" class="modal chat-modal hidden">
+<div
+id="chatModal"
+class="modal chat-modal hidden">
 
 <div class="modal-card">
 
@@ -1738,7 +2102,9 @@ CHAT
 
 <div>
 
-<div id="chatUserName" class="chat-user">
+<div
+id="chatUserName"
+class="chat-user">
 Select a conversation
 </div>
 
@@ -1748,11 +2114,17 @@ Select a conversation
 
 </div>
 
-<button class="close" onclick="closeChat()">×</button>
+<button
+class="close"
+onclick="closeChat()">
+×
+</button>
 
 </div>
 
-<div id="chatMessages" class="chat-messages">
+<div
+id="chatMessages"
+class="chat-messages">
 
 <div class="chat-empty">
 Select a conversation to start chatting.
@@ -1760,14 +2132,16 @@ Select a conversation to start chatting.
 
 </div>
 
-<form id="chatForm" class="chat-input">
+<form
+id="chatForm"
+class="chat-input">
 
 <input
 id="chatInput"
 placeholder="Type a message..."
 autocomplete="off">
 
-<button>Send</button>
+<button type="submit">Send</button>
 
 </form>
 
@@ -1776,14 +2150,13 @@ autocomplete="off">
 </div>
 
 </div>
-
 </div>
 
 
 <script>
 
 /* =========================================================
-SUPABASE CONFIG
+SUPABASE
 ========================================================= */
 
 const SUPABASE_URL =
@@ -1794,8 +2167,8 @@ const SUPABASE_KEY =
 
 const supabaseClient =
 window.supabase.createClient(
-SUPABASE_URL,
-SUPABASE_KEY
+  SUPABASE_URL,
+  SUPABASE_KEY
 );
 
 
@@ -1820,25 +2193,36 @@ HELPERS
 
 function escapeHtml(value){
 
-return String(value ?? "")
-.replaceAll("&","&amp;")
-.replaceAll("<","&lt;")
-.replaceAll(">","&gt;")
-.replaceAll('"',"&quot;")
-.replaceAll("'","&#039;");
-
+  return String(value ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 }
+
 
 function formatMoney(value){
 
-return Number(value || 0).toLocaleString(
-"en-PH",
-{
-minimumFractionDigits:2,
-maximumFractionDigits:2
+  return Number(value || 0).toLocaleString(
+    "en-PH",
+    {
+      minimumFractionDigits:2,
+      maximumFractionDigits:2
+    }
+  );
 }
-);
 
+
+function showAuthMessage(text,type=""){
+
+  const box =
+    document.getElementById("authMessage");
+
+  box.className =
+    type ? "message " + type : "message";
+
+  box.textContent = text;
 }
 
 
@@ -1848,68 +2232,63 @@ LANDING / AUTH
 
 function showAuth(){
 
-document
-.getElementById("landingScreen")
-.classList.add("hidden");
+  document
+    .getElementById("landingScreen")
+    .classList.add("hidden");
 
-document
-.getElementById("authScreen")
-.classList.remove("hidden");
+  document
+    .getElementById("authScreen")
+    .classList.remove("hidden");
 
-showLogin();
-
+  showLogin();
 }
+
 
 function showLogin(){
 
-document
-.getElementById("loginForm")
-.classList.remove("hidden");
+  document
+    .getElementById("loginForm")
+    .classList.remove("hidden");
 
-document
-.getElementById("signupForm")
-.classList.add("hidden");
+  document
+    .getElementById("signupForm")
+    .classList.add("hidden");
 
-document
-.getElementById("loginTab")
-.classList.add("active");
+  document
+    .getElementById("loginTab")
+    .classList.add("active");
 
-document
-.getElementById("signupTab")
-.classList.remove("active");
+  document
+    .getElementById("signupTab")
+    .classList.remove("active");
 
+  document
+    .getElementById("authMessage")
+    .textContent = "";
 }
+
 
 function showSignup(){
 
-document
-.getElementById("loginForm")
-.classList.add("hidden");
+  document
+    .getElementById("loginForm")
+    .classList.add("hidden");
 
-document
-.getElementById("signupForm")
-.classList.remove("hidden");
+  document
+    .getElementById("signupForm")
+    .classList.remove("hidden");
 
-document
-.getElementById("signupTab")
-.classList.add("active");
+  document
+    .getElementById("signupTab")
+    .classList.add("active");
 
-document
-.getElementById("loginTab")
-.classList.remove("active");
+  document
+    .getElementById("loginTab")
+    .classList.remove("active");
 
-}
-
-function showAuthMessage(text,type){
-
-const box =
-document.getElementById("authMessage");
-
-box.className =
-"message " + (type || "");
-
-box.textContent = text;
-
+  document
+    .getElementById("authMessage")
+    .textContent = "";
 }
 
 
@@ -1921,41 +2300,38 @@ document
 .getElementById("loginForm")
 .addEventListener("submit",async e=>{
 
-e.preventDefault();
+  e.preventDefault();
 
-const email =
-document.getElementById("loginEmail")
-.value.trim();
+  const email =
+    document.getElementById("loginEmail")
+      .value.trim();
 
-const password =
-document.getElementById("loginPassword")
-.value;
+  const password =
+    document.getElementById("loginPassword")
+      .value;
 
-showAuthMessage(
-"Signing in...",
-""
-);
+  showAuthMessage("Signing in...");
 
-const {data,error} =
-await supabaseClient.auth.signInWithPassword({
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
 
-email,
-password
+  if(error){
 
-});
+    showAuthMessage(
+      error.message,
+      "error"
+    );
 
-if(error){
+    return;
+  }
 
-showAuthMessage(
-error.message,
-"error"
-);
-
-return;
-
-}
-
-await initializeApp(data.user);
+  await initializeApp(data.user);
 
 });
 
@@ -1968,583 +2344,842 @@ document
 .getElementById("signupForm")
 .addEventListener("submit",async e=>{
 
-e.preventDefault();
+  e.preventDefault();
 
-const fullName =
-document.getElementById("signupName")
-.value.trim();
+  const fullName =
+    document
+      .getElementById("signupName")
+      .value.trim();
 
-const email =
-document.getElementById("signupEmail")
-.value.trim();
+  const email =
+    document
+      .getElementById("signupEmail")
+      .value.trim();
 
-const password =
-document.getElementById("signupPassword")
-.value;
+  const password =
+    document
+      .getElementById("signupPassword")
+      .value;
 
-const role =
-document.getElementById("signupRole")
-.value;
+  const role =
+    document
+      .getElementById("signupRole")
+      .value;
 
-showAuthMessage(
-"Creating your account...",
-""
-);
+  if(password.length < 8){
 
-const {data,error} =
-await supabaseClient.auth.signUp({
+    showAuthMessage(
+      "Password must be at least 8 characters.",
+      "error"
+    );
 
-email,
-password,
+    return;
+  }
 
-options:{
-data:{
-full_name:fullName,
-role:role
-}
-}
+  showAuthMessage(
+    "Creating your account..."
+  );
+
+  /*
+    Store full_name + role in Auth metadata.
+    The SQL trigger can use these values when
+    creating the public users profile.
+  */
+
+  const {
+    data,
+    error
+  } =
+  await supabaseClient.auth.signUp({
+
+    email,
+    password,
+
+    options:{
+      data:{
+        full_name:fullName,
+        role:role
+      }
+    }
+
+  });
+
+  if(error){
+
+    showAuthMessage(
+      error.message,
+      "error"
+    );
+
+    return;
+  }
+
+  if(data.user && data.session){
+
+    await initializeApp(data.user);
+
+  }else{
+
+    showAuthMessage(
+      "Account created! Check your email for verification, then log in.",
+      "success"
+    );
+
+  }
 
 });
 
-if(error){
 
-showAuthMessage(
-error.message,
-"error"
-);
+/* =========================================================
+PROFILE LOADER
+========================================================= */
 
-return;
+async function getOrCreateProfile(user){
 
+  /*
+    FIRST:
+    Search using auth_user_id.
+  */
+
+  let {
+    data:profile,
+    error
+  } =
+  await supabaseClient
+    .from("users")
+    .select("*")
+    .eq("auth_user_id",user.id)
+    .maybeSingle();
+
+  if(error){
+
+    console.error(
+      "Profile lookup:",
+      error
+    );
+
+    throw error;
+  }
+
+  if(profile){
+    return profile;
+  }
+
+  /*
+    SECOND:
+    If profile is missing, create it.
+
+    IMPORTANT:
+    email is included here.
+    This fixes:
+    "null value in column email..."
+  */
+
+  const metadata =
+    user.user_metadata || {};
+
+  const fullName =
+    metadata.full_name ||
+    metadata.name ||
+    (
+      user.email
+      ? user.email.split("@")[0]
+      : "AgriLink User"
+    );
+
+  const role =
+    String(metadata.role || "BUYER")
+      .toUpperCase() === "FARMER"
+      ? "FARMER"
+      : "BUYER";
+
+  const {
+    data:newProfile,
+    error:createError
+  } =
+  await supabaseClient
+    .from("users")
+    .insert({
+
+      auth_user_id:user.id,
+
+      /*
+        THIS WAS MISSING BEFORE.
+      */
+      email:user.email,
+
+      full_name:fullName,
+
+      role:role
+
+    })
+    .select("*")
+    .single();
+
+  if(createError){
+
+    console.error(
+      "Profile creation:",
+      createError
+    );
+
+    throw createError;
+  }
+
+  return newProfile;
 }
-
-if(!data.user){
-showAuthMessage(
-"Account could not be created.",
-"error"
-);
-return;
-}
-
-
-/*
-If email confirmation is disabled,
-session already exists.
-*/
-
-if(data.session){
-
-await initializeApp(data.user);
-
-}else{
-
-showAuthMessage(
-"Account created. Please verify your email, then log in.",
-"success"
-);
-
-}
-
-});
 
 
 /* =========================================================
 INITIALIZE APP
-FIXED PROFILE CREATION
 ========================================================= */
 
 async function initializeApp(user){
 
-if(!user){
-return;
-}
+  if(!user){
+    return;
+  }
 
-currentUser = user;
+  currentUser = user;
 
+  try{
 
-/*
-FIRST:
-Try to find existing profile.
-*/
+    currentProfile =
+      await getOrCreateProfile(user);
 
-let {data:profile,error} =
-await supabaseClient
-.from("users")
-.select("*")
-.eq("auth_user_id",user.id)
-.maybeSingle();
+  }catch(error){
 
+    showAuthMessage(
+      "Your account exists, but AgriLink could not create your profile: " +
+      error.message,
+      "error"
+    );
 
-if(error){
+    return;
+  }
 
-console.error(
-"Profile lookup error:",
-error
-);
+  document
+    .getElementById("landingScreen")
+    .classList.add("hidden");
 
-showAuthMessage(
-"Could not load your profile: " +
-error.message,
-"error"
-);
+  document
+    .getElementById("authScreen")
+    .classList.add("hidden");
 
-return;
+  document
+    .getElementById("app")
+    .classList.remove("hidden");
 
-}
+  document
+    .getElementById("userName")
+    .textContent =
+      currentProfile.full_name || "User";
 
+  document
+    .getElementById("roleBadge")
+    .textContent =
+      currentProfile.role || "BUYER";
 
-/*
-SECOND:
-If profile doesn't exist,
-create it automatically.
-*/
+  const farmer =
+    currentProfile.role === "FARMER";
 
-if(!profile){
+  document
+    .getElementById("addProductButton")
+    .classList.toggle(
+      "hidden",
+      !farmer
+    );
 
-const metadata =
-user.user_metadata || {};
+  document
+    .getElementById("farmerDashboard")
+    .classList.toggle(
+      "hidden",
+      !farmer
+    );
 
-const fullName =
-metadata.full_name ||
-metadata.name ||
-(
-user.email
-? user.email.split("@")[0]
-: "AgriLink User"
-);
+  document
+    .getElementById("farmerTransactions")
+    .classList.toggle(
+      "hidden",
+      !farmer
+    );
 
-const role =
-metadata.role === "FARMER"
-? "FARMER"
-: "BUYER";
+  document
+    .getElementById("buyerSearchSection")
+    .classList.toggle(
+      "hidden",
+      farmer
+    );
 
+  document
+    .getElementById("buyerOrders")
+    .classList.toggle(
+      "hidden",
+      farmer
+    );
 
-/*
-IMPORTANT FIX:
-Your users.email column is NOT NULL.
-Therefore email MUST be inserted.
-*/
+  document
+    .getElementById("marketplaceTitle")
+    .textContent =
+      farmer
+      ? "My Products"
+      : "Marketplace";
 
-const {data:newProfile,error:createError} =
-await supabaseClient
-.from("users")
-.insert({
+  await loadProducts();
+  await loadOrders();
+  await loadConversations();
+  await loadNotifications();
 
-auth_user_id:user.id,
-
-email:user.email,
-
-full_name:fullName,
-
-role:role
-
-})
-.select("*")
-.single();
-
-
-if(createError){
-
-console.error(
-"Profile creation error:",
-createError
-);
-
-showAuthMessage(
-"Your account exists, but AgriLink could not create your profile. " +
-createError.message,
-"error"
-);
-
-return;
-
-}
-
-profile = newProfile;
-
-}
-
-
-currentProfile = profile;
-
-
-/*
-SHOW APP
-*/
-
-document
-.getElementById("landingScreen")
-.classList.add("hidden");
-
-document
-.getElementById("authScreen")
-.classList.add("hidden");
-
-document
-.getElementById("app")
-.classList.remove("hidden");
-
-
-document
-.getElementById("userName")
-.textContent =
-profile.full_name || "User";
-
-
-document
-.getElementById("roleBadge")
-.textContent =
-profile.role || "BUYER";
-
-
-const farmer =
-profile.role === "FARMER";
-
-
-document
-.getElementById("addProductButton")
-.classList.toggle(
-"hidden",
-!farmer
-);
-
-document
-.getElementById("farmerDashboard")
-.classList.toggle(
-"hidden",
-!farmer
-);
-
-document
-.getElementById("farmerTransactions")
-.classList.toggle(
-"hidden",
-!farmer
-);
-
-document
-.getElementById("buyerSearchSection")
-.classList.toggle(
-"hidden",
-farmer
-);
-
-document
-.getElementById("buyerOrders")
-.classList.toggle(
-"hidden",
-farmer
-);
-
-document
-.getElementById("marketplaceTitle")
-.textContent =
-farmer
-? "My Products"
-: "Marketplace";
-
-
-await loadProducts();
-await loadOrders();
-await loadConversations();
-await loadNotifications();
-
-subscribeToOrders();
-
+  subscribeToOrders();
 }
 
 
 /* =========================================================
-SEARCH
+PRODUCT SEARCH
 ========================================================= */
 
 async function searchProducts(){
 
-const name =
-document
-.getElementById("searchName")
-.value
-.trim()
-.toLowerCase();
+  const name =
+    document
+      .getElementById("searchName")
+      .value
+      .trim()
+      .toLowerCase();
 
-const location =
-document
-.getElementById("searchLocation")
-.value
-.trim()
-.toLowerCase();
+  const location =
+    document
+      .getElementById("searchLocation")
+      .value
+      .trim()
+      .toLowerCase();
 
-const price =
-document
-.getElementById("searchPrice")
-.value;
+  const priceValue =
+    document
+      .getElementById("searchPrice")
+      .value;
 
-const maxPrice =
-price === ""
-? null
-: Number(price);
+  const maxPrice =
+    priceValue === ""
+    ? null
+    : Number(priceValue);
 
+  let results =
+    [...allProducts];
 
-let results =
-[...allProducts];
+  if(name){
 
+    results =
+      results.filter(product =>
+        String(product.name || "")
+          .toLowerCase()
+          .includes(name)
+      );
+  }
 
-if(name){
+  if(location){
 
-results =
-results.filter(product =>
-String(product.name || "")
-.toLowerCase()
-.includes(name)
-);
+    results =
+      results.filter(product =>
+        String(product.location || "")
+          .toLowerCase()
+          .includes(location)
+      );
+  }
 
-}
+  if(
+    maxPrice !== null &&
+    Number.isFinite(maxPrice)
+  ){
 
-if(location){
+    results =
+      results.filter(product =>
+        Number(product.price || 0)
+        <= maxPrice
+      );
+  }
 
-results =
-results.filter(product =>
-String(product.location || "")
-.toLowerCase()
-.includes(location)
-);
-
-}
-
-if(
-maxPrice !== null &&
-Number.isFinite(maxPrice)
-){
-
-results =
-results.filter(product =>
-Number(product.price || 0)
-<= maxPrice
-);
-
-}
-
-renderProducts(results);
-
+  renderProducts(results);
 }
 
 
 function clearSearch(){
 
-document.getElementById("searchName").value="";
-document.getElementById("searchLocation").value="";
-document.getElementById("searchPrice").value="";
+  document.getElementById("searchName").value="";
+  document.getElementById("searchLocation").value="";
+  document.getElementById("searchPrice").value="";
 
-renderProducts(allProducts);
-
+  renderProducts(allProducts);
 }
 
 
 /* =========================================================
-PRODUCTS
+LOAD PRODUCTS
 ========================================================= */
 
 async function loadProducts(){
 
-const container =
-document.getElementById("products");
+  const container =
+    document.getElementById("products");
 
-container.innerHTML =
-`<div class="empty">Loading products...</div>`;
+  container.innerHTML =
+    `<div class="empty">
+      Loading products...
+    </div>`;
 
+  let query =
+    supabaseClient
+      .from("products")
+      .select(`
+        id,
+        name,
+        description,
+        price,
+        quantity,
+        unit,
+        location,
+        image_url,
+        status,
+        seller_id,
+        created_at,
+        users:seller_id(
+          id,
+          full_name,
+          role
+        )
+      `)
+      .order(
+        "created_at",
+        {ascending:false}
+      );
 
-let query =
-supabaseClient
-.from("products")
-.select(`
-id,
-name,
-description,
-price,
-quantity,
-unit,
-location,
-image_url,
-status,
-seller_id,
-created_at,
-users:seller_id(
-id,
-full_name,
-role
-)
-`)
-.order(
-"created_at",
-{ascending:false}
-);
+  if(currentProfile?.role === "FARMER"){
 
+    query =
+      query
+        .eq(
+          "seller_id",
+          currentProfile.id
+        )
+        .in(
+          "status",
+          ["ACTIVE","SOLD"]
+        );
 
-if(currentProfile?.role === "FARMER"){
+  }else{
 
-query =
-query
-.eq("seller_id",currentProfile.id)
-.in("status",["ACTIVE","SOLD"]);
+    query =
+      query
+        .eq("status","ACTIVE")
+        .gt("quantity",0);
 
-}else{
+  }
 
-query =
-query
-.eq("status","ACTIVE")
-.gt("quantity",0);
+  const {
+    data,
+    error
+  } =
+    await query;
 
+  if(error){
+
+    console.error(error);
+
+    container.innerHTML =
+      `<div class="empty">
+        Unable to load products.<br><br>
+        ${escapeHtml(error.message)}
+      </div>`;
+
+    return;
+  }
+
+  allProducts =
+    data || [];
+
+  renderProducts(allProducts);
+
+  updateFarmerStats();
 }
 
 
-const {data,error} =
-await query;
-
-
-if(error){
-
-console.error(error);
-
-container.innerHTML =
-`<div class="empty">
-Unable to load products.<br><br>
-${escapeHtml(error.message)}
-</div>`;
-
-return;
-
-}
-
-
-allProducts = data || [];
-
-renderProducts(allProducts);
-
-updateFarmerStats();
-
-}
-
+/* =========================================================
+RENDER PRODUCTS
+========================================================= */
 
 function renderProducts(products){
 
-const container =
-document.getElementById("products");
+  const container =
+    document.getElementById("products");
 
+  if(!products?.length){
 
-if(!products || !products.length){
+    container.innerHTML =
+      `<div class="empty">
+        <h3>No products found</h3>
+        <p>Try another search or add a product.</p>
+      </div>`;
 
-container.innerHTML =
-`<div class="empty">
-<h3>No matching products</h3>
-<p>Try another search.</p>
-</div>`;
+    return;
+  }
 
-return;
+  container.innerHTML =
+    products.map(product=>{
 
+      const image =
+        product.image_url
+        ?
+        `<img
+          src="${escapeHtml(product.image_url)}"
+          alt="${escapeHtml(product.name)}">`
+        :
+        `<div class="product-placeholder">
+          🌱
+        </div>`;
+
+      const sellerName =
+        product.users?.full_name ||
+        "Farmer";
+
+      const owner =
+        currentProfile?.id ===
+        product.seller_id;
+
+      return `
+
+      <div class="product-card">
+
+        <div class="product-image">
+          ${image}
+        </div>
+
+        <div class="product-content">
+
+          <h3>
+            ${escapeHtml(product.name)}
+          </h3>
+
+          <div class="price">
+            ₱${formatMoney(product.price)}
+            /
+            ${escapeHtml(product.unit || "unit")}
+          </div>
+
+          <div class="product-description">
+            ${escapeHtml(
+              product.description ||
+              "No description provided."
+            )}
+          </div>
+
+          <div class="product-location">
+            📍 ${escapeHtml(
+              product.location ||
+              "Location not specified"
+            )}
+          </div>
+
+          <div
+            class="product-seller"
+            onclick="openFarmerProfile('${product.seller_id}')">
+
+            👤
+            <strong>
+              ${escapeHtml(sellerName)}
+            </strong>
+
+            · View profile →
+
+          </div>
+
+          <div class="product-location">
+            📦
+            ${escapeHtml(product.quantity)}
+            ${escapeHtml(product.unit || "")}
+          </div>
+
+          <div class="product-actions">
+
+          ${
+            owner
+            ?
+            `
+            <button
+              class="delete-product"
+              onclick="deleteProduct('${product.id}')">
+              Delete
+            </button>
+            `
+            :
+            `
+            <button
+              class="chat-btn"
+              onclick="startChat(
+                '${product.seller_id}',
+                '${product.id}'
+              )">
+              💬 Chat
+            </button>
+
+            <button
+              class="buy-btn"
+              onclick="openBuyModal('${product.id}')">
+              Buy
+            </button>
+            `
+          }
+
+          </div>
+
+        </div>
+
+      </div>
+
+      `;
+
+    }).join("");
 }
 
 
-container.innerHTML =
-products.map(product=>{
+/* =========================================================
+FARMER PROFILE
+========================================================= */
 
-const image =
-product.image_url
-?
-`<img src="${escapeHtml(product.image_url)}"
-alt="${escapeHtml(product.name)}">`
-:
-`<div class="product-placeholder">🌱</div>`;
+async function openFarmerProfile(farmerId){
 
+  const modal =
+    document.getElementById("profileModal");
 
-const sellerName =
-product.users?.full_name ||
-"Farmer";
+  const content =
+    document.getElementById("profileContent");
 
+  modal.classList.remove("hidden");
 
-const owner =
-currentProfile?.id ===
-product.seller_id;
+  content.innerHTML =
+    `<div class="empty">
+      Loading farmer profile...
+    </div>`;
 
+  const {
+    data:farmer,
+    error:farmerError
+  } =
+    await supabaseClient
+      .from("users")
+      .select("*")
+      .eq("id",farmerId)
+      .eq("role","FARMER")
+      .maybeSingle();
 
-return `
+  if(farmerError){
 
-<div class="product-card">
+    content.innerHTML =
+      `<div class="empty">
+        ${escapeHtml(farmerError.message)}
+      </div>`;
 
-<div class="product-image">
-${image}
-</div>
+    return;
+  }
 
-<div class="product-content">
+  if(!farmer){
 
-<h3>
-${escapeHtml(product.name)}
-</h3>
+    content.innerHTML =
+      `<div class="empty">
+        Farmer profile not found.
+      </div>`;
 
-<div class="price">
-₱${formatMoney(product.price)}
-/
-${escapeHtml(product.unit || "unit")}
-</div>
+    return;
+  }
 
-<div class="product-description">
-${escapeHtml(
-product.description ||
-"No description provided."
-)}
-</div>
+  const {
+    data:products,
+    error:productError
+  } =
+    await supabaseClient
+      .from("products")
+      .select(`
+        id,
+        name,
+        description,
+        price,
+        quantity,
+        unit,
+        location,
+        image_url,
+        status,
+        created_at
+      `)
+      .eq("seller_id",farmerId)
+      .eq("status","ACTIVE")
+      .gt("quantity",0)
+      .order(
+        "created_at",
+        {ascending:false}
+      );
 
-<div class="product-location">
-📍 ${escapeHtml(
-product.location ||
-"Location not specified"
-)}
-</div>
+  if(productError){
 
-<div class="product-seller">
-👤 ${escapeHtml(sellerName)}
-</div>
+    content.innerHTML =
+      `<div class="empty">
+        ${escapeHtml(productError.message)}
+      </div>`;
 
-<div class="product-location">
-📦 ${escapeHtml(product.quantity)}
-${escapeHtml(product.unit || "")}
-</div>
+    return;
+  }
 
-<div class="product-actions">
+  const productList =
+    products || [];
 
-${
-owner
-?
-`
-<button
-class="delete-product"
-onclick="deleteProduct('${product.id}')">
-Delete
-</button>
-`
-:
-`
-<button
-class="chat-btn"
-onclick="startChat('${product.seller_id}','${product.id}')">
-💬 Chat
-</button>
+  content.innerHTML = `
 
-<button
-class="buy-btn"
-onclick="openBuyModal('${product.id}')">
-Buy
-</button>
-`
+    <div class="profile-cover"></div>
+
+    <div class="profile-main">
+
+      <div class="profile-avatar">
+        👨‍🌾
+      </div>
+
+      <div class="profile-name">
+        ${escapeHtml(
+          farmer.full_name || "Farmer"
+        )}
+      </div>
+
+      <div class="profile-role">
+        VERIFIED FARMER ACCOUNT
+      </div>
+
+      <div class="profile-meta">
+
+        <span>
+          🌱 Farmer
+        </span>
+
+        <span>
+          📦 ${productList.length} active products
+        </span>
+
+        ${
+          farmer.email
+          ?
+          `<span>
+            ✉️ ${escapeHtml(farmer.email)}
+          </span>`
+          :
+          ""
+        }
+
+      </div>
+
+      <div class="profile-bio">
+        Welcome to my AgriLink farmer profile.
+        Browse my available agricultural products below.
+      </div>
+
+      <div
+        class="section-title"
+        style="margin-top:25px">
+
+        <h2>
+          Products by
+          ${escapeHtml(
+            farmer.full_name || "this farmer"
+          )}
+        </h2>
+
+      </div>
+
+      ${
+        productList.length
+        ?
+        `
+        <div class="profile-product-grid">
+
+          ${productList.map(product=>{
+
+            const image =
+              product.image_url
+              ?
+              `<img
+                src="${escapeHtml(
+                  product.image_url
+                )}"
+                alt="${escapeHtml(
+                  product.name
+                )}">`
+              :
+              `<div
+                style="font-size:40px">
+                🌱
+              </div>`;
+
+            return `
+              <div class="mini-product">
+
+                <div class="mini-product-img">
+                  ${image}
+                </div>
+
+                <div class="mini-product-body">
+
+                  <div class="mini-product-name">
+                    ${escapeHtml(
+                      product.name
+                    )}
+                  </div>
+
+                  <div class="mini-product-price">
+                    ₱${formatMoney(
+                      product.price
+                    )}
+                    /
+                    ${escapeHtml(
+                      product.unit || "unit"
+                    )}
+                  </div>
+
+                  <div
+                    style="
+                      font-size:11px;
+                      color:#718078;
+                      margin-top:5px;">
+                    📦
+                    ${escapeHtml(
+                      product.quantity
+                    )}
+                    ${escapeHtml(
+                      product.unit || ""
+                    )}
+                  </div>
+
+                </div>
+
+              </div>
+            `;
+
+          }).join("")}
+
+        </div>
+        `
+        :
+        `
+        <div class="empty">
+          This farmer currently has no active products.
+        </div>
+        `
+      }
+
+    </div>
+  `;
 }
 
-</div>
 
-</div>
+function closeProfile(){
 
-</div>
-
-`;
-
-}).join("");
+  document
+    .getElementById("profileModal")
+    .classList.add("hidden");
 
 }
 
@@ -2555,36 +3190,51 @@ FARMER STATS
 
 async function updateFarmerStats(){
 
-if(currentProfile?.role !== "FARMER"){
-return;
-}
+  if(currentProfile?.role !== "FARMER"){
+    return;
+  }
 
-const {data:orders} =
-await supabaseClient
-.from("orders")
-.select("status")
-.eq("seller_id",currentProfile.id);
+  const {
+    data:orders
+  } =
+    await supabaseClient
+      .from("orders")
+      .select("status")
+      .eq(
+        "seller_id",
+        currentProfile.id
+      );
 
-const list = orders || [];
+  const list =
+    orders || [];
 
-document.getElementById("statProducts")
-.textContent = allProducts.length;
+  document
+    .getElementById("statProducts")
+    .textContent =
+      allProducts.length;
 
-document.getElementById("statPending")
-.textContent =
-list.filter(x=>x.status==="PENDING").length;
+  document
+    .getElementById("statPending")
+    .textContent =
+      list.filter(
+        x=>x.status==="PENDING"
+      ).length;
 
-document.getElementById("statOngoing")
-.textContent =
-list.filter(x=>
-x.status==="CONFIRMED" ||
-x.status==="ONGOING"
-).length;
+  document
+    .getElementById("statOngoing")
+    .textContent =
+      list.filter(
+        x =>
+          x.status==="CONFIRMED" ||
+          x.status==="ONGOING"
+      ).length;
 
-document.getElementById("statCompleted")
-.textContent =
-list.filter(x=>x.status==="COMPLETED").length;
-
+  document
+    .getElementById("statCompleted")
+    .textContent =
+      list.filter(
+        x=>x.status==="COMPLETED"
+      ).length;
 }
 
 
@@ -2594,17 +3244,18 @@ ADD PRODUCT
 
 function openAddProduct(){
 
-document
-.getElementById("productModal")
-.classList.remove("hidden");
+  document
+    .getElementById("productModal")
+    .classList.remove("hidden");
 
 }
 
+
 function closeAddProduct(){
 
-document
-.getElementById("productModal")
-.classList.add("hidden");
+  document
+    .getElementById("productModal")
+    .classList.add("hidden");
 
 }
 
@@ -2613,184 +3264,210 @@ document
 .getElementById("productForm")
 .addEventListener("submit",async e=>{
 
-e.preventDefault();
+  e.preventDefault();
 
-if(currentProfile?.role !== "FARMER"){
+  if(currentProfile?.role !== "FARMER"){
 
-alert("Only farmers can publish products.");
+    alert(
+      "Only farmers can publish products."
+    );
 
-return;
+    return;
+  }
 
-}
+  const message =
+    document.getElementById(
+      "productMessage"
+    );
 
-const message =
-document.getElementById("productMessage");
+  const name =
+    document.getElementById(
+      "productName"
+    ).value.trim();
 
-const name =
-document.getElementById("productName")
-.value.trim();
+  const price =
+    Number(
+      document.getElementById(
+        "productPrice"
+      ).value
+    );
 
-const price =
-Number(document.getElementById("productPrice").value);
+  const quantity =
+    Number(
+      document.getElementById(
+        "productQuantity"
+      ).value
+    );
 
-const quantity =
-Number(document.getElementById("productQuantity").value);
+  if(!name){
 
-if(!name){
+    message.innerHTML =
+      `<div class="message error">
+        Product name is required.
+      </div>`;
 
-message.innerHTML =
-`<div class="message error">
-Product name is required.
-</div>`;
+    return;
+  }
 
-return;
+  if(
+    !Number.isFinite(price) ||
+    price < 0
+  ){
 
-}
+    message.innerHTML =
+      `<div class="message error">
+        Enter a valid price.
+      </div>`;
 
-if(!Number.isFinite(price) || price < 0){
+    return;
+  }
 
-message.innerHTML =
-`<div class="message error">
-Enter a valid price.
-</div>`;
+  if(
+    !Number.isFinite(quantity) ||
+    quantity < 0
+  ){
 
-return;
+    message.innerHTML =
+      `<div class="message error">
+        Enter a valid quantity.
+      </div>`;
 
-}
+    return;
+  }
 
-if(!Number.isFinite(quantity) || quantity < 0){
+  message.innerHTML =
+    `<div class="message">
+      Publishing...
+    </div>`;
 
-message.innerHTML =
-`<div class="message error">
-Enter a valid quantity.
-</div>`;
+  const file =
+    document
+      .getElementById("productImage")
+      .files[0];
 
-return;
+  let imageUrl = null;
 
-}
+  if(file){
 
-message.innerHTML =
-`<div class="message">
-Publishing...
-</div>`;
+    const safeName =
+      file.name.replace(
+        /[^a-zA-Z0-9._-]/g,
+        "_"
+      );
 
+    const path =
+      `${currentUser.id}/${Date.now()}-${safeName}`;
 
-const file =
-document
-.getElementById("productImage")
-.files[0];
+    const {
+      error:uploadError
+    } =
+      await supabaseClient
+        .storage
+        .from("product-images")
+        .upload(
+          path,
+          file,
+          {
+            upsert:false
+          }
+        );
 
-let imageUrl = null;
+    if(uploadError){
 
+      message.innerHTML =
+        `<div class="message error">
+          ${escapeHtml(
+            uploadError.message
+          )}
+        </div>`;
 
-if(file){
+      return;
+    }
 
-const safeName =
-file.name.replace(
-/[^a-zA-Z0-9._-]/g,
-"_"
-);
+    const {
+      data:urlData
+    } =
+      supabaseClient
+        .storage
+        .from("product-images")
+        .getPublicUrl(path);
 
-const path =
-`${currentUser.id}/${Date.now()}-${safeName}`;
+    imageUrl =
+      urlData.publicUrl;
+  }
 
-const {error:uploadError} =
-await supabaseClient
-.storage
-.from("product-images")
-.upload(
-path,
-file,
-{
-upsert:false
-}
-);
+  const {
+    error
+  } =
+    await supabaseClient
+      .from("products")
+      .insert({
 
-if(uploadError){
+        seller_id:
+          currentProfile.id,
 
-message.innerHTML =
-`<div class="message error">
-${escapeHtml(uploadError.message)}
-</div>`;
+        name:name,
 
-return;
+        description:
+          document
+            .getElementById(
+              "productDescription"
+            )
+            .value.trim() || null,
 
-}
+        price:price,
 
-const {data:urlData} =
-supabaseClient
-.storage
-.from("product-images")
-.getPublicUrl(path);
+        quantity:quantity,
 
-imageUrl =
-urlData.publicUrl;
+        unit:
+          document
+            .getElementById(
+              "productUnit"
+            ).value,
 
-}
+        location:
+          document
+            .getElementById(
+              "productLocation"
+            )
+            .value.trim() || null,
 
+        image_url:imageUrl,
 
-const {error} =
-await supabaseClient
-.from("products")
-.insert({
+        status:
+          quantity > 0
+          ? "ACTIVE"
+          : "SOLD"
 
-seller_id:currentProfile.id,
+      });
 
-name:name,
+  if(error){
 
-description:
-document
-.getElementById("productDescription")
-.value.trim() || null,
+    message.innerHTML =
+      `<div class="message error">
+        ${escapeHtml(
+          error.message
+        )}
+      </div>`;
 
-price:price,
+    return;
+  }
 
-quantity:quantity,
+  message.innerHTML =
+    `<div class="message success">
+      Product published successfully!
+    </div>`;
 
-unit:
-document.getElementById("productUnit").value,
+  document
+    .getElementById("productForm")
+    .reset();
 
-location:
-document.getElementById("productLocation")
-.value.trim() || null,
+  await loadProducts();
 
-image_url:imageUrl,
-
-status:
-quantity > 0
-? "ACTIVE"
-: "SOLD"
-
-});
-
-
-if(error){
-
-console.error(error);
-
-message.innerHTML =
-`<div class="message error">
-${escapeHtml(error.message)}
-</div>`;
-
-return;
-
-}
-
-
-message.innerHTML =
-`<div class="message success">
-Product published successfully!
-</div>`;
-
-document.getElementById("productForm").reset();
-
-await loadProducts();
-
-setTimeout(()=>{
-closeAddProduct();
-message.innerHTML="";
-},700);
+  setTimeout(()=>{
+    closeAddProduct();
+    message.innerHTML="";
+  },700);
 
 });
 
@@ -2801,26 +3478,31 @@ DELETE PRODUCT
 
 async function deleteProduct(id){
 
-if(!confirm("Delete this product?")){
-return;
-}
+  if(!confirm(
+    "Delete this product?"
+  )){
+    return;
+  }
 
-const {error} =
-await supabaseClient
-.from("products")
-.delete()
-.eq("id",id)
-.eq("seller_id",currentProfile.id);
+  const {
+    error
+  } =
+    await supabaseClient
+      .from("products")
+      .delete()
+      .eq("id",id)
+      .eq(
+        "seller_id",
+        currentProfile.id
+      );
 
-if(error){
+  if(error){
 
-alert(error.message);
-return;
+    alert(error.message);
+    return;
+  }
 
-}
-
-await loadProducts();
-
+  await loadProducts();
 }
 
 
@@ -2830,132 +3512,157 @@ BUY
 
 async function openBuyModal(productId){
 
-const {data:product,error} =
-await supabaseClient
-.from("products")
-.select(`
-*,
-users:seller_id(
-full_name
-)
-`)
-.eq("id",productId)
-.single();
+  const {
+    data:product,
+    error
+  } =
+    await supabaseClient
+      .from("products")
+      .select(`
+        *,
+        users:seller_id(
+          full_name
+        )
+      `)
+      .eq("id",productId)
+      .single();
 
-if(error || !product){
+  if(error || !product){
 
-alert(
-"Product could not be found."
-);
+    alert(
+      "Product could not be found."
+    );
 
-return;
+    return;
+  }
 
-}
+  if(
+    product.seller_id ===
+    currentProfile.id
+  ){
 
-if(product.seller_id === currentProfile.id){
+    alert(
+      "You cannot buy your own product."
+    );
 
-alert("You cannot buy your own product.");
+    return;
+  }
 
-return;
+  if(
+    Number(product.quantity) <= 0
+  ){
 
-}
+    alert(
+      "This product is out of stock."
+    );
 
-if(Number(product.quantity) <= 0){
+    return;
+  }
 
-alert("This product is out of stock.");
+  currentProduct = product;
 
-return;
+  document
+    .getElementById("buyProductId")
+    .value =
+      product.id;
 
-}
+  document
+    .getElementById("buyQuantity")
+    .value =
+      "1";
 
-currentProduct = product;
+  document
+    .getElementById("buyProductInfo")
+    .innerHTML =
+    `
+      <div
+        style="
+          background:#f2f7f3;
+          padding:15px;
+          border-radius:13px;
+          margin-bottom:10px;">
 
-document
-.getElementById("buyProductId")
-.value = product.id;
+        <strong>
+          ${escapeHtml(
+            product.name
+          )}
+        </strong>
 
-document
-.getElementById("buyQuantity")
-.value = "1";
+        <br>
 
-document
-.getElementById("buyProductInfo")
-.innerHTML =
-`
-<div style="
-background:#f7f7f7;
-padding:15px;
-border-radius:13px;
-margin-bottom:10px;
-">
+        <span style="color:#16833b;font-weight:900">
+          ₱${formatMoney(
+            product.price
+          )}
+        </span>
+        /
+        ${escapeHtml(
+          product.unit || "unit"
+        )}
 
-<strong>
-${escapeHtml(product.name)}
-</strong>
+        <br>
 
-<br>
+        Available:
+        ${escapeHtml(
+          product.quantity
+        )}
 
-₱${formatMoney(product.price)}
-/
-${escapeHtml(product.unit || "unit")}
+        <br>
 
-<br>
+        Seller:
+        ${escapeHtml(
+          product.users?.full_name ||
+          "Farmer"
+        )}
 
-Available:
-${escapeHtml(product.quantity)}
+      </div>
+    `;
 
-<br>
+  updateBuyTotal();
 
-Seller:
-${escapeHtml(
-product.users?.full_name || "Farmer"
-)}
-
-</div>
-`;
-
-updateBuyTotal();
-
-document
-.getElementById("buyModal")
-.classList.remove("hidden");
-
+  document
+    .getElementById("buyModal")
+    .classList.remove("hidden");
 }
 
 
 function updateBuyTotal(){
 
-if(!currentProduct){
-return;
-}
+  if(!currentProduct){
+    return;
+  }
 
-const quantity =
-Number(
-document.getElementById("buyQuantity").value
-);
+  const quantity =
+    Number(
+      document
+        .getElementById(
+          "buyQuantity"
+        ).value
+    );
 
-const total =
-Number(currentProduct.price || 0)
-*
-(quantity || 0);
+  const total =
+    Number(
+      currentProduct.price || 0
+    ) *
+    (quantity || 0);
 
-document
-.getElementById("buyTotalPreview")
-textContent =
-"Total: ₱" +
-formatMoney(total);
-
+  document
+    .getElementById(
+      "buyTotalPreview"
+    )
+    .textContent =
+      "Total: ₱" +
+      formatMoney(total);
 }
 
 
 function closeBuyModal(){
 
-document
-.getElementById("buyModal")
-.classList.add("hidden");
+  document
+    .getElementById("buyModal")
+    .classList.add("hidden");
 
-currentProduct = null;
-
+  currentProduct = null;
 }
 
 
@@ -2967,179 +3674,225 @@ document
 .getElementById("buyForm")
 .addEventListener("submit",async e=>{
 
-e.preventDefault();
+  e.preventDefault();
 
-if(!currentProduct){
-return;
-}
+  if(!currentProduct){
+    return;
+  }
 
-const quantity =
-Number(
-document.getElementById("buyQuantity").value
-);
+  const quantity =
+    Number(
+      document
+        .getElementById(
+          "buyQuantity"
+        ).value
+    );
 
-if(!Number.isFinite(quantity) || quantity <= 0){
+  if(
+    !Number.isFinite(quantity) ||
+    quantity <= 0
+  ){
 
-alert("Enter a valid quantity.");
+    alert(
+      "Enter a valid quantity."
+    );
 
-return;
+    return;
+  }
 
-}
+  if(
+    quantity >
+    Number(currentProduct.quantity)
+  ){
 
-if(quantity > Number(currentProduct.quantity)){
+    alert(
+      "Not enough stock available."
+    );
 
-alert("Not enough stock available.");
+    return;
+  }
 
-return;
+  const total =
+    Number(currentProduct.price) *
+    quantity;
 
-}
+  const paymentMethod =
+    document
+      .getElementById(
+        "paymentMethod"
+      ).value;
 
-const total =
-Number(currentProduct.price)
-*
-quantity;
+  const buyerNote =
+    document
+      .getElementById(
+        "buyerNote"
+      )
+      .value.trim();
 
-const paymentMethod =
-document.getElementById("paymentMethod").value;
+  const buyMessage =
+    document.getElementById(
+      "buyMessage"
+    );
 
-const buyerNote =
-document
-.getElementById("buyerNote")
-.value.trim();
+  buyMessage.innerHTML =
+    `<div class="message">
+      Creating order...
+    </div>`;
 
-const buyMessage =
-document.getElementById("buyMessage");
+  const {
+    data:order,
+    error
+  } =
+    await supabaseClient
+      .from("orders")
+      .insert({
 
-buyMessage.innerHTML =
-`<div class="message">
-Creating order...
-</div>`;
+        product_id:
+          currentProduct.id,
 
+        buyer_id:
+          currentProfile.id,
 
-const {data:order,error} =
-await supabaseClient
-.from("orders")
-.insert({
+        seller_id:
+          currentProduct.seller_id,
 
-product_id:currentProduct.id,
+        quantity:quantity,
 
-buyer_id:currentProfile.id,
+        unit_price:
+          Number(
+            currentProduct.price
+          ),
 
-seller_id:currentProduct.seller_id,
+        total_price:
+          total,
 
-quantity:quantity,
+        payment_method:
+          paymentMethod,
 
-unit_price:Number(currentProduct.price),
+        payment_status:
+          paymentMethod ===
+          "CASH_ON_PICKUP"
+          ? "UNPAID"
+          : "PENDING",
 
-total_price:total,
+        status:
+          "PENDING",
 
-payment_method:paymentMethod,
+        buyer_note:
+          buyerNote || null
 
-payment_status:
-paymentMethod === "CASH_ON_PICKUP"
-? "UNPAID"
-: "PENDING",
+      })
+      .select()
+      .single();
 
-status:"PENDING",
+  if(error){
 
-buyer_note:
-buyerNote || null
+    buyMessage.innerHTML =
+      `<div class="message error">
+        ${escapeHtml(
+          error.message
+        )}
+      </div>`;
 
-})
-.select()
-.single();
+    return;
+  }
 
+  /*
+    Update stock.
+  */
 
-if(error){
+  const remaining =
+    Number(
+      currentProduct.quantity
+    ) - quantity;
 
-console.error(error);
+  const {
+    error:updateError
+  } =
+    await supabaseClient
+      .from("products")
+      .update({
 
-buyMessage.innerHTML =
-`<div class="message error">
-${escapeHtml(error.message)}
-</div>`;
+        quantity:remaining,
 
-return;
+        status:
+          remaining <= 0
+          ? "SOLD"
+          : "ACTIVE"
 
-}
+      })
+      .eq(
+        "id",
+        currentProduct.id
+      )
+      .eq(
+        "status",
+        "ACTIVE"
+      );
 
+  if(updateError){
 
-const remaining =
-Number(currentProduct.quantity)
--
-quantity;
+    buyMessage.innerHTML =
+      `<div class="message error">
+        Order created, but stock could not
+        be updated:
+        ${escapeHtml(
+          updateError.message
+        )}
+      </div>`;
 
-const {error:updateError} =
-await supabaseClient
-.from("products")
-.update({
+    return;
+  }
 
-quantity:remaining,
+  /*
+    Notification.
+  */
 
-status:
-remaining <= 0
-? "SOLD"
-: "ACTIVE"
+  const {
+    error:notificationError
+  } =
+    await supabaseClient
+      .from("notifications")
+      .insert({
 
-})
-.eq("id",currentProduct.id)
-.eq("status","ACTIVE");
+        user_id:
+          currentProduct.seller_id,
 
-if(updateError){
+        title:
+          "New Order",
 
-console.error(
-"Stock update error:",
-updateError
-);
+        body:
+          `${currentProfile.full_name || "A buyer"} placed an order for ${quantity} ${currentProduct.unit || "unit"}.`,
 
-buyMessage.innerHTML =
-`<div class="message error">
-Order created, but stock could not be updated:
-${escapeHtml(updateError.message)}
-</div>`;
+        type:
+          "ORDER",
 
-return;
+        reference_id:
+          order.id
 
-}
+      });
 
+  if(notificationError){
 
-const {error:notificationError} =
-await supabaseClient
-.from("notifications")
-.insert({
+    console.error(
+      notificationError
+    );
+  }
 
-user_id:currentProduct.seller_id,
+  buyMessage.innerHTML =
+    `<div class="message success">
+      Order created successfully!
+    </div>`;
 
-title:"New Order",
+  setTimeout(async()=>{
 
-body:
-`${currentProfile.full_name || "A buyer"} placed an order for ${quantity} ${currentProduct.unit || "unit"}.`,
+    closeBuyModal();
 
-type:"ORDER",
+    await loadProducts();
 
-reference_id:order.id
+    await loadOrders();
 
-});
-
-if(notificationError){
-console.error(notificationError);
-}
-
-
-buyMessage.innerHTML =
-`<div class="message success">
-Order created successfully!
-</div>`;
-
-setTimeout(async()=>{
-
-closeBuyModal();
-
-await loadProducts();
-
-await loadOrders();
-
-},700);
+  },700);
 
 });
 
@@ -3150,138 +3903,162 @@ ORDERS
 
 async function loadOrders(){
 
-if(!currentProfile){
-return;
-}
+  if(!currentProfile){
+    return;
+  }
 
-if(currentProfile.role === "FARMER"){
-await loadFarmerOrders();
-}else{
-await loadBuyerOrders();
-}
+  if(
+    currentProfile.role ===
+    "FARMER"
+  ){
 
+    await loadFarmerOrders();
+
+  }else{
+
+    await loadBuyerOrders();
+
+  }
 }
 
 
 async function loadBuyerOrders(){
 
-const container =
-document.getElementById("orders");
+  const container =
+    document.getElementById(
+      "orders"
+    );
 
-container.innerHTML =
-`<div class="empty">
-Loading orders...
-</div>`;
+  container.innerHTML =
+    `<div class="empty">
+      Loading orders...
+    </div>`;
 
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("orders")
+      .select(`
+        *,
+        products:product_id(
+          name,
+          unit
+        ),
+        seller:seller_id(
+          full_name
+        )
+      `)
+      .eq(
+        "buyer_id",
+        currentProfile.id
+      )
+      .order(
+        "created_at",
+        {ascending:false}
+      );
 
-const {data,error} =
-await supabaseClient
-.from("orders")
-.select(`
-*,
-products:product_id(
-name,
-unit
-),
-seller:seller_id(
-full_name
-)
-`)
-.eq("buyer_id",currentProfile.id)
-.order(
-"created_at",
-{ascending:false}
-);
+  if(error){
 
+    container.innerHTML =
+      `<div class="empty">
+        ${escapeHtml(
+          error.message
+        )}
+      </div>`;
 
-if(error){
+    return;
+  }
 
-container.innerHTML =
-`<div class="empty">
-${escapeHtml(error.message)}
-</div>`;
+  if(!data?.length){
 
-return;
+    container.innerHTML =
+      `<div class="empty">
+        <h3>No orders yet</h3>
+        <p>
+          Your orders will appear here.
+        </p>
+      </div>`;
 
-}
+    return;
+  }
 
-if(!data?.length){
-
-container.innerHTML =
-`<div class="empty">
-<h3>No orders yet</h3>
-<p>Your orders will appear here.</p>
-</div>`;
-
-return;
-
-}
-
-container.innerHTML =
-data.map(renderOrder).join("");
-
+  container.innerHTML =
+    data.map(
+      renderOrder
+    ).join("");
 }
 
 
 async function loadFarmerOrders(){
 
-const container =
-document.getElementById("farmerOrders");
+  const container =
+    document.getElementById(
+      "farmerOrders"
+    );
 
-container.innerHTML =
-`<div class="empty">
-Loading transactions...
-</div>`;
+  container.innerHTML =
+    `<div class="empty">
+      Loading transactions...
+    </div>`;
 
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("orders")
+      .select(`
+        *,
+        products:product_id(
+          name,
+          unit
+        ),
+        buyer:buyer_id(
+          full_name
+        )
+      `)
+      .eq(
+        "seller_id",
+        currentProfile.id
+      )
+      .order(
+        "created_at",
+        {ascending:false}
+      );
 
-const {data,error} =
-await supabaseClient
-.from("orders")
-.select(`
-*,
-products:product_id(
-name,
-unit
-),
-buyer:buyer_id(
-full_name
-)
-`)
-.eq("seller_id",currentProfile.id)
-.order(
-"created_at",
-{ascending:false}
-);
+  if(error){
 
+    container.innerHTML =
+      `<div class="empty">
+        ${escapeHtml(
+          error.message
+        )}
+      </div>`;
 
-if(error){
+    return;
+  }
 
-container.innerHTML =
-`<div class="empty">
-${escapeHtml(error.message)}
-</div>`;
+  if(!data?.length){
 
-return;
+    container.innerHTML =
+      `<div class="empty">
+        <h3>No transactions yet</h3>
+        <p>
+          Buyer orders will appear here.
+        </p>
+      </div>`;
 
-}
+    return;
+  }
 
-if(!data?.length){
+  container.innerHTML =
+    data.map(
+      renderOrder
+    ).join("");
 
-container.innerHTML =
-`<div class="empty">
-<h3>No transactions yet</h3>
-<p>Buyer orders will appear here.</p>
-</div>`;
-
-return;
-
-}
-
-container.innerHTML =
-data.map(renderOrder).join("");
-
-updateFarmerStats();
-
+  updateFarmerStats();
 }
 
 
@@ -3291,180 +4068,226 @@ RENDER ORDER
 
 function renderOrder(order){
 
-const productName =
-order.products?.name ||
-"Product";
+  const productName =
+    order.products?.name ||
+    "Product";
 
-const unit =
-order.products?.unit ||
-"unit";
+  const unit =
+    order.products?.unit ||
+    "unit";
 
-const isFarmer =
-currentProfile.role === "FARMER";
+  const isFarmer =
+    currentProfile.role ===
+    "FARMER";
 
-const otherName =
-isFarmer
-? order.buyer?.full_name || "Buyer"
-: order.seller?.full_name || "Farmer";
+  const otherName =
+    isFarmer
+    ?
+    order.buyer?.full_name ||
+    "Buyer"
+    :
+    order.seller?.full_name ||
+    "Farmer";
 
-const status =
-order.status || "PENDING";
+  const status =
+    order.status ||
+    "PENDING";
 
-let actions = "";
+  let actions = "";
 
+  if(isFarmer){
 
-if(isFarmer){
+    if(status === "PENDING"){
 
-if(status === "PENDING"){
+      actions += `
+        <button
+          class="accept-btn"
+          onclick="updateOrderStatus(
+            '${order.id}',
+            'CONFIRMED'
+          )">
+          Accept
+        </button>
 
-actions += `
-<button
-class="accept-btn"
-onclick="updateOrderStatus('${order.id}','CONFIRMED')">
-Accept
-</button>
+        <button
+          class="reject-btn"
+          onclick="updateOrderStatus(
+            '${order.id}',
+            'REJECTED'
+          )">
+          Reject
+        </button>
+      `;
 
-<button
-class="reject-btn"
-onclick="updateOrderStatus('${order.id}','REJECTED')">
-Reject
-</button>
-`;
+    }
 
-}
+    if(status === "CONFIRMED"){
 
-if(status === "CONFIRMED"){
+      actions += `
+        <button
+          class="complete-btn"
+          onclick="updateOrderStatus(
+            '${order.id}',
+            'ONGOING'
+          )">
+          Start Transaction
+        </button>
+      `;
 
-actions += `
-<button
-class="complete-btn"
-onclick="updateOrderStatus('${order.id}','ONGOING')">
-Start Transaction
-</button>
-`;
+    }
 
-}
+    if(status === "ONGOING"){
 
-if(status === "ONGOING"){
+      actions += `
+        <button
+          class="complete-btn"
+          onclick="updateOrderStatus(
+            '${order.id}',
+            'COMPLETED'
+          )">
+          Mark Completed
+        </button>
+      `;
 
-actions += `
-<button
-class="complete-btn"
-onclick="updateOrderStatus('${order.id}','COMPLETED')">
-Mark Completed
-</button>
-`;
+    }
 
-}
+  }else{
 
-}else{
+    if(
+      status === "PENDING" ||
+      status === "CONFIRMED"
+    ){
 
-if(
-status === "PENDING" ||
-status === "CONFIRMED"
-){
+      actions += `
+        <button
+          class="cancel-btn"
+          onclick="updateOrderStatus(
+            '${order.id}',
+            'CANCELLED'
+          )">
+          Cancel Order
+        </button>
+      `;
 
-actions += `
-<button
-class="cancel-btn"
-onclick="updateOrderStatus('${order.id}','CANCELLED')">
-Cancel Order
-</button>
-`;
+    }
 
-}
+  }
 
-}
+  return `
 
+    <div class="order-card">
 
-return `
+      <div class="order-top">
 
-<div class="order-card">
+        <strong>
+          ${escapeHtml(
+            productName
+          )}
+        </strong>
 
-<div class="order-top">
+        <span
+          class="
+            order-status
+            status-${escapeHtml(
+              status
+            )}
+          ">
+          ${escapeHtml(status)}
+        </span>
 
-<strong>
-${escapeHtml(productName)}
-</strong>
+      </div>
 
-<span class="order-status status-${escapeHtml(status)}">
-${escapeHtml(status)}
-</span>
+      <div class="order-info">
 
-</div>
+        ${isFarmer ? "Buyer" : "Farmer"}:
 
-<div class="order-info">
+        <strong>
+          ${escapeHtml(
+            otherName
+          )}
+        </strong>
 
-${isFarmer ? "Buyer" : "Farmer"}:
+        <br>
 
-<strong>
-${escapeHtml(otherName)}
-</strong>
+        Quantity:
+        ${escapeHtml(
+          order.quantity
+        )}
+        ${escapeHtml(unit)}
 
-<br>
+        <br>
 
-Quantity:
-${escapeHtml(order.quantity)}
-${escapeHtml(unit)}
+        Unit Price:
+        ₱${formatMoney(
+          order.unit_price
+        )}
 
-<br>
+        <br>
 
-Unit Price:
-₱${formatMoney(order.unit_price)}
+        Total:
+        <strong>
+          ₱${formatMoney(
+            order.total_price
+          )}
+        </strong>
 
-<br>
+        <br>
 
-Total:
-<strong>
-₱${formatMoney(order.total_price)}
-</strong>
+        Payment:
+        ${formatPaymentMethod(
+          order.payment_method
+        )}
 
-<br>
+        <br>
 
-Payment:
-${formatPaymentMethod(order.payment_method)}
+        Payment Status:
+        ${escapeHtml(
+          order.payment_status ||
+          "PENDING"
+        )}
 
-<br>
+        <br>
 
-Payment Status:
-${escapeHtml(order.payment_status || "PENDING")}
+        ${
+          order.buyer_note
+          ?
+          `Note:
+          ${escapeHtml(
+            order.buyer_note
+          )}`
+          :
+          ""
+        }
 
-<br>
+      </div>
 
-${order.buyer_note
-? `Note: ${escapeHtml(order.buyer_note)}`
-: ""}
+      <div class="order-actions">
+        ${actions}
+      </div>
 
-</div>
-
-<div class="order-actions">
-${actions}
-</div>
-
-</div>
-`;
-
+    </div>
+  `;
 }
 
 
 function formatPaymentMethod(method){
 
-const map = {
+  const map = {
 
-GCASH:"GCash",
+    GCASH:"GCash",
 
-MAYA:"Maya",
+    MAYA:"Maya",
 
-BANK_TRANSFER:"Bank Transfer",
+    BANK_TRANSFER:"Bank Transfer",
 
-CASH_ON_PICKUP:"Cash on Pickup"
+    CASH_ON_PICKUP:
+      "Cash on Pickup"
 
-};
+  };
 
-return map[method] ||
-method ||
-"Not specified";
-
+  return map[method] ||
+    method ||
+    "Not specified";
 }
 
 
@@ -3472,80 +4295,104 @@ method ||
 UPDATE ORDER
 ========================================================= */
 
-async function updateOrderStatus(orderId,newStatus){
+async function updateOrderStatus(
+  orderId,
+  newStatus
+){
 
-const {data:order,error:findError} =
-await supabaseClient
-.from("orders")
-.select("*")
-.eq("id",orderId)
-.single();
+  const {
+    data:order,
+    error:findError
+  } =
+    await supabaseClient
+      .from("orders")
+      .select("*")
+      .eq("id",orderId)
+      .single();
 
-if(findError || !order){
+  if(
+    findError ||
+    !order
+  ){
 
-alert(
-"Order not found."
-);
+    alert(
+      "Order not found."
+    );
 
-return;
+    return;
+  }
 
-}
+  const allowed =
+    currentProfile.role ===
+    "FARMER"
+    ?
+    order.seller_id ===
+    currentProfile.id
+    :
+    order.buyer_id ===
+    currentProfile.id;
 
-const allowed =
-currentProfile.role === "FARMER"
-? order.seller_id === currentProfile.id
-: order.buyer_id === currentProfile.id;
+  if(!allowed){
 
-if(!allowed){
+    alert(
+      "You cannot update this order."
+    );
 
-alert(
-"You cannot update this order."
-);
+    return;
+  }
 
-return;
+  const {
+    error
+  } =
+    await supabaseClient
+      .from("orders")
+      .update({
+        status:newStatus
+      })
+      .eq(
+        "id",
+        orderId
+      );
 
-}
+  if(error){
 
-const {error} =
-await supabaseClient
-.from("orders")
-.update({
-status:newStatus
-})
-.eq("id",orderId);
+    alert(
+      error.message
+    );
 
-if(error){
+    return;
+  }
 
-alert(error.message);
+  const targetUser =
+    currentProfile.role ===
+    "FARMER"
+    ?
+    order.buyer_id
+    :
+    order.seller_id;
 
-return;
+  await supabaseClient
+    .from("notifications")
+    .insert({
 
-}
+      user_id:
+        targetUser,
 
-const targetUser =
-currentProfile.role === "FARMER"
-? order.buyer_id
-: order.seller_id;
+      title:
+        "Order Updated",
 
-await supabaseClient
-.from("notifications")
-.insert({
+      body:
+        `Order status changed to ${newStatus}.`,
 
-user_id:targetUser,
+      type:
+        "ORDER",
 
-title:"Order Updated",
+      reference_id:
+        orderId
 
-body:
-`Order status changed to ${newStatus}.`,
+    });
 
-type:"ORDER",
-
-reference_id:orderId
-
-});
-
-await loadOrders();
-
+  await loadOrders();
 }
 
 
@@ -3555,373 +4402,432 @@ CHAT
 
 function openChat(){
 
-document
-.getElementById("chatModal")
-.classList.remove("hidden");
+  document
+    .getElementById("chatModal")
+    .classList.remove("hidden");
 
-loadConversations();
-
+  loadConversations();
 }
 
 
 function closeChat(){
 
-document
-.getElementById("chatModal")
-.classList.add("hidden");
+  document
+    .getElementById("chatModal")
+    .classList.add("hidden");
 
-if(messageChannel){
+  if(messageChannel){
 
-supabaseClient.removeChannel(
-messageChannel
-);
+    supabaseClient.removeChannel(
+      messageChannel
+    );
 
-messageChannel = null;
+    messageChannel = null;
+  }
 
-}
-
-currentConversation = null;
-
-}
-
-
-async function startChat(sellerId,productId){
-
-if(!currentProfile){
-
-alert("Please login first.");
-
-return;
-
-}
-
-if(sellerId === currentProfile.id){
-
-alert("You cannot chat with yourself.");
-
-return;
-
-}
-
-if(currentProfile.role !== "BUYER"){
-
-alert(
-"Farmers can reply to conversations started by buyers."
-);
-
-return;
-
+  currentConversation = null;
 }
 
 
-let query =
-supabaseClient
-.from("conversations")
-.select("*")
-.eq("buyer_id",currentProfile.id)
-.eq("seller_id",sellerId);
+async function startChat(
+  sellerId,
+  productId
+){
 
+  if(!currentProfile){
 
-if(productId){
+    alert(
+      "Please login first."
+    );
 
-query =
-query.eq("product_id",productId);
+    return;
+  }
 
-}
+  if(
+    sellerId ===
+    currentProfile.id
+  ){
 
+    alert(
+      "You cannot chat with yourself."
+    );
 
-const {data:existing,error} =
-await query.maybeSingle();
+    return;
+  }
 
-if(error){
+  if(
+    currentProfile.role !==
+    "BUYER"
+  ){
 
-alert(error.message);
+    alert(
+      "Farmers can reply to conversations started by buyers."
+    );
 
-return;
+    return;
+  }
 
-}
+  let query =
+    supabaseClient
+      .from("conversations")
+      .select("*")
+      .eq(
+        "buyer_id",
+        currentProfile.id
+      )
+      .eq(
+        "seller_id",
+        sellerId
+      );
 
-let conversation = existing;
+  if(productId){
 
+    query =
+      query.eq(
+        "product_id",
+        productId
+      );
+  }
 
-if(!conversation){
+  const {
+    data:existing,
+    error
+  } =
+    await query.maybeSingle();
 
-const {data:newConversation,error:createError} =
-await supabaseClient
-.from("conversations")
-.insert({
+  if(error){
 
-buyer_id:currentProfile.id,
+    alert(
+      error.message
+    );
 
-seller_id:sellerId,
+    return;
+  }
 
-product_id:productId || null
+  let conversation =
+    existing;
 
-})
-.select("*")
-.single();
+  if(!conversation){
 
-if(createError){
+    const {
+      data:newConversation,
+      error:createError
+    } =
+      await supabaseClient
+        .from("conversations")
+        .insert({
 
-alert(createError.message);
+          buyer_id:
+            currentProfile.id,
 
-return;
+          seller_id:
+            sellerId,
 
-}
+          product_id:
+            productId || null
 
-conversation = newConversation;
+        })
+        .select("*")
+        .single();
 
-}
+    if(createError){
 
-openChat();
+      alert(
+        createError.message
+      );
 
-await loadConversations();
+      return;
+    }
 
-setTimeout(()=>{
-selectConversation(conversation);
-},200);
+    conversation =
+      newConversation;
+  }
 
+  openChat();
+
+  await loadConversations();
+
+  setTimeout(()=>{
+    selectConversation(
+      conversation
+    );
+  },200);
 }
 
 
 async function loadConversations(){
 
-if(!currentProfile){
-return;
+  if(!currentProfile){
+    return;
+  }
+
+  const list =
+    document.getElementById(
+      "conversationList"
+    );
+
+  list.innerHTML =
+    `<div class="chat-empty">
+      Loading...
+    </div>`;
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("conversations")
+      .select(`
+        *,
+        buyer:buyer_id(
+          id,
+          full_name,
+          role
+        ),
+        seller:seller_id(
+          id,
+          full_name,
+          role
+        )
+      `)
+      .or(
+        `buyer_id.eq.${currentProfile.id},seller_id.eq.${currentProfile.id}`
+      )
+      .order(
+        "updated_at",
+        {ascending:false}
+      );
+
+  if(error){
+
+    list.innerHTML =
+      `<div class="chat-empty">
+        ${escapeHtml(
+          error.message
+        )}
+      </div>`;
+
+    return;
+  }
+
+  if(!data?.length){
+
+    list.innerHTML =
+      `<div class="chat-empty">
+        No conversations yet.<br><br>
+        Start a chat from a product.
+      </div>`;
+
+    return;
+  }
+
+  list.innerHTML = "";
+
+  for(
+    const conversation of data
+  ){
+
+    const otherUser =
+      conversation.buyer_id ===
+      currentProfile.id
+      ?
+      conversation.seller
+      :
+      conversation.buyer;
+
+    const item =
+      document.createElement(
+        "div"
+      );
+
+    item.className =
+      "conversation-item";
+
+    item.innerHTML = `
+
+      <div class="conversation-name">
+        ${escapeHtml(
+          otherUser?.full_name ||
+          "User"
+        )}
+      </div>
+
+      <div class="conversation-preview">
+        ${escapeHtml(
+          otherUser?.role ||
+          ""
+        )}
+      </div>
+    `;
+
+    item.onclick =
+      ()=>selectConversation(
+        conversation
+      );
+
+    list.appendChild(item);
+  }
 }
 
-const list =
-document.getElementById("conversationList");
 
-list.innerHTML =
-`<div class="chat-empty">Loading...</div>`;
+async function selectConversation(
+  conversation
+){
 
+  currentConversation =
+    conversation;
 
-const {data,error} =
-await supabaseClient
-.from("conversations")
-.select(`
-*,
-buyer:buyer_id(
-id,
-full_name,
-role
-),
-seller:seller_id(
-id,
-full_name,
-role
-)
-`)
-.or(
-`buyer_id.eq.${currentProfile.id},seller_id.eq.${currentProfile.id}`
-)
-.order(
-"updated_at",
-{ascending:false}
-);
+  const otherUser =
+    conversation.buyer_id ===
+    currentProfile.id
+    ?
+    conversation.seller
+    :
+    conversation.buyer;
 
+  document
+    .getElementById(
+      "chatUserName"
+    )
+    .textContent =
+      otherUser?.full_name ||
+      "User";
 
-if(error){
+  await loadMessages();
 
-list.innerHTML =
-`<div class="chat-empty">
-${escapeHtml(error.message)}
-</div>`;
-
-return;
-
-}
-
-if(!data?.length){
-
-list.innerHTML =
-`<div class="chat-empty">
-No conversations yet.<br><br>
-Start a chat from a product.
-</div>`;
-
-return;
-
-}
-
-list.innerHTML = "";
-
-for(const conversation of data){
-
-const otherUser =
-conversation.buyer_id === currentProfile.id
-? conversation.seller
-: conversation.buyer;
-
-const item =
-document.createElement("div");
-
-item.className =
-"conversation-item";
-
-item.innerHTML = `
-<div class="conversation-name">
-${escapeHtml(
-otherUser?.full_name || "User"
-)}
-</div>
-
-<div class="conversation-preview">
-${escapeHtml(
-otherUser?.role || ""
-)}
-</div>
-`;
-
-item.onclick =
-()=>selectConversation(conversation);
-
-list.appendChild(item);
-
-}
-
-}
-
-
-async function selectConversation(conversation){
-
-currentConversation =
-conversation;
-
-const otherUser =
-conversation.buyer_id === currentProfile.id
-? conversation.seller
-: conversation.buyer;
-
-document
-.getElementById("chatUserName")
-.textContent =
-otherUser?.full_name || "User";
-
-await loadMessages();
-
-subscribeToMessages();
-
+  subscribeToMessages();
 }
 
 
 async function loadMessages(){
 
-if(!currentConversation){
-return;
-}
+  if(!currentConversation){
+    return;
+  }
 
-const box =
-document.getElementById("chatMessages");
+  const box =
+    document.getElementById(
+      "chatMessages"
+    );
 
-box.innerHTML =
-`<div class="chat-empty">
-Loading messages...
-</div>`;
+  box.innerHTML =
+    `<div class="chat-empty">
+      Loading messages...
+    </div>`;
 
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("messages")
+      .select("*")
+      .eq(
+        "conversation_id",
+        currentConversation.id
+      )
+      .order(
+        "created_at",
+        {ascending:true}
+      );
 
-const {data,error} =
-await supabaseClient
-.from("messages")
-.select("*")
-.eq(
-"conversation_id",
-currentConversation.id
-)
-.order(
-"created_at",
-{ascending:true}
-);
+  if(error){
 
+    box.innerHTML =
+      `<div class="chat-empty">
+        ${escapeHtml(
+          error.message
+        )}
+      </div>`;
 
-if(error){
+    return;
+  }
 
-box.innerHTML =
-`<div class="chat-empty">
-${escapeHtml(error.message)}
-</div>`;
+  if(!data?.length){
 
-return;
+    box.innerHTML =
+      `<div class="chat-empty">
+        No messages yet.<br>
+        Say hello 👋
+      </div>`;
 
-}
+    return;
+  }
 
-if(!data?.length){
+  box.innerHTML =
+    data.map(
+      renderMessage
+    ).join("");
 
-box.innerHTML =
-`<div class="chat-empty">
-No messages yet.<br>Say hello 👋
-</div>`;
-
-return;
-
-}
-
-box.innerHTML =
-data.map(renderMessage).join("");
-
-box.scrollTop =
-box.scrollHeight;
-
+  box.scrollTop =
+    box.scrollHeight;
 }
 
 
 function renderMessage(message){
 
-const mine =
-message.sender_id === currentProfile.id;
+  const mine =
+    message.sender_id ===
+    currentProfile.id;
 
-const time =
-message.created_at
-?
-new Date(
-message.created_at
-).toLocaleTimeString(
-[],
-{
-hour:"2-digit",
-minute:"2-digit"
-}
-)
-: "";
+  const time =
+    message.created_at
+    ?
+    new Date(
+      message.created_at
+    ).toLocaleTimeString(
+      [],
+      {
+        hour:"2-digit",
+        minute:"2-digit"
+      }
+    )
+    :
+    "";
 
-return `
+  return `
 
-<div
-class="message-row ${mine ? "mine" : ""}"
-id="message-${message.id}">
+    <div
+      class="
+        message-row
+        ${mine ? "mine" : ""}
+      "
+      id="message-${message.id}">
 
-<div class="chat-bubble">
+      <div class="chat-bubble">
 
-<div>
-${escapeHtml(message.content)}
-</div>
+        <div>
+          ${escapeHtml(
+            message.content
+          )}
+        </div>
 
-<div class="chat-time">
+        <div class="chat-time">
 
-${time}
+          ${time}
 
-${
-mine
-?
-`
-<button
-class="message-delete"
-onclick="deleteMessage('${message.id}')">
-Delete
-</button>
-`
-: ""
-}
+          ${
+            mine
+            ?
+            `
+              <button
+                class="message-delete"
+                onclick="deleteMessage(
+                  '${message.id}'
+                )">
+                Delete
+              </button>
+            `
+            :
+            ""
+          }
 
-</div>
+        </div>
 
-</div>
+      </div>
 
-</div>
-
-`;
-
+    </div>
+  `;
 }
 
 
@@ -3931,94 +4837,96 @@ REALTIME MESSAGES
 
 function subscribeToMessages(){
 
-if(!currentConversation){
-return;
-}
+  if(!currentConversation){
+    return;
+  }
 
-if(messageChannel){
+  if(messageChannel){
 
-supabaseClient.removeChannel(
-messageChannel
-);
+    supabaseClient.removeChannel(
+      messageChannel
+    );
+  }
 
-}
+  messageChannel =
+    supabaseClient
+      .channel(
+        "conversation-" +
+        currentConversation.id +
+        "-" +
+        Date.now()
+      )
 
-messageChannel =
-supabaseClient
-.channel(
-"conversation-" +
-currentConversation.id +
-"-" +
-Date.now()
-)
+      .on(
+        "postgres_changes",
+        {
+          event:"INSERT",
+          schema:"public",
+          table:"messages",
+          filter:
+            `conversation_id=eq.${currentConversation.id}`
+        },
+        payload=>{
 
-.on(
-"postgres_changes",
-{
-event:"INSERT",
-schema:"public",
-table:"messages",
-filter:
-`conversation_id=eq.${currentConversation.id}`
-},
-payload=>{
+          const box =
+            document.getElementById(
+              "chatMessages"
+            );
 
-const box =
-document.getElementById("chatMessages");
+          const empty =
+            box.querySelector(
+              ".chat-empty"
+            );
 
-const empty =
-box.querySelector(".chat-empty");
+          if(empty){
+            box.innerHTML="";
+          }
 
-if(empty){
-box.innerHTML="";
-}
+          if(
+            !document.getElementById(
+              "message-" +
+              payload.new.id
+            )
+          ){
 
-if(
-!document.getElementById(
-"message-" +
-payload.new.id
-)
-){
+            box.insertAdjacentHTML(
+              "beforeend",
+              renderMessage(
+                payload.new
+              )
+            );
 
-box.insertAdjacentHTML(
-"beforeend",
-renderMessage(payload.new)
-);
+          }
 
-}
+          box.scrollTop =
+            box.scrollHeight;
+        }
+      )
 
-box.scrollTop =
-box.scrollHeight;
+      .on(
+        "postgres_changes",
+        {
+          event:"DELETE",
+          schema:"public",
+          table:"messages",
+          filter:
+            `conversation_id=eq.${currentConversation.id}`
+        },
+        payload=>{
 
-}
-)
+          const element =
+            document.getElementById(
+              "message-" +
+              payload.old.id
+            );
 
-.on(
-"postgres_changes",
-{
-event:"DELETE",
-schema:"public",
-table:"messages",
-filter:
-`conversation_id=eq.${currentConversation.id}`
-},
-payload=>{
+          if(element){
+            element.remove();
+          }
+        }
+      )
 
-const element =
-document.getElementById(
-"message-" +
-payload.old.id
-);
-
-if(element){
-element.remove();
-}
-
-}
-)
-
-.subscribe();
-
+      .subscribe();
 }
 
 
@@ -4030,68 +4938,72 @@ document
 .getElementById("chatForm")
 .addEventListener("submit",async e=>{
 
-e.preventDefault();
+  e.preventDefault();
 
-if(!currentConversation){
+  if(!currentConversation){
 
-alert(
-"Select a conversation first."
-);
+    alert(
+      "Select a conversation first."
+    );
 
-return;
+    return;
+  }
 
-}
+  const input =
+    document.getElementById(
+      "chatInput"
+    );
 
-const input =
-document.getElementById("chatInput");
+  const text =
+    input.value.trim();
 
-const text =
-input.value.trim();
+  if(!text){
+    return;
+  }
 
-if(!text){
-return;
-}
+  input.disabled = true;
 
-input.disabled = true;
+  const {
+    error
+  } =
+    await supabaseClient
+      .from("messages")
+      .insert({
 
-const {error} =
-await supabaseClient
-.from("messages")
-.insert({
+        conversation_id:
+          currentConversation.id,
 
-conversation_id:
-currentConversation.id,
+        sender_id:
+          currentProfile.id,
 
-sender_id:
-currentProfile.id,
+        content:
+          text
 
-content:text
+      });
 
-});
+  input.disabled = false;
 
-input.disabled = false;
+  if(error){
 
-if(error){
+    alert(
+      error.message
+    );
 
-alert(error.message);
+    return;
+  }
 
-return;
+  input.value = "";
 
-}
-
-input.value = "";
-
-await supabaseClient
-.from("conversations")
-.update({
-updated_at:
-new Date().toISOString()
-})
-.eq(
-"id",
-currentConversation.id
-);
-
+  await supabaseClient
+    .from("conversations")
+    .update({
+      updated_at:
+        new Date().toISOString()
+    })
+    .eq(
+      "id",
+      currentConversation.id
+    );
 });
 
 
@@ -4101,24 +5013,30 @@ DELETE MESSAGE
 
 async function deleteMessage(id){
 
-if(!confirm("Delete this message?")){
-return;
-}
+  if(!confirm(
+    "Delete this message?"
+  )){
+    return;
+  }
 
-const {error} =
-await supabaseClient
-.from("messages")
-.delete()
-.eq("id",id)
-.eq(
-"sender_id",
-currentProfile.id
-);
+  const {
+    error
+  } =
+    await supabaseClient
+      .from("messages")
+      .delete()
+      .eq(
+        "id",
+        id
+      )
+      .eq(
+        "sender_id",
+        currentProfile.id
+      );
 
-if(error){
-alert(error.message);
-}
-
+  if(error){
+    alert(error.message);
+  }
 }
 
 
@@ -4128,102 +5046,130 @@ NOTIFICATIONS
 
 function toggleNotifications(){
 
-document
-.getElementById("notificationPanel")
-.classList.toggle("hidden");
+  document
+    .getElementById(
+      "notificationPanel"
+    )
+    .classList.toggle(
+      "hidden"
+    );
 
-loadNotifications();
-
+  loadNotifications();
 }
 
 
 async function loadNotifications(){
 
-if(!currentProfile){
-return;
-}
+  if(!currentProfile){
+    return;
+  }
 
-const box =
-document.getElementById("notifications");
+  const box =
+    document.getElementById(
+      "notifications"
+    );
 
-const {data,error} =
-await supabaseClient
-.from("notifications")
-.select("*")
-.eq("user_id",currentProfile.id)
-.order(
-"created_at",
-{ascending:false}
-)
-.limit(30);
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("notifications")
+      .select("*")
+      .eq(
+        "user_id",
+        currentProfile.id
+      )
+      .order(
+        "created_at",
+        {ascending:false}
+      )
+      .limit(30);
 
-if(error){
+  if(error){
 
-box.innerHTML =
-`<div style="padding:15px">
-${escapeHtml(error.message)}
-</div>`;
+    box.innerHTML =
+      `<div style="padding:15px">
+        ${escapeHtml(
+          error.message
+        )}
+      </div>`;
 
-return;
+    return;
+  }
 
-}
+  if(!data?.length){
 
-if(!data?.length){
+    box.innerHTML =
+      `<div
+        style="
+          padding:15px;
+          color:#777">
+        No notifications.
+      </div>`;
 
-box.innerHTML =
-`<div style="padding:15px;color:#777">
-No notifications.
-</div>`;
+    return;
+  }
 
-return;
+  box.innerHTML =
+    data.map(
+      notification=>`
 
-}
+        <div
+          class="
+            notification-item
+            ${
+              notification.is_read
+              ? ""
+              : "unread"
+            }
+          "
+          onclick="markNotificationRead(
+            '${notification.id}'
+          )">
 
-box.innerHTML =
-data.map(notification=>`
+          <strong>
+            ${escapeHtml(
+              notification.title
+            )}
+          </strong>
 
-<div
-class="notification-item ${
-notification.is_read ? "" : "unread"
-}"
-onclick="markNotificationRead('${notification.id}')">
+          <br>
 
-<strong>
-${escapeHtml(notification.title)}
-</strong>
+          ${escapeHtml(
+            notification.body
+          )}
 
-<br>
+          <small>
+            ${new Date(
+              notification.created_at
+            ).toLocaleString()}
+          </small>
 
-${escapeHtml(notification.body)}
+        </div>
 
-<small>
-${new Date(
-notification.created_at
-).toLocaleString()}
-</small>
-
-</div>
-
-`).join("");
-
+      `
+    ).join("");
 }
 
 
 async function markNotificationRead(id){
 
-await supabaseClient
-.from("notifications")
-.update({
-is_read:true
-})
-.eq("id",id)
-.eq(
-"user_id",
-currentProfile.id
-);
+  await supabaseClient
+    .from("notifications")
+    .update({
+      is_read:true
+    })
+    .eq(
+      "id",
+      id
+    )
+    .eq(
+      "user_id",
+      currentProfile.id
+    );
 
-await loadNotifications();
-
+  await loadNotifications();
 }
 
 
@@ -4233,58 +5179,52 @@ REALTIME ORDERS
 
 function subscribeToOrders(){
 
-if(!currentProfile){
-return;
-}
+  if(!currentProfile){
+    return;
+  }
 
-if(orderChannel){
+  if(orderChannel){
 
-supabaseClient.removeChannel(
-orderChannel
-);
+    supabaseClient.removeChannel(
+      orderChannel
+    );
+  }
 
-}
+  orderChannel =
+    supabaseClient
+      .channel(
+        "orders-" +
+        currentProfile.id +
+        "-" +
+        Date.now()
+      )
 
-orderChannel =
-supabaseClient
-.channel(
-"orders-" +
-currentProfile.id +
-"-" +
-Date.now()
-)
+      .on(
+        "postgres_changes",
+        {
+          event:"*",
+          schema:"public",
+          table:"orders"
+        },
+        async payload=>{
 
-.on(
-"postgres_changes",
-{
-event:"*",
-schema:"public",
-table:"orders"
-},
-async payload=>{
+          const row =
+            payload.new ||
+            payload.old;
 
-const row =
-payload.new ||
-payload.old;
+          if(
+            row.buyer_id ===
+              currentProfile.id ||
+            row.seller_id ===
+              currentProfile.id
+          ){
 
-if(!row){
-return;
-}
+            await loadOrders();
+          }
+        }
+      )
 
-if(
-row.buyer_id === currentProfile.id ||
-row.seller_id === currentProfile.id
-){
-
-await loadOrders();
-
-}
-
-}
-)
-
-.subscribe();
-
+      .subscribe();
 }
 
 
@@ -4294,44 +5234,45 @@ LOGOUT
 
 async function logout(){
 
-if(messageChannel){
+  if(messageChannel){
 
-await supabaseClient.removeChannel(
-messageChannel
-);
+    await supabaseClient
+      .removeChannel(
+        messageChannel
+      );
 
-messageChannel = null;
+    messageChannel = null;
+  }
 
-}
+  if(orderChannel){
 
-if(orderChannel){
+    await supabaseClient
+      .removeChannel(
+        orderChannel
+      );
 
-await supabaseClient.removeChannel(
-orderChannel
-);
+    orderChannel = null;
+  }
 
-orderChannel = null;
+  await supabaseClient
+    .auth
+    .signOut();
 
-}
+  currentUser = null;
+  currentProfile = null;
+  currentConversation = null;
 
-await supabaseClient.auth.signOut();
+  document
+    .getElementById("app")
+    .classList.add("hidden");
 
-currentUser = null;
-currentProfile = null;
-currentConversation = null;
+  document
+    .getElementById("authScreen")
+    .classList.add("hidden");
 
-document
-.getElementById("app")
-.classList.add("hidden");
-
-document
-.getElementById("authScreen")
-.classList.add("hidden");
-
-document
-.getElementById("landingScreen")
-.classList.remove("hidden");
-
+  document
+    .getElementById("landingScreen")
+    .classList.remove("hidden");
 }
 
 
@@ -4341,49 +5282,52 @@ SESSION
 
 async function checkSession(){
 
-const {data,error} =
-await supabaseClient
-.auth
-.getSession();
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .auth
+      .getSession();
 
-if(error){
+  if(error){
 
-console.error(error);
+    console.error(error);
 
-return;
+    return;
+  }
 
-}
+  if(data.session){
 
-if(data.session){
-
-await initializeApp(
-data.session.user
-);
-
-}
-
+    await initializeApp(
+      data.session.user
+    );
+  }
 }
 
 
 supabaseClient
 .auth
 .onAuthStateChange(
-async(event,session)=>{
+  async(event,session)=>{
 
-if(
-event === "SIGNED_IN" &&
-session
-){
+    if(
+      event === "SIGNED_IN" &&
+      session
+    ){
 
-await initializeApp(
-session.user
+      await initializeApp(
+        session.user
+      );
+    }
+
+  }
 );
 
-}
 
-}
-);
-
+/* =========================================================
+START
+========================================================= */
 
 checkSession();
 
