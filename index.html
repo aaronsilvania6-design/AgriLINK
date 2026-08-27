@@ -4122,7 +4122,7 @@ function renderOrder(order){
         Total:
         <strong>
           ₱${formatMoney(
-            order.total_price
+            (order.total_amount ?? order.total_price)
           )}
         </strong>
 
