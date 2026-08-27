@@ -1657,6 +1657,19 @@ AgriLink AI
 
 </div>
 
+<div
+style="
+margin-left:auto;
+margin-right:10px;
+font-size:11px;
+font-weight:800;
+color:#16833b;
+background:#eaf8ef;
+padding:7px 10px;
+border-radius:999px;">
+● LIVE
+</div>
+
 <div class="nav-actions">
 
 <button
@@ -2036,20 +2049,23 @@ Total: ₱0.00
 
 <label>Buying Method</label>
 
-<select id="paymentMethod">
-  <option value="CASH_ON_PICKUP">Demo Purchase — No Real Payment</option>
+<select id="paymentMethod" disabled>
+  <option value="CASH_ON_PICKUP">Competition Demo Purchase</option>
 </select>
 
 <div
 style="
 margin-top:10px;
+padding:12px 14px;
+background:#fff8e8;
+border:1px solid #f1dfaa;
+border-radius:12px;
 font-size:12px;
-color:#718078;
+color:#705b21;
 line-height:1.5;">
-🧪 <strong>Competition Demo Mode:</strong> This purchase is simulated.
-No GCash, Maya, bank transfer, or real-money payment is processed.
-The order, stock change, status updates, and notifications are saved
-through Supabase so both buyer and farmer can see the transaction live.
+🧪 <strong>Competition Demo Mode</strong><br>
+No real money is charged. This creates a real demo order in Supabase,
+updates the available stock atomically, and sends the farmer a live notification.
 </div>
 
 <label>Buyer Note</label>
@@ -3516,6 +3532,11 @@ BUY
 
 async function openBuyModal(productId){
 
+  if(!currentProfile || currentProfile.role !== "BUYER"){
+    alert("Only buyer accounts can place demo orders.");
+    return;
+  }
+
   const {
     data:product,
     error
@@ -3671,7 +3692,7 @@ function closeBuyModal(){
 
 
 /* =========================================================
-CREATE ORDER
+CREATE DEMO ORDER
 ========================================================= */
 
 document
@@ -3680,228 +3701,96 @@ document
 
   e.preventDefault();
 
-  if(!currentProduct){
+  if(!currentProduct || !currentProfile){
     return;
   }
 
   const quantity =
     Number(
       document
-        .getElementById(
-          "buyQuantity"
-        ).value
+        .getElementById("buyQuantity")
+        .value
     );
 
-  if(
-    !Number.isFinite(quantity) ||
-    quantity <= 0
-  ){
-
-    alert(
-      "Enter a valid quantity."
-    );
-
+  if(!Number.isFinite(quantity) || quantity <= 0){
+    alert("Enter a valid quantity.");
     return;
   }
 
-  if(
-    quantity >
-    Number(currentProduct.quantity)
-  ){
-
-    alert(
-      "Not enough stock available."
-    );
-
+  if(quantity > Number(currentProduct.quantity)){
+    alert("Not enough stock available.");
     return;
   }
-
-  const total =
-    Number(currentProduct.price) *
-    quantity;
-
-  const paymentMethod =
-    DEMO_PURCHASE_MODE
-    ? "CASH_ON_PICKUP"
-    : document
-        .getElementById(
-          "paymentMethod"
-        ).value;
 
   const buyerNote =
     document
-      .getElementById(
-        "buyerNote"
-      )
-      .value.trim();
+      .getElementById("buyerNote")
+      .value
+      .trim();
 
   const buyMessage =
-    document.getElementById(
-      "buyMessage"
+    document.getElementById("buyMessage");
+
+  const button =
+    document.querySelector(
+      '#buyForm button[type="submit"]'
     );
+
+  if(button){
+    button.disabled = true;
+    button.textContent = "Placing Demo Order...";
+  }
 
   buyMessage.innerHTML =
     `<div class="message">
-      Creating order...
+      Creating secure demo order...
     </div>`;
 
   const {
-    data:order,
+    data,
     error
   } =
-    await supabaseClient
-      .from("orders")
-      .insert({
-
-        product_id:
-          currentProduct.id,
-
-        buyer_id:
-          currentProfile.id,
-
-        seller_id:
-          currentProduct.seller_id,
-
-        quantity:quantity,
-
-        unit_price:
-          Number(
-            currentProduct.price
-          ),
-
-        total_price:
-          total,
-
-        payment_method:
-          paymentMethod,
-
-        payment_status:
-          paymentMethod ===
-          "CASH_ON_PICKUP"
-          ? "UNPAID"
-          : "PENDING",
-
-        status:
-          "PENDING",
-
-        buyer_note:
-          buyerNote || null
-
-      })
-      .select()
-      .single();
+    await supabaseClient.rpc(
+      "place_demo_order",
+      {
+        p_product_id:currentProduct.id,
+        p_quantity:quantity,
+        p_buyer_note:buyerNote || null
+      }
+    );
 
   if(error){
 
     buyMessage.innerHTML =
       `<div class="message error">
-        ${escapeHtml(
-          error.message
-        )}
+        ${escapeHtml(error.message)}
       </div>`;
+
+    if(button){
+      button.disabled = false;
+      button.textContent = "Place Demo Order";
+    }
 
     return;
   }
 
-  /*
-    Update stock.
-  */
-
-  const remaining =
-    Number(
-      currentProduct.quantity
-    ) - quantity;
-
-  const {
-    error:updateError
-  } =
-    await supabaseClient
-      .from("products")
-      .update({
-
-        quantity:remaining,
-
-        status:
-          remaining <= 0
-          ? "SOLD"
-          : "ACTIVE"
-
-      })
-      .eq(
-        "id",
-        currentProduct.id
-      )
-      .eq(
-        "status",
-        "ACTIVE"
-      );
-
-  if(updateError){
-
-    buyMessage.innerHTML =
-      `<div class="message error">
-        Order created, but stock could not
-        be updated:
-        ${escapeHtml(
-          updateError.message
-        )}
-      </div>`;
-
-    return;
-  }
-
-  /*
-    Notification.
-  */
-
-  const {
-    error:notificationError
-  } =
-    await supabaseClient
-      .from("notifications")
-      .insert({
-
-        user_id:
-          currentProduct.seller_id,
-
-        title:
-          "New Order",
-
-        body:
-          `${currentProfile.full_name || "A buyer"} placed an order for ${quantity} ${currentProduct.unit || "unit"}.`,
-
-        type:
-          "ORDER",
-
-        reference_id:
-          order.id
-
-      });
-
-  if(notificationError){
-
-    console.error(
-      notificationError
-    );
-  }
+  const result = data || {};
 
   buyMessage.innerHTML =
     `<div class="message success">
-      Demo purchase placed successfully! No real payment was made.
+      Demo purchase placed successfully!<br>
+      Order ID: ${escapeHtml(result.order_id || "created")}<br>
+      No real payment was made.
     </div>`;
 
-  setTimeout(async()=>{
+  await loadProducts();
+  await loadOrders();
 
+  setTimeout(()=>{
     closeBuyModal();
-
-    await loadProducts();
-
-    await loadOrders();
-
-  },700);
+  },900);
 
 });
-
 
 /* =========================================================
 ORDERS
@@ -4241,7 +4130,8 @@ function renderOrder(order){
 
         Payment:
         ${formatPaymentMethod(
-          order.payment_method
+          order.payment_method,
+          order.demo_mode === true
         )}
 
         <br>
@@ -4276,19 +4166,17 @@ function renderOrder(order){
 }
 
 
-function formatPaymentMethod(method){
+function formatPaymentMethod(method,demoMode=false){
+
+  if(demoMode){
+    return "Competition Demo Purchase";
+  }
 
   const map = {
-
     GCASH:"GCash",
-
     MAYA:"Maya",
-
     BANK_TRANSFER:"Bank Transfer",
-
-    CASH_ON_PICKUP:
-      "Demo Purchase — No Real Payment"
-
+    CASH_ON_PICKUP:"Cash on Pickup"
   };
 
   return map[method] ||
@@ -5226,13 +5114,18 @@ function subscribeToOrders(){
           ){
 
             await loadOrders();
+            await updateFarmerStats();
           }
         }
       )
 
       .subscribe((status)=>{
         if(status === "CHANNEL_ERROR" || status === "TIMED_OUT"){
-          setTimeout(subscribeToOrders,3000);
+          setTimeout(()=>{
+            if(currentProfile){
+              subscribeToOrders();
+            }
+          },3000);
         }
       });
 }
@@ -5250,15 +5143,20 @@ function subscribeToLiveData(){
 
   if(productChannel){
     supabaseClient.removeChannel(productChannel);
+    productChannel = null;
   }
 
   if(notificationChannel){
     supabaseClient.removeChannel(notificationChannel);
+    notificationChannel = null;
   }
 
   productChannel =
     supabaseClient
-      .channel("products-live-" + Date.now())
+      .channel(
+        "products-live-" +
+        currentProfile.id + "-" + Date.now()
+      )
       .on(
         "postgres_changes",
         {
@@ -5270,15 +5168,21 @@ function subscribeToLiveData(){
           await loadProducts();
         }
       )
-      .subscribe();
+      .subscribe(status=>{
+        if(status === "CHANNEL_ERROR" || status === "TIMED_OUT"){
+          setTimeout(()=>{
+            if(currentProfile){
+              subscribeToLiveData();
+            }
+          },3000);
+        }
+      });
 
   notificationChannel =
     supabaseClient
       .channel(
         "notifications-" +
-        currentProfile.id +
-        "-" +
-        Date.now()
+        currentProfile.id + "-" + Date.now()
       )
       .on(
         "postgres_changes",
@@ -5292,9 +5196,16 @@ function subscribeToLiveData(){
           await loadNotifications();
         }
       )
-      .subscribe();
+      .subscribe(status=>{
+        if(status === "CHANNEL_ERROR" || status === "TIMED_OUT"){
+          setTimeout(()=>{
+            if(currentProfile){
+              subscribeToLiveData();
+            }
+          },3000);
+        }
+      });
 }
-
 
 /* =========================================================
 LOGOUT
