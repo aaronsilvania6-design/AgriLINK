@@ -1717,6 +1717,8 @@ Your agricultural marketplace starts here.
 
 <div id="roleBadge" class="role-badge"></div>
 
+<div class="role-badge" style="margin-left:7px">● LIVE SYNC</div>
+
 </section>
 
 
@@ -2032,15 +2034,10 @@ color:#16833b;
 Total: ₱0.00
 </div>
 
-<label>Payment Method</label>
+<label>Buying Method</label>
 
 <select id="paymentMethod">
-
-<option value="GCASH">GCash</option>
-<option value="MAYA">Maya</option>
-<option value="BANK_TRANSFER">Bank Transfer</option>
-<option value="CASH_ON_PICKUP">Cash on Pickup</option>
-
+  <option value="CASH_ON_PICKUP">Demo Purchase — No Real Payment</option>
 </select>
 
 <div
@@ -2049,9 +2046,10 @@ margin-top:10px;
 font-size:12px;
 color:#718078;
 line-height:1.5;">
-🔐 Payment information is recorded as a transaction status.
-Actual online payment processing should be connected to a
-secure payment provider/backend before accepting real money.
+🧪 <strong>Competition Demo Mode:</strong> This purchase is simulated.
+No GCash, Maya, bank transfer, or real-money payment is processed.
+The order, stock change, status updates, and notifications are saved
+through Supabase so both buyer and farmer can see the transaction live.
 </div>
 
 <label>Buyer Note</label>
@@ -2183,8 +2181,13 @@ let currentProduct = null;
 
 let messageChannel = null;
 let orderChannel = null;
+let productChannel = null;
+let notificationChannel = null;
 
 let allProducts = [];
+
+// Competition-safe mode: purchases are simulated and never charge real money.
+const DEMO_PURCHASE_MODE = true;
 
 
 /* =========================================================
@@ -2631,6 +2634,7 @@ async function initializeApp(user){
   await loadNotifications();
 
   subscribeToOrders();
+  subscribeToLiveData();
 }
 
 
@@ -3717,10 +3721,12 @@ document
     quantity;
 
   const paymentMethod =
-    document
-      .getElementById(
-        "paymentMethod"
-      ).value;
+    DEMO_PURCHASE_MODE
+    ? "CASH_ON_PICKUP"
+    : document
+        .getElementById(
+          "paymentMethod"
+        ).value;
 
   const buyerNote =
     document
@@ -3881,7 +3887,7 @@ document
 
   buyMessage.innerHTML =
     `<div class="message success">
-      Order created successfully!
+      Demo purchase placed successfully! No real payment was made.
     </div>`;
 
   setTimeout(async()=>{
@@ -4281,7 +4287,7 @@ function formatPaymentMethod(method){
     BANK_TRANSFER:"Bank Transfer",
 
     CASH_ON_PICKUP:
-      "Cash on Pickup"
+      "Demo Purchase — No Real Payment"
 
   };
 
@@ -5224,6 +5230,68 @@ function subscribeToOrders(){
         }
       )
 
+      .subscribe((status)=>{
+        if(status === "CHANNEL_ERROR" || status === "TIMED_OUT"){
+          setTimeout(subscribeToOrders,3000);
+        }
+      });
+}
+
+
+/* =========================================================
+REALTIME PRODUCTS + NOTIFICATIONS
+========================================================= */
+
+function subscribeToLiveData(){
+
+  if(!currentProfile){
+    return;
+  }
+
+  if(productChannel){
+    supabaseClient.removeChannel(productChannel);
+  }
+
+  if(notificationChannel){
+    supabaseClient.removeChannel(notificationChannel);
+  }
+
+  productChannel =
+    supabaseClient
+      .channel("products-live-" + Date.now())
+      .on(
+        "postgres_changes",
+        {
+          event:"*",
+          schema:"public",
+          table:"products"
+        },
+        async()=>{
+          await loadProducts();
+        }
+      )
+      .subscribe();
+
+  notificationChannel =
+    supabaseClient
+      .channel(
+        "notifications-" +
+        currentProfile.id +
+        "-" +
+        Date.now()
+      )
+      .on(
+        "postgres_changes",
+        {
+          event:"INSERT",
+          schema:"public",
+          table:"notifications",
+          filter:`user_id=eq.${currentProfile.id}`
+        },
+        async()=>{
+          await loadNotifications();
+        }
+      )
       .subscribe();
 }
 
@@ -5252,6 +5320,16 @@ async function logout(){
       );
 
     orderChannel = null;
+  }
+
+  if(productChannel){
+    await supabaseClient.removeChannel(productChannel);
+    productChannel = null;
+  }
+
+  if(notificationChannel){
+    await supabaseClient.removeChannel(notificationChannel);
+    notificationChannel = null;
   }
 
   await supabaseClient
@@ -5334,4 +5412,4 @@ checkSession();
 </script>
 
 </body>
-</html>]
+</html>
