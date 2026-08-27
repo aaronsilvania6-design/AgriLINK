@@ -4275,7 +4275,7 @@ async function updateOrderStatus(
       title:
         "Order Updated",
 
-      body:
+      message:
         `Order status changed to ${newStatus}.`,
 
       type:
@@ -5031,7 +5031,7 @@ async function loadNotifications(){
           <br>
 
           ${escapeHtml(
-            notification.body
+            notification.message || notification.body || ""
           )}
 
           <small>
