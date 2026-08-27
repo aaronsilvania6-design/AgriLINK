@@ -4,9 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="theme-color" content="#16833b">
-<title>AgriLink AI — Agricultural Marketplace</title>
+<title>AgriLink — Agricultural Marketplace</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+
+</script>
 
 <style>
 *{
@@ -1394,6 +1396,104 @@ RESPONSIVE
     grid-template-columns:1fr 1fr;
   }
 }
+
+/* =========================================================
+   AGRILINK ENHANCED COMPETITION UI
+   ========================================================= */
+:root{
+  --role-primary:#16833b;
+  --role-primary-2:#22a447;
+  --role-soft:#eaf8ef;
+  --role-dark:#12351f;
+}
+body.role-farmer{
+  --role-primary:#b63a35;
+  --role-primary-2:#d95a4f;
+  --role-soft:#fff0ee;
+  --role-dark:#4d1715;
+}
+body.role-buyer{
+  --role-primary:#16833b;
+  --role-primary-2:#22a447;
+  --role-soft:#eaf8ef;
+  --role-dark:#12351f;
+}
+.navbar{
+  border-bottom:1px solid color-mix(in srgb,var(--role-primary) 18%,#e1e9e3);
+  box-shadow:0 10px 35px rgba(18,53,31,.07);
+}
+.nav-logo{background:linear-gradient(135deg,var(--role-primary),var(--role-primary-2))!important}
+.nav-brand{color:var(--role-dark)!important}
+.role-badge{background:var(--role-soft)!important;color:var(--role-primary)!important;border-color:color-mix(in srgb,var(--role-primary) 20%,transparent)!important}
+.primary-btn,.buy-btn,.accept-btn,.complete-btn{background:linear-gradient(135deg,var(--role-primary),var(--role-primary-2))!important}
+.hero-primary{background:linear-gradient(135deg,var(--role-primary),var(--role-primary-2))!important}
+.secondary-btn:hover{border-color:var(--role-primary)!important;color:var(--role-primary)!important}
+
+/* dashboard hero */
+.role-home{
+  position:relative;overflow:hidden;margin-top:24px;padding:28px;border-radius:26px;
+  color:white;background:linear-gradient(135deg,var(--role-dark),var(--role-primary));
+  box-shadow:0 20px 55px color-mix(in srgb,var(--role-primary) 22%,transparent);
+}
+.role-home:after{content:"";position:absolute;width:260px;height:260px;border-radius:50%;right:-90px;top:-120px;background:rgba(255,255,255,.12)}
+.role-home .eyebrow{font-size:11px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;opacity:.82}
+.role-home h2{font-size:30px;margin:8px 0 8px;position:relative;z-index:1}
+.role-home p{max-width:680px;line-height:1.65;opacity:.92;position:relative;z-index:1}
+.role-home-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;position:relative;z-index:1}
+.role-home-actions button{border:0;border-radius:13px;padding:11px 15px;font-weight:900;background:#fff;color:var(--role-dark)}
+.role-home-actions button.ghost{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.25)}
+
+.quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:18px}
+.quick-card{background:#fff;border:1px solid #e5ece7;border-radius:19px;padding:18px;box-shadow:0 10px 28px rgba(18,53,31,.06);transition:.2s;cursor:pointer}
+.quick-card:hover{transform:translateY(-3px);box-shadow:0 16px 34px rgba(18,53,31,.1)}
+.quick-icon{font-size:25px;margin-bottom:10px}.quick-card strong{display:block;font-size:15px}.quick-card span{display:block;color:#718078;font-size:12px;line-height:1.5;margin-top:4px}
+
+/* product polish */
+.product-card{border-radius:22px!important;overflow:hidden!important;transition:transform .2s,box-shadow .2s,border-color .2s!important}
+.product-card:hover{transform:translateY(-5px);box-shadow:0 22px 45px rgba(18,53,31,.12)!important;border-color:color-mix(in srgb,var(--role-primary) 22%,#e1e9e3)!important}
+.product-image{position:relative!important}
+.product-image:after{content:"FRESH LISTING";position:absolute;left:10px;top:10px;padding:5px 8px;border-radius:999px;background:rgba(255,255,255,.9);color:var(--role-primary);font-size:9px;font-weight:900;letter-spacing:.08em}
+.product-seller{cursor:pointer}
+.buy-btn{box-shadow:0 8px 20px color-mix(in srgb,var(--role-primary) 20%,transparent)!important}
+
+/* stats */
+.farmer-dashboard{margin-top:20px}
+.stat-card{border-top:3px solid var(--role-primary)!important}
+.stat-card .stat-value{color:var(--role-primary)!important}
+
+/* profile */
+.profile-modal-card{overflow:hidden!important}
+.profile-cover{background:linear-gradient(135deg,var(--role-dark),var(--role-primary),var(--role-primary-2))!important;height:135px!important}
+.profile-main{position:relative}
+.profile-avatar{box-shadow:0 12px 25px rgba(0,0,0,.14)!important}
+.profile-rating{display:flex;align-items:center;gap:7px;margin:12px 0;font-weight:900;color:#a06b00}
+.stars{letter-spacing:2px;color:#f5a623}.rating-muted{color:#718078;font-weight:700;font-size:12px}
+.profile-bio{background:#f7faf8;border:1px solid #e4ece6;border-radius:15px;padding:14px!important;line-height:1.65}
+.profile-edit-btn{margin-top:15px;background:var(--role-primary)!important;color:#fff!important;border:0!important}
+
+/* review modal */
+.review-stars{display:flex;gap:7px;margin:12px 0 16px}
+.review-star{width:44px;height:44px;border-radius:13px;border:1px solid #e4e9e5;background:#fff;font-size:22px;color:#c7cfca}
+.review-star.active{background:#fff5d9;border-color:#f1c45b;color:#e9a400}
+.review-summary{background:#f7faf8;border-radius:16px;padding:15px;margin:12px 0}
+
+/* Agribot */
+.bot-launcher{position:fixed;right:22px;bottom:22px;width:62px;height:62px;border-radius:20px;border:0;background:linear-gradient(135deg,#16833b,#22a447);color:#fff;box-shadow:0 16px 35px rgba(22,131,59,.28);font-size:25px;z-index:90}
+body.role-farmer .bot-launcher{background:linear-gradient(135deg,#9f2f2b,#d95a4f)}
+.bot-window{position:fixed;right:22px;bottom:94px;width:min(380px,calc(100vw - 30px));height:500px;background:#fff;border:1px solid #dfe8e2;border-radius:24px;box-shadow:0 25px 70px rgba(18,53,31,.2);z-index:90;overflow:hidden;display:flex;flex-direction:column}
+.bot-header{padding:16px 18px;background:linear-gradient(135deg,var(--role-dark),var(--role-primary));color:#fff;display:flex;justify-content:space-between;align-items:center}
+.bot-header small{display:block;opacity:.75;margin-top:2px}.bot-messages{flex:1;overflow:auto;padding:16px;background:#f7faf8}.bot-msg{max-width:85%;padding:11px 13px;border-radius:15px;margin-bottom:9px;font-size:13px;line-height:1.5}.bot-msg.bot{background:#fff;border:1px solid #e2e9e4}.bot-msg.user{margin-left:auto;background:var(--role-soft);color:var(--role-dark)}
+.bot-suggestions{display:flex;gap:6px;flex-wrap:wrap;padding:9px 12px;border-top:1px solid #e6ece8}.bot-suggestions button{border:1px solid #dce6df;background:#fff;border-radius:999px;padding:7px 9px;font-size:11px}.bot-input{display:flex;padding:10px;border-top:1px solid #e6ece8;gap:8px}.bot-input input{flex:1;border:1px solid #dfe7e2;border-radius:12px;padding:10px}.bot-input button{border:0;border-radius:12px;padding:10px 13px;background:var(--role-primary);color:#fff;font-weight:900}
+
+/* top actions */
+.profile-nav-btn{border:1px solid #dce7df!important;background:#fff!important;color:var(--role-dark)!important}
+.live-pill{color:var(--role-primary)!important;background:var(--role-soft)!important}
+
+/* mobile */
+@media(max-width:800px){
+ .quick-grid{grid-template-columns:1fr}.role-home h2{font-size:25px}.bot-window{right:15px;bottom:88px}.bot-launcher{right:15px;bottom:15px}
+}
+
 </style>
 </head>
 
@@ -1409,7 +1509,7 @@ LANDING
 
 <div class="brand">
   <div class="brand-icon">🌾</div>
-  AgriLink AI
+  AgriLink
 </div>
 
 <button onclick="showAuth()">Get Started</button>
@@ -1421,7 +1521,7 @@ LANDING
 <div>
 
 <div class="hero-tag">
-🌱 AI-powered agricultural marketplace
+🌱 Smart agricultural marketplace
 </div>
 
 <h1>
@@ -1430,7 +1530,7 @@ to opportunity.
 </h1>
 
 <p>
-AgriLink AI connects farmers and buyers through a trusted digital
+AgriLink connects farmers and buyers through a trusted digital
 marketplace — making agricultural products easier to discover,
 buy, sell and manage.
 </p>
@@ -1466,7 +1566,7 @@ Learn More
 </div>
 
 <div class="floating-card float-three">
-<div class="float-title">Powered by AI</div>
+<div class="float-title">Helpful tools</div>
 <div class="float-value">✨ AgriBot</div>
 </div>
 
@@ -1529,7 +1629,7 @@ AUTH
 <h1>Grow your marketplace.</h1>
 
 <p>
-Join AgriLink AI and connect agricultural supply with real opportunities.
+Join AgriLink and connect agricultural supply with real opportunities.
 </p>
 
 <div class="auth-points">
@@ -1552,7 +1652,7 @@ Join AgriLink AI and connect agricultural supply with real opportunities.
 <h2>Welcome back.</h2>
 
 <p class="auth-subtitle">
-Sign in to continue to AgriLink AI.
+Sign in to continue to AgriLink.
 </p>
 
 <div class="tabs">
@@ -1653,20 +1753,12 @@ APP
 <div class="nav-brand">
 
 <div class="nav-logo">🌾</div>
-AgriLink AI
+AgriLink
 
 </div>
 
 <div
-style="
-margin-left:auto;
-margin-right:10px;
-font-size:11px;
-font-weight:800;
-color:#16833b;
-background:#eaf8ef;
-padding:7px 10px;
-border-radius:999px;">
+class="live-pill" style="margin-left:auto;margin-right:10px;font-size:11px;font-weight:800;padding:7px 10px;border-radius:999px;">
 ● LIVE
 </div>
 
@@ -1682,6 +1774,18 @@ onclick="toggleNotifications()">
 class="secondary-btn"
 onclick="openChat()">
 💬 Chat
+</button>
+
+<button
+class="secondary-btn profile-nav-btn"
+onclick="openMyProfile()">
+👤 Profile
+</button>
+
+<button
+class="secondary-btn"
+onclick="toggleAgriBot()">
+🌱 AgriBot
 </button>
 
 <button
@@ -1775,6 +1879,15 @@ Clear
 
 </section>
 
+
+<section id="roleHomePanel" class="role-home">
+  <div class="eyebrow" id="roleHomeEyebrow">AGRILINK</div>
+  <h2 id="roleHomeTitle">Welcome to AgriLink</h2>
+  <p id="roleHomeText">Your marketplace dashboard is ready.</p>
+  <div class="role-home-actions" id="roleHomeActions"></div>
+</section>
+
+<div class="quick-grid" id="quickGrid"></div>
 
 <section
 id="farmerDashboard"
@@ -2087,6 +2200,68 @@ Place Order
 </div>
 </div>
 
+
+<!-- =======================================================
+MY PROFILE MODAL
+======================================================= -->
+<div id="myProfileModal" class="modal hidden">
+  <div class="modal-card" style="max-width:700px">
+    <div class="modal-header">
+      <h2>My Profile</h2>
+      <button class="close" onclick="closeMyProfile()">×</button>
+    </div>
+    <div id="myProfileContent"></div>
+  </div>
+</div>
+
+<!-- =======================================================
+REVIEW MODAL
+======================================================= -->
+<div id="reviewModal" class="modal hidden">
+  <div class="modal-card" style="max-width:560px">
+    <div class="modal-header">
+      <h2>Rate your purchase</h2>
+      <button class="close" onclick="closeReviewModal()">×</button>
+    </div>
+    <div id="reviewProductInfo" class="review-summary"></div>
+    <form id="reviewForm">
+      <input id="reviewOrderId" type="hidden">
+      <div style="font-weight:900">How was your experience?</div>
+      <div class="review-stars" id="reviewStars">
+        <button type="button" class="review-star" data-rating="1" onclick="setReviewRating(1)">★</button>
+        <button type="button" class="review-star" data-rating="2" onclick="setReviewRating(2)">★</button>
+        <button type="button" class="review-star" data-rating="3" onclick="setReviewRating(3)">★</button>
+        <button type="button" class="review-star" data-rating="4" onclick="setReviewRating(4)">★</button>
+        <button type="button" class="review-star" data-rating="5" onclick="setReviewRating(5)">★</button>
+      </div>
+      <textarea id="reviewText" maxlength="500" placeholder="Tell the farmer what you liked or what could be improved..."></textarea>
+      <button class="primary-btn" type="submit">Submit Rating</button>
+      <div id="reviewMessage"></div>
+    </form>
+  </div>
+</div>
+
+<!-- =======================================================
+AGRIBOT
+======================================================= -->
+<button id="botLauncher" class="bot-launcher" onclick="toggleAgriBot()" aria-label="Open AgriBot">🌱</button>
+<div id="botWindow" class="bot-window hidden">
+  <div class="bot-header">
+    <div><strong>AgriBot</strong><small>Your AgriLink helper</small></div>
+    <button class="close" style="color:#fff" onclick="toggleAgriBot()">×</button>
+  </div>
+  <div id="botMessages" class="bot-messages"></div>
+  <div class="bot-suggestions">
+    <button onclick="askAgriBot('How do I buy a product?')">How do I buy?</button>
+    <button onclick="askAgriBot('How do I sell?')">How do I sell?</button>
+    <button onclick="askAgriBot('How do ratings work?')">Ratings</button>
+    <button onclick="askAgriBot('How do I edit my profile?')">Profile</button>
+  </div>
+  <form class="bot-input" id="botForm">
+    <input id="botInput" placeholder="Ask AgriBot anything..." autocomplete="off">
+    <button type="submit">Send</button>
+  </form>
+</div>
 
 <!-- =======================================================
 CHAT MODAL
@@ -2601,6 +2776,10 @@ async function initializeApp(user){
 
   const farmer =
     currentProfile.role === "FARMER";
+
+  document.body.classList.toggle("role-farmer", farmer);
+  document.body.classList.toggle("role-buyer", !farmer);
+  setupRoleHome();
 
   document
     .getElementById("addProductButton")
@@ -5028,7 +5207,7 @@ async function loadNotifications(){
           <br>
 
           ${escapeHtml(
-            notification.message || notification.body || ""
+            notification.message || notification.message || ""
           )}
 
           <small>
@@ -5240,6 +5419,11 @@ async function logout(){
     notificationChannel = null;
   }
 
+  if(reviewChannel){
+    await supabaseClient.removeChannel(reviewChannel);
+    reviewChannel = null;
+  }
+
   await supabaseClient
     .auth
     .signOut();
@@ -5316,6 +5500,260 @@ START
 ========================================================= */
 
 checkSession();
+
+/* =========================================================
+   ENHANCED AGRILINK FEATURES
+   ========================================================= */
+
+let reviewRating = 0;
+let reviewedOrderIds = new Set();
+
+function setupRoleHome(){
+  const farmer = currentProfile?.role === "FARMER";
+  const title = document.getElementById("roleHomeTitle");
+  const text = document.getElementById("roleHomeText");
+  const eyebrow = document.getElementById("roleHomeEyebrow");
+  const actions = document.getElementById("roleHomeActions");
+  const quick = document.getElementById("quickGrid");
+  if(!title || !actions || !quick) return;
+
+  eyebrow.textContent = farmer ? "FARMER SPACE" : "BUYER SPACE";
+  title.textContent = farmer
+    ? `Grow your farm business, ${currentProfile.full_name || "Farmer"}.`
+    : `Find fresh products, ${currentProfile.full_name || "Buyer"}.`;
+  text.textContent = farmer
+    ? "Manage your listings, respond to orders, build trust and keep your customers coming back."
+    : "Discover local products, connect with farmers, track your orders and share your experience.";
+
+  actions.innerHTML = farmer ? `
+    <button onclick="openAddProduct()">＋ Add Product</button>
+    <button class="ghost" onclick="loadOrders();document.getElementById('farmerTransactions').scrollIntoView({behavior:'smooth'})">View Orders</button>
+    <button class="ghost" onclick="openMyProfile()">Edit Profile</button>
+  ` : `
+    <button onclick="document.getElementById('buyerSearchSection').scrollIntoView({behavior:'smooth'})">🛒 Explore Marketplace</button>
+    <button class="ghost" onclick="document.getElementById('buyerOrders').scrollIntoView({behavior:'smooth'})">Track Orders</button>
+    <button class="ghost" onclick="openMyProfile()">Edit Profile</button>
+  `;
+
+  quick.innerHTML = farmer ? `
+    <div class="quick-card" onclick="openAddProduct()"><div class="quick-icon">🌾</div><strong>List your harvest</strong><span>Publish fresh products with photos, price, stock and location.</span></div>
+    <div class="quick-card" onclick="document.getElementById('farmerTransactions').scrollIntoView({behavior:'smooth'})"><div class="quick-icon">📋</div><strong>Manage orders</strong><span>Accept, start and complete buyer transactions.</span></div>
+    <div class="quick-card" onclick="openMyProfile()"><div class="quick-icon">⭐</div><strong>Build trust</strong><span>Add a bio and let buyers see your ratings and profile.</span></div>
+  ` : `
+    <div class="quick-card" onclick="document.getElementById('buyerSearchSection').scrollIntoView({behavior:'smooth'})"><div class="quick-icon">🛍️</div><strong>Shop local</strong><span>Search agricultural products by name, location and price.</span></div>
+    <div class="quick-card" onclick="document.getElementById('buyerOrders').scrollIntoView({behavior:'smooth'})"><div class="quick-icon">📦</div><strong>Track purchases</strong><span>See your order status as it changes in real time.</span></div>
+    <div class="quick-card" onclick="openAgriBotWelcome()"><div class="quick-icon">🌱</div><strong>Ask AgriBot</strong><span>Get quick help with buying, selling, profiles and ratings.</span></div>
+  `;
+}
+
+async function openMyProfile(){
+  if(!currentProfile) return;
+  const modal=document.getElementById("myProfileModal");
+  const box=document.getElementById("myProfileContent");
+  modal.classList.remove("hidden");
+  box.innerHTML='<div class="empty">Loading your profile...</div>';
+
+  const {data:orders=[]}=await supabaseClient.from("orders").select("status,total_amount,total_price").or(`buyer_id.eq.${currentProfile.id},seller_id.eq.${currentProfile.id}`);
+  const isFarmer=currentProfile.role==="FARMER";
+  const completed=(orders||[]).filter(o=>o.status==="COMPLETED").length;
+  const avatar=isFarmer?'👨‍🌾':'🛒';
+
+  let ratingHtml='';
+  if(isFarmer){
+    const {data:reviews}=await supabaseClient.from("reviews").select("rating").eq("seller_id",currentProfile.id);
+    const arr=reviews||[];
+    const avg=arr.length?arr.reduce((a,r)=>a+Number(r.rating),0)/arr.length:0;
+    ratingHtml=`<div class="profile-rating"><span class="stars">${starString(avg)}</span><span>${avg?avg.toFixed(1):'New'}</span><span class="rating-muted">${arr.length} review${arr.length===1?'':'s'}</span></div>`;
+  }else{
+    ratingHtml=`<div class="profile-rating"><span class="stars">★</span><span>${completed}</span><span class="rating-muted">completed purchase${completed===1?'':'s'}</span></div>`;
+  }
+
+  box.innerHTML=`
+    <div class="profile-cover"></div>
+    <div class="profile-main">
+      <div class="profile-avatar">${avatar}</div>
+      <div class="profile-name">${escapeHtml(currentProfile.full_name||'AgriLink User')}</div>
+      <div class="profile-role">${escapeHtml(currentProfile.role||'USER')} ACCOUNT</div>
+      ${ratingHtml}
+      <div class="profile-meta">
+        <span>✉️ ${escapeHtml(currentProfile.email||currentUser?.email||'')}</span>
+        ${currentProfile.location?`<span>📍 ${escapeHtml(currentProfile.location)}</span>`:''}
+      </div>
+      <div class="profile-bio">${escapeHtml(currentProfile.bio||'Tell the AgriLink community a little about yourself.')}</div>
+      <form id="profileEditForm" style="margin-top:18px">
+        <div class="form-grid">
+          <div><label>Display Name</label><input id="editFullName" value="${escapeHtml(currentProfile.full_name||'') }" required></div>
+          <div><label>Location</label><input id="editLocation" value="${escapeHtml(currentProfile.location||'') }" placeholder="Municipality / Province"></div>
+        </div>
+        <label>About Me</label>
+        <textarea id="editBio" maxlength="500" placeholder="Write a short description about yourself...">${escapeHtml(currentProfile.bio||'')}</textarea>
+        <label>Contact Number <span style="font-size:11px;color:#718078">optional</span></label>
+        <input id="editPhone" value="${escapeHtml(currentProfile.phone||'')}" placeholder="09xx xxx xxxx">
+        <button class="primary-btn profile-edit-btn" type="submit">Save Profile</button>
+        <div id="profileEditMessage"></div>
+      </form>
+    </div>`;
+
+  document.getElementById("profileEditForm").addEventListener("submit",saveMyProfile);
+}
+
+function closeMyProfile(){document.getElementById("myProfileModal").classList.add("hidden")}
+
+async function saveMyProfile(e){
+  e.preventDefault();
+  const msg=document.getElementById("profileEditMessage");
+  const payload={
+    full_name:document.getElementById("editFullName").value.trim(),
+    bio:document.getElementById("editBio").value.trim()||null,
+    location:document.getElementById("editLocation").value.trim()||null,
+    phone:document.getElementById("editPhone").value.trim()||null
+  };
+  if(!payload.full_name){msg.innerHTML='<div class="message error">Name is required.</div>';return}
+  const {data,error}=await supabaseClient.from("users").update(payload).eq("id",currentProfile.id).select("*").single();
+  if(error){msg.innerHTML=`<div class="message error">${escapeHtml(error.message)}</div>`;return}
+  currentProfile=data;
+  document.getElementById("userName").textContent=currentProfile.full_name||'User';
+  msg.innerHTML='<div class="message success">Profile updated successfully.</div>';
+  setupRoleHome();
+  setTimeout(()=>openMyProfile(),350);
+}
+
+function starString(avg){
+  const rounded=Math.round(Number(avg)||0);
+  return '★★★★★'.split('').map((_,i)=>i<rounded?'★':'☆').join('');
+}
+
+/* Rebuild public farmer profile with rating/bio using the existing modal. */
+/* =========================================================
+   REVIEWS
+   ========================================================= */
+async function loadReviewState(){
+  if(currentProfile?.role!=="BUYER") return;
+  const {data}=await supabaseClient.from("reviews").select("order_id").eq("buyer_id",currentProfile.id);
+  reviewedOrderIds=new Set((data||[]).map(x=>x.order_id));
+}
+
+async function openReviewForOrder(orderId){
+  const {data:order,error}=await supabaseClient.from("orders").select(`*,products:product_id(name,unit),seller:seller_id(full_name)`).eq("id",orderId).eq("buyer_id",currentProfile.id).single();
+  if(error||!order){alert(error?.message||"Order not found.");return;}
+  openReviewModal(order);
+}
+
+function openReviewModal(order){
+  if(!order || order.status!=="COMPLETED") return;
+  if(reviewedOrderIds.has(order.id)){alert("You already rated this purchase.");return}
+  reviewRating=0;
+  document.getElementById("reviewOrderId").value=order.id;
+  document.getElementById("reviewProductInfo").innerHTML=`<strong>${escapeHtml(order.products?.name||'Product')}</strong><br><span style="color:#718078">Purchased from ${escapeHtml(order.seller?.full_name||'Farmer')}</span>`;
+  document.getElementById("reviewText").value='';
+  setReviewRating(0);
+  document.getElementById("reviewMessage").innerHTML='';
+  document.getElementById("reviewModal").classList.remove("hidden");
+}
+function closeReviewModal(){document.getElementById("reviewModal").classList.add("hidden")}
+function setReviewRating(value){
+  reviewRating=value;
+  document.querySelectorAll(".review-star").forEach(btn=>btn.classList.toggle("active",Number(btn.dataset.rating)<=value));
+}
+
+document.getElementById("reviewForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  if(reviewRating<1){document.getElementById("reviewMessage").innerHTML='<div class="message error">Please choose a star rating.</div>';return}
+  const orderId=document.getElementById("reviewOrderId").value;
+  const {data:order,error:orderError}=await supabaseClient.from("orders").select("*").eq("id",orderId).eq("buyer_id",currentProfile.id).eq("status","COMPLETED").single();
+  if(orderError||!order){document.getElementById("reviewMessage").innerHTML='<div class="message error">This completed order could not be found.</div>';return}
+  const {error}=await supabaseClient.from("reviews").insert({order_id:order.id,buyer_id:currentProfile.id,seller_id:order.seller_id,product_id:order.product_id,rating:reviewRating,review_text:document.getElementById("reviewText").value.trim()||null});
+  if(error){document.getElementById("reviewMessage").innerHTML=`<div class="message error">${escapeHtml(error.message)}</div>`;return}
+  reviewedOrderIds.add(order.id);
+  document.getElementById("reviewMessage").innerHTML='<div class="message success">Thank you! Your rating was submitted.</div>';
+  setTimeout(()=>{closeReviewModal();loadOrders();},500);
+});
+
+/* Override order renderer so completed buyer purchases can be rated. */
+const __renderOrderBase = renderOrder;
+renderOrder = function(order){
+  let html=__renderOrderBase(order);
+  if(currentProfile?.role==="BUYER" && order.status==="COMPLETED" && !reviewedOrderIds.has(order.id)){
+    html=html.replace('<div class="order-actions">','<div class="order-actions"><button class="complete-btn" onclick="openReviewForOrder(\''+String(order.id).replace(/\'/g,'\\\'')+'\')">⭐ Rate Purchase</button>');
+  }
+  return html;
+};
+
+const __loadOrdersBase = loadOrders;
+loadOrders = async function(){
+  if(currentProfile?.role==="BUYER") await loadReviewState();
+  await __loadOrdersBase();
+};
+
+/* =========================================================
+   PUBLIC FARMER PROFILE RATING ENHANCEMENT
+   ========================================================= */
+const __openFarmerProfileBase = openFarmerProfile;
+openFarmerProfile = async function(farmerId){
+  await __openFarmerProfileBase(farmerId);
+  const box=document.getElementById("profileContent");
+  if(!box || box.innerHTML.includes('profile-rating')) return;
+  const {data:farmer}=await supabaseClient.from("users").select("bio,location,phone,full_name,role,email").eq("id",farmerId).maybeSingle();
+  const {data:reviews}=await supabaseClient.from("reviews").select("rating,review_text,created_at,buyer_id").eq("seller_id",farmerId).order("created_at",{ascending:false}).limit(8);
+  const arr=reviews||[]; const avg=arr.length?arr.reduce((a,r)=>a+Number(r.rating),0)/arr.length:0;
+  const main=box.querySelector('.profile-main');
+  if(main){
+    const bio=main.querySelector('.profile-bio');
+    if(bio) bio.innerHTML=escapeHtml(farmer?.bio||'This farmer has not added a description yet.') + (farmer?.location?`<br><span style="font-size:12px;color:#718078">📍 ${escapeHtml(farmer.location)}</span>`:'');
+    const rating=document.createElement('div'); rating.className='profile-rating'; rating.innerHTML=`<span class="stars">${starString(avg)}</span><span>${avg?avg.toFixed(1):'New'}</span><span class="rating-muted">${arr.length} review${arr.length===1?'':'s'}</span>`;
+    const role=main.querySelector('.profile-role'); if(role) role.after(rating);
+    if(arr.length){
+      const section=document.createElement('div'); section.style.marginTop='18px'; section.innerHTML=`<h3 style="margin-bottom:10px">Recent Reviews</h3>`+arr.slice(0,4).map(r=>`<div class="review-summary"><div class="stars">${starString(r.rating)}</div><div style="font-size:12px;margin-top:5px">${escapeHtml(r.review_text||'Great transaction!')}</div></div>`).join(''); main.appendChild(section);
+    }
+  }
+};
+
+/* =========================================================
+   AGRIBOT - lightweight built-in helper
+   ========================================================= */
+function toggleAgriBot(){
+  const w=document.getElementById('botWindow'); if(!w)return;
+  const opening=w.classList.contains('hidden'); w.classList.toggle('hidden',!opening);
+  if(opening && !document.getElementById('botMessages').children.length) openAgriBotWelcome();
+}
+function openAgriBotWelcome(){
+  const w=document.getElementById('botWindow'); if(w.classList.contains('hidden')) w.classList.remove('hidden');
+  const box=document.getElementById('botMessages');
+  if(!box.children.length) botSay(`Hi ${currentProfile?.full_name||'there'}! I’m AgriBot 🌱. I can guide you around AgriLink, including buying, selling, profiles, orders and ratings.`);
+}
+function botSay(text){const box=document.getElementById('botMessages');box.insertAdjacentHTML('beforeend',`<div class="bot-msg bot">${escapeHtml(text)}</div>`);box.scrollTop=box.scrollHeight}
+function botUser(text){const box=document.getElementById('botMessages');box.insertAdjacentHTML('beforeend',`<div class="bot-msg user">${escapeHtml(text)}</div>`);box.scrollTop=box.scrollHeight}
+function askAgriBot(text){botUser(text);setTimeout(()=>botReply(text),180)}
+function botReply(text){
+  const q=String(text).toLowerCase(); const farmer=currentProfile?.role==='FARMER'; let reply;
+  if(q.includes('buy')) reply='To buy, open Marketplace, choose a product, set the quantity, then place the Competition Demo Order. No real money is charged.';
+  else if(q.includes('sell')||q.includes('product')) reply=farmer?'Use + Product to publish a listing. Add a clear name, price, stock, location, description and photo.':'Only farmer accounts can publish products. You can contact a farmer through Chat.';
+  else if(q.includes('rating')||q.includes('review')||q.includes('star')) reply='After a completed purchase, the buyer gets a Rate Purchase button. Choose 1–5 stars and optionally write a review.';
+  else if(q.includes('profile')||q.includes('bio')) reply='Tap Profile in the top bar. You can edit your display name, location, short bio and optional contact number.';
+  else if(q.includes('order')||q.includes('track')) reply='Your order status moves through the marketplace workflow. Realtime updates let both sides see status changes without refreshing.';
+  else if(q.includes('farmer')) reply='Farmer accounts focus on listings, stock, orders, customer trust and their public farmer profile.';
+  else if(q.includes('buyer')) reply='Buyer accounts focus on discovery, search, purchasing, chat, order tracking and ratings.';
+  else if(q.includes('hello')||q.includes('hi')) reply='Hello! 🌱 What would you like help with?';
+  else reply='I can help with buying, selling, orders, ratings, profiles and using AgriLink. Try asking “How do I buy?”';
+  botSay(reply);
+}
+document.getElementById('botForm').addEventListener('submit',e=>{e.preventDefault();const input=document.getElementById('botInput');const t=input.value.trim();if(!t)return;input.value='';askAgriBot(t)});
+
+/* Realtime products + notifications + reviews */
+let reviewChannel = null;
+function subscribeReviewRealtime(){
+  if(!currentProfile)return;
+  if(reviewChannel){ supabaseClient.removeChannel(reviewChannel); reviewChannel=null; }
+  reviewChannel=supabaseClient.channel('reviews-live-'+currentProfile.id+'-'+Date.now())
+    .on('postgres_changes',{event:'*',schema:'public',table:'reviews'},async()=>{
+      if(currentProfile?.role==='FARMER') await openMyProfile();
+      if(currentProfile?.role==='BUYER') await loadOrders();
+    })
+    .subscribe();
+}
+const __initEnhancedBase=initializeApp;
+initializeApp=async function(user){await __initEnhancedBase(user);setupRoleHome();subscribeReviewRealtime();};
+
 
 </script>
 
