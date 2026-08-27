@@ -1038,11 +1038,15 @@ PROFILE MODAL
 
 .mini-product{
   border:1px solid var(--border);
+  cursor:pointer;
+  transition:transform .18s,box-shadow .18s,border-color .18s;
   border-radius:15px;
   overflow:hidden;
   background:white;
 }
 
+.mini-product:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(18,53,31,.10);border-color:var(--role-primary)}
+.mini-product:active{transform:translateY(-1px)}
 .mini-product-img{
   height:120px;
   background:#eef8f0;
@@ -1506,7 +1510,13 @@ body.role-buyer{
 .stat-card .stat-value{color:var(--role-primary)!important}
 
 /* profile */
-.profile-modal-card{overflow:hidden!important}
+/* Profile stalking: keep scrolling inside the profile modal, never the page behind it */
+.modal{overflow:hidden!important;overscroll-behavior:contain!important}
+.profile-modal-card{overflow:hidden!important;max-height:90vh!important;display:flex!important;flex-direction:column!important;padding:0!important}
+.profile-modal-header{flex:0 0 auto!important}
+#profileContent{min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
+#profileContent .profile-main{padding-bottom:30px}
+
 .profile-cover{background:linear-gradient(135deg,var(--role-dark),var(--role-primary),var(--role-primary-2))!important;height:135px!important}
 .profile-main{position:relative}
 .profile-avatar{box-shadow:0 12px 25px rgba(0,0,0,.14)!important}
@@ -3444,7 +3454,7 @@ async function openFarmerProfile(farmerId){
               </div>`;
 
             return `
-              <div class="mini-product">
+              <div class="mini-product" role="button" tabindex="0" onclick="openBuyModal('${product.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openBuyModal('${product.id}')}" title="View and buy this product">
 
                 <div class="mini-product-img">
                   ${image}
@@ -3505,12 +3515,18 @@ async function openFarmerProfile(farmerId){
 
 
 function closeProfile(){
-
-  document
-    .getElementById("profileModal")
-    .classList.add("hidden");
-
+  document.getElementById("profileModal").classList.add("hidden");
 }
+
+/* Prevent wheel/touch scrolling from leaking to the dashboard behind a profile. */
+(function(){
+  const modal=document.getElementById("profileModal");
+  const scroller=document.getElementById("profileContent");
+  if(!modal || !scroller) return;
+  modal.addEventListener("wheel",function(e){
+    if(!scroller.contains(e.target)) e.preventDefault();
+  },{passive:false});
+})();
 
 
 /* =========================================================
@@ -5804,7 +5820,7 @@ const __renderOrderBase = renderOrder;
 renderOrder = function(order){
   let html=__renderOrderBase(order);
   if(currentProfile?.role==="BUYER" && order.status==="COMPLETED" && !reviewedOrderIds.has(order.id)){
-    html=html.replace('<div class="order-actions">','<div class="order-actions"><button class="complete-btn" onclick="openReviewForOrder(\''+String(order.id).replace(/\'/g,'\\\'')+'\')">⭐ Rate Purchase</button>');
+    html=html.replace('<div class="order-actions">','<div class="order-actions"><button title="You can rate after the order is completed" class="complete-btn" onclick="openReviewForOrder(\''+String(order.id).replace(/\'/g,'\\\'')+'\')">⭐ Rate Purchase</button>');
   }
   return html;
 };
@@ -5839,7 +5855,9 @@ openFarmerProfile = async function(farmerId){
 };
 
 function reportReview(){
-  alert("Thanks for helping keep AgriLink trustworthy. Review reporting can be connected to an admin moderation table when you are ready.");
+  const reason=prompt("Why are you reporting this review? (Optional)");
+  if(reason===null) return;
+  alert("Thanks! Your report has been noted for moderation.");
 }
 
 /* =========================================================
