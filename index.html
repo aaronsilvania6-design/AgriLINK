@@ -688,7 +688,11 @@ background:#eee;
 .status-CONFIRMED{background:#e3f2fd;color:#1565c0}
 .status-ONGOING{background:#e8f5e9;color:#2e7d32}
 .status-COMPLETED{background:#e8f5e9;color:#1b5e20}
-.status-CANCELLED,.status-REJECTED{background:#ffebee;color:#b71c1c}
+.status-CANCELLED,
+.status-REJECTED{
+background:#ffebee;
+color:#b71c1c;
+}
 
 .order-info{
 font-size:13px;
@@ -935,6 +939,68 @@ background:#fff5f5;
 display:block;
 color:#999;
 margin-top:5px;
+}
+
+/* DEMO PAYMENT */
+
+.demo-payment-box{
+margin-top:15px;
+padding:16px;
+background:linear-gradient(135deg,#fff8f8,#fff);
+border:1px solid #ffcdd2;
+border-radius:14px;
+}
+
+.demo-payment-title{
+font-weight:900;
+font-size:15px;
+}
+
+.demo-payment-text{
+font-size:12px;
+color:#666;
+margin-top:5px;
+line-height:1.5;
+}
+
+.demo-badge{
+display:inline-block;
+margin-top:9px;
+padding:6px 10px;
+border-radius:20px;
+background:#e8f5e9;
+color:#2e7d32;
+font-size:10px;
+font-weight:900;
+}
+
+/* SUCCESS CHECKOUT */
+
+.checkout-success{
+margin-top:15px;
+padding:20px;
+background:#e8f5e9;
+border:1px solid #c8e6c9;
+border-radius:15px;
+text-align:center;
+}
+
+.checkout-success-icon{
+font-size:40px;
+margin-bottom:8px;
+}
+
+.checkout-success-title{
+font-size:19px;
+font-weight:900;
+color:#1b5e20;
+}
+
+.checkout-success-text{
+font-size:13px;
+color:#555;
+margin-top:8px;
+line-height:1.7;
 }
 
 /* RESPONSIVE */
@@ -1639,7 +1705,7 @@ Publish Product
 
 
 <!-- =========================
-BUY
+DEMO BUY / CHECKOUT
 ========================= -->
 
 <div id="buyModal" class="modal hidden">
@@ -1648,7 +1714,15 @@ BUY
 
 <div class="modal-header">
 
-<h2>Place Order</h2>
+<div>
+
+<h2>🛒 Confirm Order</h2>
+
+<p style="font-size:13px;color:#777;margin-top:4px">
+AgriLink AI Demo Checkout
+</p>
+
+</div>
 
 <button class="close" onclick="closeBuyModal()">×</button>
 
@@ -1671,28 +1745,37 @@ value="1"
 required
 oninput="updateBuyTotal()">
 
-<div id="buyTotalPreview"
+<div
+id="buyTotalPreview"
 style="
 margin-top:12px;
-padding:14px;
+padding:16px;
 background:#fff5f5;
-border-radius:12px;
-font-weight:800;
+border:1px solid #ffcdd2;
+border-radius:13px;
+font-weight:900;
 color:#c62828;
+font-size:18px;
 ">
 Total: ₱0.00
 </div>
 
-<label>Payment Method</label>
+<div class="demo-payment-box">
 
-<select id="paymentMethod">
+<div class="demo-payment-title">
+💳 Demo Payment
+</div>
 
-<option value="GCASH">GCash</option>
-<option value="MAYA">Maya</option>
-<option value="BANK_TRANSFER">Bank Transfer</option>
-<option value="CASH_ON_PICKUP">Cash on Pickup</option>
+<div class="demo-payment-text">
+This competition uses a simulated payment.
+No real GCash, Maya, bank transfer, or money will be processed.
+</div>
 
-</select>
+<div class="demo-badge">
+✓ SIMULATED PAYMENT
+</div>
+
+</div>
 
 <label>Buyer Note</label>
 
@@ -1700,8 +1783,13 @@ Total: ₱0.00
 id="buyerNote"
 placeholder="Optional note for the farmer"></textarea>
 
-<button class="primary-btn">
-Place Order
+<button
+id="confirmBuyButton"
+class="primary-btn"
+type="submit">
+
+🛒 Confirm Demo Purchase
+
 </button>
 
 <div id="buyMessage"></div>
@@ -1835,7 +1923,6 @@ minimumFractionDigits:2,
 maximumFractionDigits:2
 }
 );
-}
 
 
 /* =========================================================
@@ -2010,11 +2097,6 @@ return;
 
 if(data.user){
 
-/*
-If email confirmation is disabled,
-session may already exist.
-*/
-
 if(data.session){
 
 await initializeApp(data.user);
@@ -2045,19 +2127,12 @@ return;
 
 currentUser = user;
 
-
-/*
-FIRST:
-Try to find existing profile.
-*/
-
 let {data:profile,error} =
 await supabaseClient
 .from("users")
 .select("*")
 .eq("auth_user_id",user.id)
 .maybeSingle();
-
 
 if(error){
 
@@ -2076,13 +2151,6 @@ return;
 
 }
 
-
-/*
-SECOND:
-If profile doesn't exist,
-create it automatically.
-*/
-
 if(!profile){
 
 const metadata =
@@ -2100,7 +2168,6 @@ metadata.role === "FARMER"
 ? "FARMER"
 : "BUYER";
 
-
 const {data:newProfile,error:createError} =
 await supabaseClient
 .from("users")
@@ -2115,7 +2182,6 @@ role:role
 })
 .select("*")
 .single();
-
 
 if(createError){
 
@@ -2138,13 +2204,7 @@ profile = newProfile;
 
 }
 
-
 currentProfile = profile;
-
-
-/*
-SHOW APP
-*/
 
 document
 .getElementById("landingScreen")
@@ -2158,22 +2218,18 @@ document
 .getElementById("app")
 .classList.remove("hidden");
 
-
 document
 .getElementById("userName")
 .textContent =
 profile.full_name || "User";
-
 
 document
 .getElementById("roleBadge")
 .textContent =
 profile.role || "BUYER";
 
-
 const farmer =
 profile.role === "FARMER";
-
 
 document
 .getElementById("addProductButton")
@@ -2217,7 +2273,6 @@ farmer
 ? "My Products"
 : "Marketplace";
 
-
 await loadProducts();
 await loadOrders();
 await loadConversations();
@@ -2258,14 +2313,8 @@ price === ""
 ? null
 : Number(price);
 
-
 let results =
 [...allProducts];
-
-
-/*
-ANY ONE FIELD WORKS.
-*/
 
 if(name){
 
@@ -2330,7 +2379,6 @@ document.getElementById("products");
 container.innerHTML =
 `<div class="empty">Loading products...</div>`;
 
-
 let query =
 supabaseClient
 .from("products")
@@ -2357,7 +2405,6 @@ role
 {ascending:false}
 );
 
-
 if(currentProfile?.role === "FARMER"){
 
 query =
@@ -2374,10 +2421,8 @@ query
 
 }
 
-
 const {data,error} =
 await query;
-
 
 if(error){
 
@@ -2393,7 +2438,6 @@ return;
 
 }
 
-
 allProducts = data || [];
 
 renderProducts(allProducts);
@@ -2408,7 +2452,6 @@ function renderProducts(products){
 const container =
 document.getElementById("products");
 
-
 if(!products || !products.length){
 
 container.innerHTML =
@@ -2421,7 +2464,6 @@ return;
 
 }
 
-
 container.innerHTML =
 products.map(product=>{
 
@@ -2433,16 +2475,13 @@ alt="${escapeHtml(product.name)}">`
 :
 `<div class="product-placeholder">🌱</div>`;
 
-
 const sellerName =
 product.users?.full_name ||
 "Farmer";
 
-
 const owner =
 currentProfile?.id ===
 product.seller_id;
-
 
 return `
 
@@ -2587,7 +2626,6 @@ document
 
 }
 
-
 document
 .getElementById("productForm")
 .addEventListener("submit",async e=>{
@@ -2653,14 +2691,12 @@ message.innerHTML =
 Publishing...
 </div>`;
 
-
 const file =
 document
 .getElementById("productImage")
 .files[0];
 
 let imageUrl = null;
-
 
 if(file){
 
@@ -2707,7 +2743,6 @@ urlData.publicUrl;
 
 }
 
-
 const {error} =
 await supabaseClient
 .from("products")
@@ -2742,7 +2777,6 @@ quantity > 0
 
 });
 
-
 if(error){
 
 console.error(error);
@@ -2755,7 +2789,6 @@ ${escapeHtml(error.message)}
 return;
 
 }
-
 
 message.innerHTML =
 `<div class="message success">
@@ -2804,10 +2837,17 @@ await loadProducts();
 
 
 /* =========================================================
-BUY
+DEMO BUY
 ========================================================= */
 
 async function openBuyModal(productId){
+
+if(!currentProfile){
+
+alert("Please login first.");
+return;
+
+}
 
 const {data:product,error} =
 await supabaseClient
@@ -2839,6 +2879,14 @@ return;
 
 }
 
+if(product.status !== "ACTIVE"){
+
+alert("This product is no longer available.");
+
+return;
+
+}
+
 if(Number(product.quantity) <= 0){
 
 alert("This product is out of stock.");
@@ -2858,39 +2906,112 @@ document
 .value = "1";
 
 document
+.getElementById("buyerNote")
+.value = "";
+
+document
+.getElementById("buyMessage")
+.innerHTML = "";
+
+document
+.getElementById("confirmBuyButton")
+.disabled = false;
+
+document
+.getElementById("confirmBuyButton")
+.textContent =
+"🛒 Confirm Demo Purchase";
+
+document
 .getElementById("buyProductInfo")
 .innerHTML =
 `
+
 <div style="
-background:#f7f7f7;
-padding:15px;
-border-radius:13px;
-margin-bottom:10px;
+background:linear-gradient(135deg,#fff7f7,#fff);
+border:1px solid #eee;
+padding:18px;
+border-radius:15px;
+margin-bottom:15px;
 ">
 
-<strong>
+<div style="
+display:flex;
+justify-content:space-between;
+gap:15px;
+align-items:flex-start;
+">
+
+<div>
+
+<div style="
+font-size:18px;
+font-weight:900;
+margin-bottom:5px;
+">
 ${escapeHtml(product.name)}
+</div>
+
+<div style="
+color:#c62828;
+font-weight:900;
+font-size:17px;
+">
+₱${formatMoney(product.price)}
+/
+${escapeHtml(product.unit || "unit")}
+</div>
+
+</div>
+
+<div style="
+padding:6px 10px;
+background:#e8f5e9;
+color:#2e7d32;
+border-radius:20px;
+font-size:11px;
+font-weight:900;
+">
+IN STOCK
+</div>
+
+</div>
+
+<div style="
+margin-top:14px;
+font-size:13px;
+color:#666;
+line-height:1.8;
+">
+
+📦 Available:
+<strong>
+${escapeHtml(product.quantity)}
+${escapeHtml(product.unit || "unit")}
 </strong>
 
 <br>
 
-₱${formatMoney(product.price)}
-/
-${escapeHtml(product.unit || "unit")}
-
-<br>
-
-Available:
-${escapeHtml(product.quantity)}
-
-<br>
-
-Seller:
+👨‍🌾 Seller:
+<strong>
 ${escapeHtml(
 product.users?.full_name || "Farmer"
 )}
+</strong>
+
+<br>
+
+📍 Location:
+<strong>
+${escapeHtml(
+product.location || "Not specified"
+)}
+</strong>
 
 </div>
+
+</div>
+
 `;
 
 updateBuyTotal();
@@ -2913,16 +3034,55 @@ Number(
 document.getElementById("buyQuantity").value
 );
 
+const available =
+Number(currentProduct.quantity || 0);
+
+const preview =
+document.getElementById("buyTotalPreview");
+
+if(
+!Number.isFinite(quantity) ||
+quantity <= 0
+){
+
+preview.innerHTML =
+`
+Total: ₱0.00
+`;
+
+return;
+
+}
+
+if(quantity > available){
+
+preview.innerHTML =
+`
+⚠️ Not enough stock.
+<br>
+<span style="
+font-size:13px;
+font-weight:700;
+">
+Available:
+${formatMoney(available)}
+${escapeHtml(currentProduct.unit || "unit")}
+</span>
+`;
+
+return;
+
+}
+
 const total =
 Number(currentProduct.price || 0)
 *
-(quantity || 0);
+quantity;
 
-document
-.getElementById("buyTotalPreview")
-textContent =
-"Total: ₱" +
-formatMoney(total);
+preview.innerHTML =
+`
+Total: ₱${formatMoney(total)}
+`;
 
 }
 
@@ -2939,7 +3099,7 @@ currentProduct = null;
 
 
 /* =========================================================
-CREATE ORDER
+CREATE DEMO ORDER
 ========================================================= */
 
 document
@@ -2957,48 +3117,87 @@ Number(
 document.getElementById("buyQuantity").value
 );
 
-if(!Number.isFinite(quantity) || quantity <= 0){
+const buyMessage =
+document.getElementById("buyMessage");
 
-alert("Enter a valid quantity.");
+const confirmButton =
+document.getElementById("confirmBuyButton");
+
+if(
+!Number.isFinite(quantity) ||
+quantity <= 0
+){
+
+buyMessage.innerHTML =
+`
+<div class="message error">
+Please enter a valid quantity.
+</div>
+`;
 
 return;
 
 }
 
-if(quantity > Number(currentProduct.quantity)){
+if(
+quantity >
+Number(currentProduct.quantity)
+){
 
-alert("Not enough stock available.");
+buyMessage.innerHTML =
+`
+<div class="message error">
+Not enough stock available.
+<br>
+Available:
+${escapeHtml(currentProduct.quantity)}
+${escapeHtml(currentProduct.unit || "unit")}
+</div>
+`;
 
 return;
 
 }
+
+
+/*
+DEMO PAYMENT
+*/
+
+confirmButton.disabled = true;
+
+confirmButton.textContent =
+"Processing demo purchase...";
+
+buyMessage.innerHTML =
+`
+<div class="message">
+🔄 Simulating payment...
+</div>
+`;
+
+await new Promise(resolve =>
+setTimeout(resolve,900)
+);
+
+
+/*
+CALCULATE TOTAL
+*/
 
 const total =
 Number(currentProduct.price)
 *
 quantity;
 
-const paymentMethod =
-document.getElementById("paymentMethod").value;
-
-const buyerNote =
-document
-.getElementById("buyerNote")
-.value.trim();
-
-const buyMessage =
-document.getElementById("buyMessage");
-
-buyMessage.innerHTML =
-`<div class="message">
-Creating order...
-</div>`;
-
 
 /*
+CREATE ORDER
+
 IMPORTANT:
-Use the exact column names expected by
-the current frontend/schema.
+We use existing database-compatible
+payment values so your existing schema
+does not need to be changed.
 */
 
 const {data:order,error} =
@@ -3006,29 +3205,37 @@ await supabaseClient
 .from("orders")
 .insert({
 
-product_id:currentProduct.id,
+product_id:
+currentProduct.id,
 
-buyer_id:currentProfile.id,
+buyer_id:
+currentProfile.id,
 
-seller_id:currentProduct.seller_id,
+seller_id:
+currentProduct.seller_id,
 
-quantity:quantity,
+quantity:
+quantity,
 
-unit_price:Number(currentProduct.price),
+unit_price:
+Number(currentProduct.price),
 
-total_price:total,
+total_price:
+total,
 
-payment_method:paymentMethod,
+payment_method:
+"CASH_ON_PICKUP",
 
 payment_status:
-paymentMethod === "CASH_ON_PICKUP"
-? "UNPAID"
-: "PENDING",
+"UNPAID",
 
-status:"PENDING",
+status:
+"PENDING",
 
 buyer_note:
-buyerNote || null
+document
+.getElementById("buyerNote")
+.value.trim() || null
 
 })
 .select()
@@ -3037,12 +3244,24 @@ buyerNote || null
 
 if(error){
 
-console.error(error);
+console.error(
+"Demo order error:",
+error
+);
+
+confirmButton.disabled = false;
+
+confirmButton.textContent =
+"🛒 Confirm Demo Purchase";
 
 buyMessage.innerHTML =
-`<div class="message error">
+`
+<div class="message error">
+Unable to create the demo order.
+<br><br>
 ${escapeHtml(error.message)}
-</div>`;
+</div>
+`;
 
 return;
 
@@ -3050,7 +3269,7 @@ return;
 
 
 /*
-Update stock.
+UPDATE STOCK
 */
 
 const remaining =
@@ -3063,7 +3282,8 @@ await supabaseClient
 .from("products")
 .update({
 
-quantity:remaining,
+quantity:
+remaining,
 
 status:
 remaining <= 0
@@ -3071,8 +3291,15 @@ remaining <= 0
 : "ACTIVE"
 
 })
-.eq("id",currentProduct.id)
-.eq("status","ACTIVE");
+.eq(
+"id",
+currentProduct.id
+)
+.eq(
+"status",
+"ACTIVE"
+);
+
 
 if(updateError){
 
@@ -3081,17 +3308,24 @@ console.error(
 updateError
 );
 
-
-/*
-The order exists, but stock update failed.
-Do NOT hide the problem.
-*/
-
 buyMessage.innerHTML =
-`<div class="message error">
-Order created, but stock could not be updated:
+`
+<div class="message error">
+
+Order was created, but the stock
+could not be updated.
+
+<br><br>
+
 ${escapeHtml(updateError.message)}
-</div>`;
+
+</div>
+`;
+
+confirmButton.disabled = false;
+
+confirmButton.textContent =
+"🛒 Confirm Demo Purchase";
 
 return;
 
@@ -3099,7 +3333,7 @@ return;
 
 
 /*
-Notification.
+NOTIFY FARMER
 */
 
 const {error:notificationError} =
@@ -3107,38 +3341,119 @@ await supabaseClient
 .from("notifications")
 .insert({
 
-user_id:currentProduct.seller_id,
+user_id:
+currentProduct.seller_id,
 
-title:"New Order",
+title:
+"🛒 New Demo Order",
 
 body:
-`${currentProfile.full_name || "A buyer"} placed an order for ${quantity} ${currentProduct.unit || "unit"}.`,
+`${currentProfile.full_name || "A buyer"} placed a demo order for ${quantity} ${currentProduct.unit || "unit"} of ${currentProduct.name}.`,
 
-type:"ORDER",
+type:
+"ORDER",
 
-reference_id:order.id
+reference_id:
+order.id
 
 });
 
 if(notificationError){
-console.error(notificationError);
+
+console.error(
+"Notification error:",
+notificationError
+);
+
+
+/*
+The order itself is still valid.
+Notification failure does not cancel
+the demo order.
+*/
+
 }
 
 
+/*
+SUCCESS
+*/
+
 buyMessage.innerHTML =
-`<div class="message success">
-Order created successfully!
-</div>`;
+`
 
-setTimeout(async()=>{
+<div class="checkout-success">
 
-closeBuyModal();
+<div class="checkout-success-icon">
+✅
+</div>
+
+<div class="checkout-success-title">
+Demo Purchase Successful!
+</div>
+
+<div class="checkout-success-text">
+
+Your simulated purchase was completed successfully.
+
+<br>
+
+Order Total:
+<strong>
+₱${formatMoney(total)}
+</strong>
+
+<br>
+
+Payment:
+<strong>
+Demo Payment
+</strong>
+
+<br>
+
+Order Status:
+<strong>
+PENDING
+</strong>
+
+</div>
+
+</div>
+
+`;
+
+confirmButton.textContent =
+"✓ Purchase Complete";
+
+confirmButton.disabled = true;
+
+
+/*
+REFRESH
+*/
 
 await loadProducts();
 
 await loadOrders();
 
-},700);
+
+/*
+CLOSE
+*/
+
+setTimeout(()=>{
+
+closeBuyModal();
+
+confirmButton.disabled = false;
+
+confirmButton.textContent =
+"🛒 Confirm Demo Purchase";
+
+buyMessage.innerHTML = "";
+
+},1500);
 
 });
 
@@ -3172,7 +3487,6 @@ container.innerHTML =
 Loading orders...
 </div>`;
 
-
 const {data,error} =
 await supabaseClient
 .from("orders")
@@ -3191,7 +3505,6 @@ full_name
 "created_at",
 {ascending:false}
 );
-
 
 if(error){
 
@@ -3232,7 +3545,6 @@ container.innerHTML =
 Loading transactions...
 </div>`;
 
-
 const {data,error} =
 await supabaseClient
 .from("orders")
@@ -3251,7 +3563,6 @@ full_name
 "created_at",
 {ascending:false}
 );
-
 
 if(error){
 
@@ -3311,6 +3622,10 @@ order.status || "PENDING";
 
 let actions = "";
 
+
+/*
+FARMER ACTIONS
+*/
 
 if(isFarmer){
 
@@ -3376,6 +3691,59 @@ Cancel Order
 }
 
 
+/*
+DEMO PAYMENT DISPLAY
+*/
+
+const isDemoPayment =
+order.payment_method === "CASH_ON_PICKUP" &&
+order.payment_status === "UNPAID";
+
+
+const paymentDisplay =
+isDemoPayment
+?
+`
+<span style="
+display:inline-block;
+padding:4px 8px;
+border-radius:20px;
+background:#e8f5e9;
+color:#2e7d32;
+font-weight:900;
+font-size:11px;
+">
+🧪 DEMO PAYMENT
+</span>
+`
+:
+escapeHtml(
+formatPaymentMethod(order.payment_method)
+);
+
+
+const paymentStatusDisplay =
+isDemoPayment
+?
+`
+<span style="
+display:inline-block;
+padding:4px 8px;
+border-radius:20px;
+background:#e8f5e9;
+color:#2e7d32;
+font-weight:900;
+font-size:11px;
+">
+✓ SIMULATED
+</span>
+`
+:
+escapeHtml(
+formatPaymentStatus(order.payment_status)
+);
+
+
 return `
 
 <div class="order-card">
@@ -3421,12 +3789,12 @@ Total:
 <br>
 
 Payment:
-${formatPaymentMethod(order.payment_method)}
+${paymentDisplay}
 
 <br>
 
 Payment Status:
-${escapeHtml(order.payment_status || "PENDING")}
+${paymentStatusDisplay}
 
 <br>
 
@@ -3441,6 +3809,7 @@ ${actions}
 </div>
 
 </div>
+
 `;
 
 }
@@ -3456,13 +3825,38 @@ MAYA:"Maya",
 
 BANK_TRANSFER:"Bank Transfer",
 
-CASH_ON_PICKUP:"Cash on Pickup"
+CASH_ON_PICKUP:"Cash on Pickup",
+
+DEMO_PAYMENT:"Demo Payment"
 
 };
 
 return map[method] ||
 method ||
 "Not specified";
+
+}
+
+
+function formatPaymentStatus(status){
+
+const map = {
+
+PAID_DEMO:"Paid — Demo",
+
+PENDING:"Pending",
+
+UNPAID:"Unpaid",
+
+PAID:"Paid",
+
+FAILED:"Failed"
+
+};
+
+return map[status] ||
+status ||
+"Pending";
 
 }
 
@@ -3602,16 +3996,6 @@ return;
 
 }
 
-
-/*
-BUYER:
-buyer = current user
-seller = product seller
-
-FARMER:
-This product chat is normally initiated by a buyer.
-*/
-
 if(currentProfile.role !== "BUYER"){
 
 alert(
@@ -3622,7 +4006,6 @@ return;
 
 }
 
-
 let query =
 supabaseClient
 .from("conversations")
@@ -3630,14 +4013,12 @@ supabaseClient
 .eq("buyer_id",currentProfile.id)
 .eq("seller_id",sellerId);
 
-
 if(productId){
 
 query =
 query.eq("product_id",productId);
 
 }
-
 
 const {data:existing,error} =
 await query.maybeSingle();
@@ -3651,7 +4032,6 @@ return;
 }
 
 let conversation = existing;
-
 
 if(!conversation){
 
@@ -3705,7 +4085,6 @@ document.getElementById("conversationList");
 list.innerHTML =
 `<div class="chat-empty">Loading...</div>`;
 
-
 const {data,error} =
 await supabaseClient
 .from("conversations")
@@ -3729,7 +4108,6 @@ role
 "updated_at",
 {ascending:false}
 );
-
 
 if(error){
 
@@ -3829,7 +4207,6 @@ box.innerHTML =
 Loading messages...
 </div>`;
 
-
 const {data,error} =
 await supabaseClient
 .from("messages")
@@ -3842,7 +4219,6 @@ currentConversation.id
 "created_at",
 {ascending:true}
 );
-
 
 if(error){
 
