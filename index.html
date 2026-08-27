@@ -970,6 +970,8 @@ FARMER PROFILE
 MODAL
 ========================================================= */
 
+.profile-open{overflow:hidden!important}
+
 .modal{
   position:fixed;
   inset:0;
@@ -1013,6 +1015,8 @@ PROFILE MODAL
 
 .profile-modal-card{
   max-width:850px;
+  max-height:92vh;
+  overflow:hidden;
   padding:0;
   overflow:hidden;
 }
@@ -1027,6 +1031,7 @@ PROFILE MODAL
 
 .profile-modal-content{
   padding:20px;
+  overflow:auto;
 }
 
 .profile-product-grid{
@@ -1718,6 +1723,18 @@ body.role-farmer .role-badge{box-shadow:0 4px 12px rgba(182,58,53,.08)}
 }
 .review-report:hover{background:#ffeded!important;text-decoration:none!important}
 .review-report.reported{color:#68756f!important;background:#f1f4f2!important;border-color:#dce5df!important}
+.profile-safety-actions{display:block;margin:18px 0 8px;padding:14px 0 4px;border-top:1px solid var(--border)}
+.profile-safety-label{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#68757f;margin-bottom:8px}
+.profile-safety-buttons{display:flex;gap:9px;flex-wrap:wrap}
+.profile-safety-actions button{min-height:42px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.profile-unblock-btn{background:#263238;color:#fff;border:1px solid #263238;border-radius:11px;padding:9px 15px;font-weight:850;font-size:12px;cursor:pointer}
+
+.profile-safety-actions button{border-radius:11px;padding:9px 13px;font-weight:850;font-size:12px;cursor:pointer}
+.profile-block-btn{background:#0b0b0c;color:#fff;border:1px solid #000;box-shadow:0 6px 14px rgba(0,0,0,.12)}
+.profile-block-btn:hover{background:#000;transform:translateY(-1px)}
+.profile-report-btn{background:#fff5f5;color:#9a2e2e;border:1px solid #edcaca}
+.profile-report-btn:hover{background:#ffeaea}
+.profile-unblock-btn{background:#fff;color:#334e68;border:1px solid #ccd8e2}
 
 /* Small status timeline for orders */
 .order-timeline{display:flex;gap:5px;align-items:center;margin-top:12px;flex-wrap:wrap}
@@ -3371,6 +3388,7 @@ async function openFarmerProfile(farmerId){
     document.getElementById("profileContent");
 
   modal.classList.remove("hidden");
+  document.body.classList.add("profile-open");
 
   content.innerHTML =
     `<div class="empty">
@@ -5924,14 +5942,75 @@ loadOrders = async function(){
 };
 
 /* =========================================================
+   PROFILE SAFETY: BLOCK + REPORT USER
+   ========================================================= */
+async function isFarmerBlocked(farmerId){
+  if(!currentProfile || currentProfile.id===farmerId) return false;
+  const {data,error}=await supabaseClient.from("user_blocks")
+    .select("id")
+    .eq("blocker_id",String(currentProfile.id))
+    .eq("blocked_id",String(farmerId))
+    .maybeSingle();
+  return !error && !!data;
+}
+
+async function toggleBlockFarmer(farmerId, farmerName){
+  if(!currentProfile || currentProfile.role!=="BUYER") return;
+  const blocked=await isFarmerBlocked(farmerId);
+  if(blocked){
+    const {error}=await supabaseClient.from("user_blocks")
+      .delete().eq("blocker_id",String(currentProfile.id)).eq("blocked_id",String(farmerId));
+    if(error){alert(error.message);return;}
+    alert(`${farmerName || "Farmer"} has been unblocked.`);
+    await openFarmerProfile(farmerId);
+    return;
+  }
+  if(!confirm(`Block ${farmerName || "this farmer"}? You can unblock them later.`)) return;
+  const {error}=await supabaseClient.from("user_blocks").insert({
+    blocker_id:String(currentProfile.id), blocked_id:String(farmerId)
+  });
+  if(error){alert(error.message);return;}
+  alert(`${farmerName || "Farmer"} has been blocked.`);
+  closeProfile();
+  await loadProducts();
+}
+
+async function reportFarmer(farmerId, farmerName){
+  if(!currentProfile || currentProfile.id===farmerId) return;
+  const reason=prompt(`Why are you reporting ${farmerName || "this farmer"}?\n\nExamples: spam, harassment, misleading information, inappropriate content, or other.`);
+  if(reason===null) return;
+  const cleanReason=reason.trim() || "Other";
+  const {error}=await supabaseClient.from("user_reports").insert({
+    reported_user_id:String(farmerId), reporter_id:String(currentProfile.id), reason:cleanReason
+  });
+  if(error){
+    if(String(error.message||"").toLowerCase().includes("duplicate")){
+      alert("You already reported this account.");
+    }else alert(error.message);
+    return;
+  }
+  alert("Report submitted. Thank you for helping keep AgriLink safe.");
+}
+
+/* =========================================================
    PUBLIC FARMER PROFILE RATING ENHANCEMENT
    ========================================================= */
 const __openFarmerProfileBase = openFarmerProfile;
 openFarmerProfile = async function(farmerId){
   await __openFarmerProfileBase(farmerId);
   const box=document.getElementById("profileContent");
-  if(!box || box.innerHTML.includes('profile-rating')) return;
+  if(!box) return;
   const {data:farmer}=await supabaseClient.from("users").select("bio,location,phone,full_name,role,email").eq("id",farmerId).maybeSingle();
+  if(!farmer) return;
+  if(currentProfile?.role==="BUYER") {
+    const blocked=await isFarmerBlocked(farmerId);
+    if(blocked){
+      box.innerHTML=`<div class="profile-cover"></div><div class="profile-main"><div class="profile-avatar">🚫</div><div class="profile-name">${escapeHtml(farmer.full_name||"Farmer")}</div><div class="profile-role">ACCOUNT BLOCKED</div><div class="profile-bio">You have blocked this account. Its products are hidden from your marketplace view.</div><div class="profile-safety-actions"><div class="profile-safety-label">Account controls</div><div class="profile-safety-buttons"><button type="button" class="profile-unblock-btn">↩ Unblock</button></div></div></div>`;
+      box.querySelector('.profile-unblock-btn').addEventListener('click',()=>toggleBlockFarmer(String(farmerId),String(farmer.full_name||'Farmer')));
+      return;
+    }
+  }
+  if(box.innerHTML.includes('profile-rating')) return;
   const {data:reviews}=await supabaseClient.from("reviews").select("id,rating,review_text,created_at,buyer_id").eq("seller_id",farmerId).order("created_at",{ascending:false}).limit(8);
   const arr=reviews||[]; const avg=arr.length?arr.reduce((a,r)=>a+Number(r.rating),0)/arr.length:0;
   const main=box.querySelector('.profile-main');
@@ -5940,6 +6019,16 @@ openFarmerProfile = async function(farmerId){
     if(bio) bio.innerHTML=escapeHtml(farmer?.bio||'This farmer has not added a description yet.') + (farmer?.location?`<br><span style="font-size:12px;color:#718078">📍 ${escapeHtml(farmer.location)}</span>`:'');
     const rating=document.createElement('div'); rating.className='profile-rating'; rating.innerHTML=`<span class="stars">${starString(avg)}</span><span>${avg?avg.toFixed(1):'New'}</span><span class="rating-muted">${arr.length} review${arr.length===1?'':'s'}</span>`;
     const role=main.querySelector('.profile-role'); if(role) role.after(rating);
+    if(currentProfile?.role==="BUYER") {
+      const actions=document.createElement('div');
+      actions.className='profile-safety-actions';
+      actions.innerHTML=`<div class="profile-safety-label">Account controls</div><div class="profile-safety-buttons"><button type="button" class="profile-block-btn">⚫ Block</button><button type="button" class="profile-report-btn">🚩 Report Account</button></div>`;
+      const blockBtn=actions.querySelector('.profile-block-btn');
+      const reportBtn=actions.querySelector('.profile-report-btn');
+      blockBtn.addEventListener('click',()=>toggleBlockFarmer(String(farmerId),String(farmer.full_name||'Farmer')));
+      reportBtn.addEventListener('click',()=>reportFarmer(String(farmerId),String(farmer.full_name||'Farmer')));
+      if(role) role.parentNode.insertBefore(actions, role.nextSibling);
+    }
     if(arr.length){
       const section=document.createElement('div'); section.style.marginTop='18px'; section.innerHTML=`<h3 style="margin-bottom:10px">Recent Reviews</h3>`+arr.slice(0,4).map(r=>`<div class="review-summary"><div class="review-card-head"><span class="stars">${starString(r.rating)}</span><span class="review-date">${new Date(r.created_at).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'})}</span></div><div class="review-text">${escapeHtml(r.review_text||'Great transaction!')}</div><button class="review-report" type="button" onclick="reportReview('${String(r.id).replace(/'/g,"\\'")}')">🚩 Report</button></div>`).join(''); main.appendChild(section);
     }
