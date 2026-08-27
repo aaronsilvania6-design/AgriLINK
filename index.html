@@ -970,8 +970,6 @@ FARMER PROFILE
 MODAL
 ========================================================= */
 
-.profile-open{overflow:hidden!important}
-
 .modal{
   position:fixed;
   inset:0;
@@ -1015,8 +1013,6 @@ PROFILE MODAL
 
 .profile-modal-card{
   max-width:850px;
-  max-height:92vh;
-  overflow:hidden;
   padding:0;
   overflow:hidden;
 }
@@ -1031,7 +1027,6 @@ PROFILE MODAL
 
 .profile-modal-content{
   padding:20px;
-  overflow:auto;
 }
 
 .profile-product-grid{
@@ -1043,15 +1038,11 @@ PROFILE MODAL
 
 .mini-product{
   border:1px solid var(--border);
-  cursor:pointer;
-  transition:transform .18s,box-shadow .18s,border-color .18s;
   border-radius:15px;
   overflow:hidden;
   background:white;
 }
 
-.mini-product:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(18,53,31,.10);border-color:var(--role-primary)}
-.mini-product:active{transform:translateY(-1px)}
 .mini-product-img{
   height:120px;
   background:#eef8f0;
@@ -1515,13 +1506,7 @@ body.role-buyer{
 .stat-card .stat-value{color:var(--role-primary)!important}
 
 /* profile */
-/* Profile stalking: keep scrolling inside the profile modal, never the page behind it */
-.modal{overflow:hidden!important;overscroll-behavior:contain!important}
-.profile-modal-card{overflow:hidden!important;max-height:90vh!important;display:flex!important;flex-direction:column!important;padding:0!important}
-.profile-modal-header{flex:0 0 auto!important}
-#profileContent{min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
-#profileContent .profile-main{padding-bottom:30px}
-
+.profile-modal-card{overflow:hidden!important}
 .profile-cover{background:linear-gradient(135deg,var(--role-dark),var(--role-primary),var(--role-primary-2))!important;height:135px!important}
 .profile-main{position:relative}
 .profile-avatar{box-shadow:0 12px 25px rgba(0,0,0,.14)!important}
@@ -1658,94 +1643,92 @@ body.role-farmer .role-badge{box-shadow:0 4px 12px rgba(182,58,53,.08)}
 
 
 /* =========================================================
-   COMPETITION POLISH: SHARED TITLE BAR + WORKING REPORTS
+   MODAL / PROFILE SCROLL FIX
    ========================================================= */
-:root{
-  --chrome:#243447;
-  --chrome-2:#334e68;
+html.modal-is-open,body.modal-is-open{
+  overflow:hidden!important;
+  height:100%!important;
 }
-.navbar{
-  background:var(--chrome)!important;
-  border-bottom:0!important;
+body.modal-is-open{overscroll-behavior:none}
+.modal{overscroll-behavior:contain}
+.profile-modal-card{
+  max-height:88vh!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+}
+.profile-modal-card .profile-modal-header{
+  position:sticky;
+  top:0;
+  z-index:8;
+  background:rgba(255,255,255,.96);
+  backdrop-filter:blur(12px);
+}
+#profileContent{overscroll-behavior:contain}
+@media(max-width:700px){
+  .profile-modal-card{max-height:94vh!important;border-radius:20px!important}
+}
+.rate-purchase-btn{
+  background:linear-gradient(135deg,#f2a900,#ffc83d)!important;
   color:#fff!important;
-  box-shadow:0 8px 24px rgba(36,52,71,.18)!important;
+  box-shadow:0 7px 18px rgba(242,169,0,.18);
 }
-.nav-brand,.nav-brand *{color:#fff!important}
-.nav-logo{background:linear-gradient(135deg,var(--chrome),var(--chrome-2))!important;box-shadow:none!important}
-.navbar .secondary-btn,.navbar .profile-nav-btn{
-  background:rgba(255,255,255,.10)!important;
-  border-color:rgba(255,255,255,.16)!important;
-  color:#fff!important;
+.rate-purchase-btn:hover{transform:translateY(-1px)}
+
+.rating-rule{margin-top:7px;color:#718078;font-size:12px;line-height:1.5;background:#f7faf8;border:1px solid #e4ece6;padding:10px 12px;border-radius:10px}
+
+/* UNIVERSAL TITLE BAR + RESPONSIVE POLISH */
+:root{--titlebar:#263238;--titlebar-soft:#eef2f3}
+.modal-header{background:var(--titlebar);color:#fff;margin:-25px -25px 18px;padding:15px 18px;border-radius:22px 22px 0 0}
+.modal-header button{color:#fff!important;background:rgba(255,255,255,.12)!important;border-color:rgba(255,255,255,.15)!important}
+.navbar{background:var(--titlebar);color:#fff;border-bottom:0}
+.nav-brand{color:#fff!important}.secondary-btn{background:rgba(255,255,255,.10);color:#fff;border-color:rgba(255,255,255,.18)}
+.nav-logo{background:#fff!important;color:var(--titlebar)!important}.role-badge{background:rgba(255,255,255,.16)}
+.profile-scroll{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+@media(max-width:900px){.navbar{height:auto;min-height:64px;padding:8px 12px}.nav-actions{flex-wrap:wrap;justify-content:flex-end}.nav-actions button{padding:9px 10px}.search-grid{grid-template-columns:1fr 1fr}.farmer-dashboard{grid-template-columns:1fr 1fr}.container{padding:18px 14px 80px}}
+@media(max-width:600px){body{overflow-x:hidden}.navbar{position:sticky;top:0}.nav-brand{font-size:16px}.nav-actions{gap:5px}.nav-actions button{font-size:11px;padding:8px 9px}.nav-actions button span{display:none}.container{padding:12px 10px 70px}.welcome{padding:24px 18px;border-radius:18px}.search-grid{grid-template-columns:1fr}.products{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.product-image{height:125px}.product-content{padding:11px}.product-actions{flex-direction:column}.order-card{padding:14px}.order-top{align-items:flex-start}.modal{padding:8px;align-items:flex-end}.modal-card{max-height:94vh;border-radius:20px;padding:18px}.modal-header{margin:-18px -18px 15px;padding:14px 16px;border-radius:20px 20px 0 0}.profile-main{padding:0 16px 20px}.profile-card{max-height:94vh;overflow:auto}.profile-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.profile-safety-buttons{flex-direction:column}.profile-safety-buttons button{width:100%}.review-card-head{gap:6px}.review-summary{padding:12px}.review-star{width:44px;height:44px}.auth-container{grid-template-columns:1fr}.auth-showcase{display:none}.auth-card{padding:25px 18px}.feature-grid{grid-template-columns:1fr}.landing-nav{padding:0 14px}.landing-nav button{padding:9px 13px}.hero{padding:35px 14px}.hero-visual{min-height:390px}.market-preview{width:100%;transform:none;animation:none}.floating-card{display:none}}
+@media(min-width:601px) and (max-width:900px){.products{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* FINAL DEVICE-SAFE POLISH */
+html,body{width:100%;min-height:100%;overflow-x:hidden}
+body{padding-bottom:env(safe-area-inset-bottom)}
+button,input,textarea,select{min-height:44px}
+textarea{min-height:110px}
+.modal{padding:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));}
+.modal-card{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.review-star{min-width:48px;min-height:48px}
+.review-report{min-height:42px}
+.profile-safety-buttons{display:flex;gap:8px;flex-wrap:wrap}
+.profile-safety-buttons button{min-height:44px}
+@media(max-width:768px){
+  .navbar{padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right));}
+  .nav-actions{max-width:72%;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .nav-actions::-webkit-scrollbar{display:none}
+  .container{width:100%;}
+  .order-info{font-size:14px}
 }
-.navbar .live-pill{background:rgba(255,255,255,.12)!important;color:#fff!important}
-.navbar .danger-btn{background:#101820!important;border-color:#101820!important;color:#fff!important}
-.modal-header,
-.profile-modal-header,
-.chat-header,
-.notification-header{
-  background:var(--chrome)!important;
-  color:#fff!important;
+@media(max-width:480px){
+  .nav-brand{flex:0 0 auto}
+  .nav-brand .nav-logo{width:36px;height:36px}
+  .nav-actions button{white-space:nowrap}
+  .welcome h1{font-size:24px}
+  .products{grid-template-columns:1fr 1fr}
+  .product-image{height:110px}
+  .product-content h3{font-size:14px;line-height:1.25}
+  .price{font-size:16px}
+  .order-top{flex-direction:column}
+  .order-status{align-self:flex-start}
+  .modal-card{width:100%;max-width:100%;}
+  .profile-name{font-size:23px}
+  .profile-product-grid{grid-template-columns:1fr 1fr}
+  .profile-safety-buttons{flex-direction:column}
+  .profile-safety-buttons button{width:100%}
 }
-.modal-header{padding:14px 16px!important;margin:-25px -25px 18px!important}
-.modal-header h2{color:#fff!important}
-.modal-header .close,
-.profile-modal-header .close,
-.chat-header .close{
-  background:rgba(255,255,255,.13)!important;
-  color:#fff!important;
-  border:1px solid rgba(255,255,255,.15)!important;
+@media(max-width:360px){
+  .products,.profile-product-grid{grid-template-columns:1fr}
+  .nav-actions button{padding:8px 7px;font-size:10px}
 }
-.profile-modal-header{border-bottom:0!important}
-.chat-header{border-bottom:0!important}
-.notification-header{border-bottom:0!important}
-
-/* Reject stays unmistakably black and clickable */
-.reject-btn{
-  background:#0b0b0c!important;
-  color:#fff!important;
-  border:1px solid #000!important;
-  box-shadow:0 7px 16px rgba(0,0,0,.16)!important;
-}
-.reject-btn:hover{background:#000!important;transform:translateY(-1px)}
-
-/* Better report action */
-.review-report{
-  display:inline-flex!important;
-  align-items:center!important;
-  gap:5px!important;
-  margin-top:9px!important;
-  padding:6px 9px!important;
-  border:1px solid #e5d7d7!important;
-  border-radius:9px!important;
-  background:#fff7f7!important;
-  color:#8f2d2d!important;
-  text-decoration:none!important;
-}
-.review-report:hover{background:#ffeded!important;text-decoration:none!important}
-.review-report.reported{color:#68756f!important;background:#f1f4f2!important;border-color:#dce5df!important}
-.profile-safety-actions{display:block;margin:18px 0 8px;padding:14px 0 4px;border-top:1px solid var(--border)}
-.profile-safety-label{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#68757f;margin-bottom:8px}
-.profile-safety-buttons{display:flex;gap:9px;flex-wrap:wrap}
-.profile-safety-actions button{min-height:42px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
-.profile-unblock-btn{background:#263238;color:#fff;border:1px solid #263238;border-radius:11px;padding:9px 15px;font-weight:850;font-size:12px;cursor:pointer}
-
-.profile-safety-actions button{border-radius:11px;padding:9px 13px;font-weight:850;font-size:12px;cursor:pointer}
-.profile-block-btn{background:#0b0b0c;color:#fff;border:1px solid #000;box-shadow:0 6px 14px rgba(0,0,0,.12)}
-.profile-block-btn:hover{background:#000;transform:translateY(-1px)}
-.profile-report-btn{background:#fff5f5;color:#9a2e2e;border:1px solid #edcaca}
-.profile-report-btn:hover{background:#ffeaea}
-.profile-unblock-btn{background:#fff;color:#334e68;border:1px solid #ccd8e2}
-
-/* Small status timeline for orders */
-.order-timeline{display:flex;gap:5px;align-items:center;margin-top:12px;flex-wrap:wrap}
-.order-timeline span{font-size:9px;font-weight:900;padding:5px 7px;border-radius:999px;background:#eef2f0;color:#77827c}
-.order-timeline span.done{background:var(--role-soft);color:var(--role-primary)}
-.order-timeline i{width:14px;height:1px;background:#d5ddd8;display:block}
-
-/* Keep every modal self-contained on mobile */
-.modal{overscroll-behavior:contain!important;touch-action:pan-y}
-.modal-card{overscroll-behavior:contain!important}
-
+@media(min-width:769px){.modal-card{max-height:min(90vh,820px)}}
 </style>
 </head>
 
@@ -2461,7 +2444,7 @@ REVIEW MODAL
     <div id="reviewProductInfo" class="review-summary"></div>
     <form id="reviewForm">
       <input id="reviewOrderId" type="hidden">
-      <div style="font-weight:900">How was your experience?</div>
+      <div style="font-weight:900">How was your experience?</div><div class="rating-rule">⭐ You can rate a purchase only after the order is marked <b>COMPLETED</b>.</div>
       <div class="review-stars" id="reviewStars">
         <button type="button" class="review-star" data-rating="1" onclick="setReviewRating(1)">★</button>
         <button type="button" class="review-star" data-rating="2" onclick="setReviewRating(2)">★</button>
@@ -3379,6 +3362,21 @@ function renderProducts(products){
 FARMER PROFILE
 ========================================================= */
 
+
+/* =========================================================
+   MODAL SCROLL CONTROLLER
+   ========================================================= */
+function setModalScrollLock(locked){
+  document.documentElement.classList.toggle("modal-is-open", !!locked);
+  document.body.classList.toggle("modal-is-open", !!locked);
+}
+document.querySelectorAll(".modal").forEach(modal=>{
+  const observer=new MutationObserver(()=>{
+    setModalScrollLock(!!document.querySelector(".modal:not(.hidden)"));
+  });
+  observer.observe(modal,{attributes:true,attributeFilter:["class"]});
+});
+
 async function openFarmerProfile(farmerId){
 
   const modal =
@@ -3388,7 +3386,7 @@ async function openFarmerProfile(farmerId){
     document.getElementById("profileContent");
 
   modal.classList.remove("hidden");
-  document.body.classList.add("profile-open");
+  setModalScrollLock(true);
 
   content.innerHTML =
     `<div class="empty">
@@ -3550,7 +3548,7 @@ async function openFarmerProfile(farmerId){
               </div>`;
 
             return `
-              <div class="mini-product" role="button" tabindex="0" onclick="openBuyModal('${product.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openBuyModal('${product.id}')}" title="View and buy this product">
+              <div class="mini-product">
 
                 <div class="mini-product-img">
                   ${image}
@@ -3611,18 +3609,12 @@ async function openFarmerProfile(farmerId){
 
 
 function closeProfile(){
-  document.getElementById("profileModal").classList.add("hidden");
-}
 
-/* Prevent wheel/touch scrolling from leaking to the dashboard behind a profile. */
-(function(){
-  const modal=document.getElementById("profileModal");
-  const scroller=document.getElementById("profileContent");
-  if(!modal || !scroller) return;
-  modal.addEventListener("wheel",function(e){
-    if(!scroller.contains(e.target)) e.preventDefault();
-  },{passive:false});
-})();
+  document
+    .getElementById("profileModal")
+    .classList.add("hidden");
+
+}
 
 
 /* =========================================================
@@ -4489,12 +4481,6 @@ function renderOrder(order){
 
   }
 
-  const timeline = ["PENDING","CONFIRMED","ONGOING","COMPLETED"];
-  const currentIndex = timeline.indexOf(status);
-  const timelineHtml = status === "REJECTED" || status === "CANCELLED"
-    ? `<div class="order-timeline"><span class="done">${escapeHtml(status)}</span></div>`
-    : `<div class="order-timeline">${timeline.map((step,i)=>`<span class="${i<=currentIndex?"done":""}">${step}</span>${i<timeline.length-1?"<i></i>":""}`).join("")}</div>`;
-
   return `
 
     <div class="order-card">
@@ -4588,8 +4574,6 @@ function renderOrder(order){
         ${actions}
       </div>
 
-      ${timelineHtml}
-
     </div>
   `;
 }
@@ -4661,12 +4645,6 @@ async function updateOrderStatus(
       "You cannot update this order."
     );
 
-    return;
-  }
-
-  const allowedStatuses = ["PENDING","CONFIRMED","ONGOING","COMPLETED","CANCELLED","REJECTED"];
-  if(!allowedStatuses.includes(newStatus)){
-    alert("Invalid order status.");
     return;
   }
 
@@ -5885,7 +5863,7 @@ function starString(avg){
    ========================================================= */
 async function loadReviewState(){
   if(currentProfile?.role!=="BUYER") return;
-  const {data}=await supabaseClient.from("reviews").select("order_id").eq("buyer_id",currentProfile.id);
+  const {data}=await supabaseClient.from("reviews").select("order_id");
   reviewedOrderIds=new Set((data||[]).map(x=>x.order_id));
 }
 
@@ -5896,7 +5874,11 @@ async function openReviewForOrder(orderId){
 }
 
 function openReviewModal(order){
-  if(!order || order.status!=="COMPLETED") return;
+  if(!order) return;
+  if(order.status!=="COMPLETED"){
+    alert("You can rate this purchase after the farmer marks the order as COMPLETED.");
+    return;
+  }
   if(reviewedOrderIds.has(order.id)){alert("You already rated this purchase.");return}
   reviewRating=0;
   document.getElementById("reviewOrderId").value=order.id;
@@ -5905,8 +5887,12 @@ function openReviewModal(order){
   setReviewRating(0);
   document.getElementById("reviewMessage").innerHTML='';
   document.getElementById("reviewModal").classList.remove("hidden");
+  setModalScrollLock(true);
 }
-function closeReviewModal(){document.getElementById("reviewModal").classList.add("hidden")}
+function closeReviewModal(){
+  document.getElementById("reviewModal").classList.add("hidden");
+  setModalScrollLock(false);
+}
 function setReviewRating(value){
   reviewRating=value;
   document.querySelectorAll(".review-star").forEach(btn=>btn.classList.toggle("active",Number(btn.dataset.rating)<=value));
@@ -5918,7 +5904,7 @@ document.getElementById("reviewForm").addEventListener("submit",async e=>{
   const orderId=document.getElementById("reviewOrderId").value;
   const {data:order,error:orderError}=await supabaseClient.from("orders").select("*").eq("id",orderId).eq("buyer_id",currentProfile.id).eq("status","COMPLETED").single();
   if(orderError||!order){document.getElementById("reviewMessage").innerHTML='<div class="message error">This completed order could not be found.</div>';return}
-  const {error}=await supabaseClient.from("reviews").insert({order_id:order.id,buyer_id:currentProfile.id,seller_id:order.seller_id,product_id:order.product_id,rating:reviewRating,review_text:document.getElementById("reviewText").value.trim()||null});
+  const {error}=await supabaseClient.from("reviews").insert({order_id:order.id,seller_id:order.seller_id,product_id:order.product_id,rating:reviewRating,review_text:document.getElementById("reviewText").value.trim()||null});
   if(error){document.getElementById("reviewMessage").innerHTML=`<div class="message error">${escapeHtml(error.message)}</div>`;return}
   reviewedOrderIds.add(order.id);
   document.getElementById("reviewMessage").innerHTML='<div class="message success">Thank you! Your rating was submitted.</div>';
@@ -5930,7 +5916,7 @@ const __renderOrderBase = renderOrder;
 renderOrder = function(order){
   let html=__renderOrderBase(order);
   if(currentProfile?.role==="BUYER" && order.status==="COMPLETED" && !reviewedOrderIds.has(order.id)){
-    html=html.replace('<div class="order-actions">','<div class="order-actions"><button title="You can rate after the order is completed" class="complete-btn" onclick="openReviewForOrder(\''+String(order.id).replace(/\'/g,'\\\'')+'\')">⭐ Rate Purchase</button>');
+    html=html.replace('<div class="order-actions">','<div class="order-actions"><button class="rate-purchase-btn" onclick="openReviewForOrder(\''+String(order.id).replace(/\'/g,'\\\'')+'\')">⭐ Rate Purchase</button>');
   }
   return html;
 };
@@ -5942,76 +5928,15 @@ loadOrders = async function(){
 };
 
 /* =========================================================
-   PROFILE SAFETY: BLOCK + REPORT USER
-   ========================================================= */
-async function isFarmerBlocked(farmerId){
-  if(!currentProfile || currentProfile.id===farmerId) return false;
-  const {data,error}=await supabaseClient.from("user_blocks")
-    .select("id")
-    .eq("blocker_id",String(currentProfile.id))
-    .eq("blocked_id",String(farmerId))
-    .maybeSingle();
-  return !error && !!data;
-}
-
-async function toggleBlockFarmer(farmerId, farmerName){
-  if(!currentProfile || currentProfile.role!=="BUYER") return;
-  const blocked=await isFarmerBlocked(farmerId);
-  if(blocked){
-    const {error}=await supabaseClient.from("user_blocks")
-      .delete().eq("blocker_id",String(currentProfile.id)).eq("blocked_id",String(farmerId));
-    if(error){alert(error.message);return;}
-    alert(`${farmerName || "Farmer"} has been unblocked.`);
-    await openFarmerProfile(farmerId);
-    return;
-  }
-  if(!confirm(`Block ${farmerName || "this farmer"}? You can unblock them later.`)) return;
-  const {error}=await supabaseClient.from("user_blocks").insert({
-    blocker_id:String(currentProfile.id), blocked_id:String(farmerId)
-  });
-  if(error){alert(error.message);return;}
-  alert(`${farmerName || "Farmer"} has been blocked.`);
-  closeProfile();
-  await loadProducts();
-}
-
-async function reportFarmer(farmerId, farmerName){
-  if(!currentProfile || currentProfile.id===farmerId) return;
-  const reason=prompt(`Why are you reporting ${farmerName || "this farmer"}?\n\nExamples: spam, harassment, misleading information, inappropriate content, or other.`);
-  if(reason===null) return;
-  const cleanReason=reason.trim() || "Other";
-  const {error}=await supabaseClient.from("user_reports").insert({
-    reported_user_id:String(farmerId), reporter_id:String(currentProfile.id), reason:cleanReason
-  });
-  if(error){
-    if(String(error.message||"").toLowerCase().includes("duplicate")){
-      alert("You already reported this account.");
-    }else alert(error.message);
-    return;
-  }
-  alert("Report submitted. Thank you for helping keep AgriLink safe.");
-}
-
-/* =========================================================
    PUBLIC FARMER PROFILE RATING ENHANCEMENT
    ========================================================= */
 const __openFarmerProfileBase = openFarmerProfile;
 openFarmerProfile = async function(farmerId){
   await __openFarmerProfileBase(farmerId);
   const box=document.getElementById("profileContent");
-  if(!box) return;
+  if(!box || box.innerHTML.includes('profile-rating')) return;
   const {data:farmer}=await supabaseClient.from("users").select("bio,location,phone,full_name,role,email").eq("id",farmerId).maybeSingle();
-  if(!farmer) return;
-  if(currentProfile?.role==="BUYER") {
-    const blocked=await isFarmerBlocked(farmerId);
-    if(blocked){
-      box.innerHTML=`<div class="profile-cover"></div><div class="profile-main"><div class="profile-avatar">🚫</div><div class="profile-name">${escapeHtml(farmer.full_name||"Farmer")}</div><div class="profile-role">ACCOUNT BLOCKED</div><div class="profile-bio">You have blocked this account. Its products are hidden from your marketplace view.</div><div class="profile-safety-actions"><div class="profile-safety-label">Account controls</div><div class="profile-safety-buttons"><button type="button" class="profile-unblock-btn">↩ Unblock</button></div></div></div>`;
-      box.querySelector('.profile-unblock-btn').addEventListener('click',()=>toggleBlockFarmer(String(farmerId),String(farmer.full_name||'Farmer')));
-      return;
-    }
-  }
-  if(box.innerHTML.includes('profile-rating')) return;
-  const {data:reviews}=await supabaseClient.from("reviews").select("id,rating,review_text,created_at,buyer_id").eq("seller_id",farmerId).order("created_at",{ascending:false}).limit(8);
+  const {data:reviews}=await supabaseClient.from("reviews").select("id,rating,review_text,created_at").eq("seller_id",farmerId).order("created_at",{ascending:false}).limit(8);
   const arr=reviews||[]; const avg=arr.length?arr.reduce((a,r)=>a+Number(r.rating),0)/arr.length:0;
   const main=box.querySelector('.profile-main');
   if(main){
@@ -6019,43 +5944,21 @@ openFarmerProfile = async function(farmerId){
     if(bio) bio.innerHTML=escapeHtml(farmer?.bio||'This farmer has not added a description yet.') + (farmer?.location?`<br><span style="font-size:12px;color:#718078">📍 ${escapeHtml(farmer.location)}</span>`:'');
     const rating=document.createElement('div'); rating.className='profile-rating'; rating.innerHTML=`<span class="stars">${starString(avg)}</span><span>${avg?avg.toFixed(1):'New'}</span><span class="rating-muted">${arr.length} review${arr.length===1?'':'s'}</span>`;
     const role=main.querySelector('.profile-role'); if(role) role.after(rating);
-    if(currentProfile?.role==="BUYER") {
-      const actions=document.createElement('div');
-      actions.className='profile-safety-actions';
-      actions.innerHTML=`<div class="profile-safety-label">Account controls</div><div class="profile-safety-buttons"><button type="button" class="profile-block-btn">⚫ Block</button><button type="button" class="profile-report-btn">🚩 Report Account</button></div>`;
-      const blockBtn=actions.querySelector('.profile-block-btn');
-      const reportBtn=actions.querySelector('.profile-report-btn');
-      blockBtn.addEventListener('click',()=>toggleBlockFarmer(String(farmerId),String(farmer.full_name||'Farmer')));
-      reportBtn.addEventListener('click',()=>reportFarmer(String(farmerId),String(farmer.full_name||'Farmer')));
-      if(role) role.parentNode.insertBefore(actions, role.nextSibling);
-    }
     if(arr.length){
-      const section=document.createElement('div'); section.style.marginTop='18px'; section.innerHTML=`<h3 style="margin-bottom:10px">Recent Reviews</h3>`+arr.slice(0,4).map(r=>`<div class="review-summary"><div class="review-card-head"><span class="stars">${starString(r.rating)}</span><span class="review-date">${new Date(r.created_at).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'})}</span></div><div class="review-text">${escapeHtml(r.review_text||'Great transaction!')}</div><button class="review-report" type="button" onclick="reportReview('${String(r.id).replace(/'/g,"\\'")}')">🚩 Report</button></div>`).join(''); main.appendChild(section);
+      const section=document.createElement('div'); section.style.marginTop='18px'; section.innerHTML=`<h3 style="margin-bottom:10px">Recent Reviews</h3>`+arr.slice(0,4).map(r=>`<div class="review-summary"><div class="review-card-head"><span class="stars">${starString(r.rating)}</span><span class="review-date">${new Date(r.created_at).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'})}</span></div><div class="review-text">${escapeHtml(r.review_text||'Great transaction!')}</div><button class="review-report" type="button" onclick="reportReview(\'${String(r.id).replace(/\'/g,"\\\'")}\')">🚩 Report</button></div>`).join(''); main.appendChild(section);
     }
   }
 };
 
-const reportedReviewIds = new Set();
-
 async function reportReview(reviewId){
   if(!currentProfile || !reviewId) return;
-  if(reportedReviewIds.has(String(reviewId))){
-    alert("You already reported this review.");
-    return;
-  }
   const reason=prompt("Why are you reporting this review?\n\nExamples: spam, harassment, misleading, inappropriate, or other.");
   if(reason===null) return;
   const cleanReason=reason.trim() || "Other";
   const {error}=await supabaseClient.from("review_reports").insert({
-    review_id:String(reviewId),
-    reporter_id:currentProfile.id,
-    reason:cleanReason
+    review_id:String(reviewId), reporter_id:currentProfile.id, reason:cleanReason
   });
-  if(error){
-    alert(error.message);
-    return;
-  }
-  reportedReviewIds.add(String(reviewId));
+  if(error){ alert(error.message); return; }
   alert("Report submitted. Thank you for helping keep AgriLink trustworthy.");
 }
 
@@ -6108,5 +6011,14 @@ initializeApp=async function(user){await __initEnhancedBase(user);setupRoleHome(
 
 </script>
 
+
+<script>
+(function(){
+  const sync=()=>document.body.classList.toggle('modal-open',!!document.querySelector('.modal:not(.hidden)'));
+  const obs=new MutationObserver(sync); obs.observe(document.body,{subtree:true,attributes:true,attributeFilter:['class']}); sync();
+  document.addEventListener('touchmove',e=>{const m=e.target.closest('.modal-card'); if(!m) e.preventDefault();},{passive:false});
+})();
+</script>
+<style>body.modal-open{overflow:hidden;touch-action:none}.modal-card{touch-action:auto}</style>
 </body>
 </html>
