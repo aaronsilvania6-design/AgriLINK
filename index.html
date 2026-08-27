@@ -1651,6 +1651,84 @@ body.role-farmer .role-badge{box-shadow:0 4px 12px rgba(182,58,53,.08)}
   .profile-rating{width:100%;justify-content:flex-start}
 }
 
+
+/* =========================================================
+   COMPETITION POLISH: SHARED TITLE BAR + WORKING REPORTS
+   ========================================================= */
+:root{
+  --chrome:#243447;
+  --chrome-2:#334e68;
+}
+.navbar{
+  background:var(--chrome)!important;
+  border-bottom:0!important;
+  color:#fff!important;
+  box-shadow:0 8px 24px rgba(36,52,71,.18)!important;
+}
+.nav-brand,.nav-brand *{color:#fff!important}
+.nav-logo{background:linear-gradient(135deg,var(--chrome),var(--chrome-2))!important;box-shadow:none!important}
+.navbar .secondary-btn,.navbar .profile-nav-btn{
+  background:rgba(255,255,255,.10)!important;
+  border-color:rgba(255,255,255,.16)!important;
+  color:#fff!important;
+}
+.navbar .live-pill{background:rgba(255,255,255,.12)!important;color:#fff!important}
+.navbar .danger-btn{background:#101820!important;border-color:#101820!important;color:#fff!important}
+.modal-header,
+.profile-modal-header,
+.chat-header,
+.notification-header{
+  background:var(--chrome)!important;
+  color:#fff!important;
+}
+.modal-header{padding:14px 16px!important;margin:-25px -25px 18px!important}
+.modal-header h2{color:#fff!important}
+.modal-header .close,
+.profile-modal-header .close,
+.chat-header .close{
+  background:rgba(255,255,255,.13)!important;
+  color:#fff!important;
+  border:1px solid rgba(255,255,255,.15)!important;
+}
+.profile-modal-header{border-bottom:0!important}
+.chat-header{border-bottom:0!important}
+.notification-header{border-bottom:0!important}
+
+/* Reject stays unmistakably black and clickable */
+.reject-btn{
+  background:#0b0b0c!important;
+  color:#fff!important;
+  border:1px solid #000!important;
+  box-shadow:0 7px 16px rgba(0,0,0,.16)!important;
+}
+.reject-btn:hover{background:#000!important;transform:translateY(-1px)}
+
+/* Better report action */
+.review-report{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:5px!important;
+  margin-top:9px!important;
+  padding:6px 9px!important;
+  border:1px solid #e5d7d7!important;
+  border-radius:9px!important;
+  background:#fff7f7!important;
+  color:#8f2d2d!important;
+  text-decoration:none!important;
+}
+.review-report:hover{background:#ffeded!important;text-decoration:none!important}
+.review-report.reported{color:#68756f!important;background:#f1f4f2!important;border-color:#dce5df!important}
+
+/* Small status timeline for orders */
+.order-timeline{display:flex;gap:5px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.order-timeline span{font-size:9px;font-weight:900;padding:5px 7px;border-radius:999px;background:#eef2f0;color:#77827c}
+.order-timeline span.done{background:var(--role-soft);color:var(--role-primary)}
+.order-timeline i{width:14px;height:1px;background:#d5ddd8;display:block}
+
+/* Keep every modal self-contained on mobile */
+.modal{overscroll-behavior:contain!important;touch-action:pan-y}
+.modal-card{overscroll-behavior:contain!important}
+
 </style>
 </head>
 
@@ -4393,6 +4471,12 @@ function renderOrder(order){
 
   }
 
+  const timeline = ["PENDING","CONFIRMED","ONGOING","COMPLETED"];
+  const currentIndex = timeline.indexOf(status);
+  const timelineHtml = status === "REJECTED" || status === "CANCELLED"
+    ? `<div class="order-timeline"><span class="done">${escapeHtml(status)}</span></div>`
+    : `<div class="order-timeline">${timeline.map((step,i)=>`<span class="${i<=currentIndex?"done":""}">${step}</span>${i<timeline.length-1?"<i></i>":""}`).join("")}</div>`;
+
   return `
 
     <div class="order-card">
@@ -4486,6 +4570,8 @@ function renderOrder(order){
         ${actions}
       </div>
 
+      ${timelineHtml}
+
     </div>
   `;
 }
@@ -4557,6 +4643,12 @@ async function updateOrderStatus(
       "You cannot update this order."
     );
 
+    return;
+  }
+
+  const allowedStatuses = ["PENDING","CONFIRMED","ONGOING","COMPLETED","CANCELLED","REJECTED"];
+  if(!allowedStatuses.includes(newStatus)){
+    alert("Invalid order status.");
     return;
   }
 
@@ -5840,7 +5932,7 @@ openFarmerProfile = async function(farmerId){
   const box=document.getElementById("profileContent");
   if(!box || box.innerHTML.includes('profile-rating')) return;
   const {data:farmer}=await supabaseClient.from("users").select("bio,location,phone,full_name,role,email").eq("id",farmerId).maybeSingle();
-  const {data:reviews}=await supabaseClient.from("reviews").select("rating,review_text,created_at,buyer_id").eq("seller_id",farmerId).order("created_at",{ascending:false}).limit(8);
+  const {data:reviews}=await supabaseClient.from("reviews").select("id,rating,review_text,created_at,buyer_id").eq("seller_id",farmerId).order("created_at",{ascending:false}).limit(8);
   const arr=reviews||[]; const avg=arr.length?arr.reduce((a,r)=>a+Number(r.rating),0)/arr.length:0;
   const main=box.querySelector('.profile-main');
   if(main){
@@ -5849,15 +5941,33 @@ openFarmerProfile = async function(farmerId){
     const rating=document.createElement('div'); rating.className='profile-rating'; rating.innerHTML=`<span class="stars">${starString(avg)}</span><span>${avg?avg.toFixed(1):'New'}</span><span class="rating-muted">${arr.length} review${arr.length===1?'':'s'}</span>`;
     const role=main.querySelector('.profile-role'); if(role) role.after(rating);
     if(arr.length){
-      const section=document.createElement('div'); section.style.marginTop='18px'; section.innerHTML=`<h3 style="margin-bottom:10px">Recent Reviews</h3>`+arr.slice(0,4).map(r=>`<div class="review-summary"><div class="review-card-head"><span class="stars">${starString(r.rating)}</span><span class="review-date">${new Date(r.created_at).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'})}</span></div><div class="review-text">${escapeHtml(r.review_text||'Great transaction!')}</div><button class="review-report" type="button" onclick="reportReview()">Report review</button></div>`).join(''); main.appendChild(section);
+      const section=document.createElement('div'); section.style.marginTop='18px'; section.innerHTML=`<h3 style="margin-bottom:10px">Recent Reviews</h3>`+arr.slice(0,4).map(r=>`<div class="review-summary"><div class="review-card-head"><span class="stars">${starString(r.rating)}</span><span class="review-date">${new Date(r.created_at).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'})}</span></div><div class="review-text">${escapeHtml(r.review_text||'Great transaction!')}</div><button class="review-report" type="button" onclick="reportReview('${String(r.id).replace(/'/g,"\\'")}')">🚩 Report</button></div>`).join(''); main.appendChild(section);
     }
   }
 };
 
-function reportReview(){
-  const reason=prompt("Why are you reporting this review? (Optional)");
+const reportedReviewIds = new Set();
+
+async function reportReview(reviewId){
+  if(!currentProfile || !reviewId) return;
+  if(reportedReviewIds.has(String(reviewId))){
+    alert("You already reported this review.");
+    return;
+  }
+  const reason=prompt("Why are you reporting this review?\n\nExamples: spam, harassment, misleading, inappropriate, or other.");
   if(reason===null) return;
-  alert("Thanks! Your report has been noted for moderation.");
+  const cleanReason=reason.trim() || "Other";
+  const {error}=await supabaseClient.from("review_reports").insert({
+    review_id:String(reviewId),
+    reporter_id:currentProfile.id,
+    reason:cleanReason
+  });
+  if(error){
+    alert(error.message);
+    return;
+  }
+  reportedReviewIds.add(String(reviewId));
+  alert("Report submitted. Thank you for helping keep AgriLink trustworthy.");
 }
 
 /* =========================================================
