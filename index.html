@@ -9194,5 +9194,38 @@ observer.observe(document.body,{subtree:true,childList:true,attributes:true,attr
 setInterval(()=>{syncNav();bindNav();addLogout();},1000);
 })();
 </script>
+
+<!-- FINAL FINAL MOBILE STATE / LOGOUT / BLOCKED MANAGER FIX -->
+<style id="agrilink-final-final-fix">
+#mobileBottomNav{display:none!important}
+#app:not(.hidden) ~ #mobileBottomNav{display:grid!important}
+@media(max-width:700px){#mobileBottomNav{position:fixed!important;left:0!important;right:0!important;bottom:0!important;z-index:99999!important}}
+#agrilinkFinalLogout{display:block!important;width:100%!important;margin:18px 0 4px!important;padding:14px!important;border:1px solid #e3bcbc!important;border-radius:12px!important;background:#fff5f5!important;color:#c62828!important;font-weight:900!important}
+</style>
+<script id="agrilink-final-final-fix-js">
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+function appVisible(){const a=$('app');return !!a&&!a.classList.contains('hidden')}
+function syncNav(){const n=$('mobileBottomNav');if(n)n.style.setProperty('display',appVisible()?'grid':'none','important')}
+function closeAll(except){
+ ['notificationPanel','chatModal','profileModal','myProfileModal','blockedAccountsModal','botWindow','authModal'].forEach(id=>{if(id!==except)$(id)?.classList.add('hidden')});
+ document.querySelectorAll('.dropdown-menu,.notification-dropdown,.chat-panel').forEach(x=>{if(!except||!x.id||x.id!==except)x.classList.add('hidden')});
+}
+function bindNav(){const n=$('mobileBottomNav');if(!n||n.dataset.finalFinal==='1')return;n.dataset.finalFinal='1';n.addEventListener('click',async e=>{
+ const b=e.target.closest('[data-mobile-nav]');if(!b||!appVisible())return;e.preventDefault();e.stopImmediatePropagation();
+ const a=b.dataset.mobileNav;n.querySelectorAll('.mobile-nav-item').forEach(x=>x.classList.toggle('active',x===b));
+ if(a==='home'){closeAll();window.scrollTo({top:0,behavior:'smooth'});}
+ else if(a==='market'){closeAll();const target=$('products')||document.querySelector('#products,.products-section,[data-section="products"]');if(target)target.scrollIntoView({behavior:'smooth',block:'start'});}
+ else if(a==='chat'){closeAll('chatModal');if(typeof openChat==='function')await openChat();}
+ else if(a==='notifications'){closeAll('notificationPanel');if(typeof toggleNotifications==='function')await toggleNotifications();}
+ else if(a==='profile'){closeAll('myProfileModal');if(typeof openMyProfile==='function')await openMyProfile();setTimeout(addLogout,100);}
+},true)}
+async function addLogout(){const box=$('myProfileContent');if(!box||!appVisible()||$('agrilinkFinalLogout'))return;const b=document.createElement('button');b.id='agrilinkFinalLogout';b.type='button';b.textContent='🚪 Logout';b.onclick=async()=>{if(!confirm('Are you sure you want to log out?'))return;try{if(window.supabaseClient?.auth)await window.supabaseClient.auth.signOut();}catch(e){console.error(e)};closeAll();$('mobileBottomNav')?.style.setProperty('display','none','important');$('app')?.classList.add('hidden');$('auth')?.classList.remove('hidden');window.scrollTo({top:0,behavior:'auto'});};box.appendChild(b)}
+function addBlockedManager(){const box=$('myProfileContent');if(!box||!appVisible()||box.querySelector('#agrilinkFinalBlockedManager'))return;const b=document.createElement('button');b.id='agrilinkFinalBlockedManager';b.type='button';b.textContent='🛡️ Manage Blocked Accounts';b.style.cssText='display:block;width:100%;margin-top:12px;padding:14px;border:1px solid #d7e5da;border-radius:12px;background:#eef8f1;color:#176b45;font-weight:900';b.onclick=async()=>{closeAll('blockedAccountsModal');if(typeof openBlockedAccounts==='function')await openBlockedAccounts()};box.appendChild(b)}
+function boot(){syncNav();bindNav();addLogout();addBlockedManager();const a=$('app');if(a&&!a.dataset.finalObserver){a.dataset.finalObserver='1';new MutationObserver(()=>{syncNav();if(appVisible()){addLogout();addBlockedManager()}}).observe(a,{attributes:true,attributeFilter:['class']})}}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,300));else setTimeout(boot,300);setInterval(()=>{syncNav();if(appVisible()){addLogout();addBlockedManager()}},800);
+})();
+</script>
 </body>
 </html>
