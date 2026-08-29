@@ -9194,5 +9194,46 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 setInterval(()=>{syncRole();bindMessenger()},1200);
 })();
 </script>
+
+<!-- FINAL PROFILE LOGOUT PERSISTENCE FIX -->
+<style id="agrilink-profile-logout-final">
+#agrilinkProfileLogout{display:block!important;width:100%!important;min-height:46px!important;margin:16px 0 6px!important;padding:13px 16px!important;border:1px solid #e2b8b8!important;border-radius:12px!important;background:#fff5f5!important;color:#c62828!important;font-weight:900!important;font-size:15px!important;cursor:pointer!important}
+</style>
+<script id="agrilink-profile-logout-final-js">
+(function(){
+'use strict';
+function addLogout(){
+ const box=document.getElementById('myProfileContent');
+ const modal=document.getElementById('myProfileModal');
+ if(!box||!modal||modal.classList.contains('hidden'))return;
+ if(document.getElementById('agrilinkProfileLogout'))return;
+ const b=document.createElement('button');
+ b.id='agrilinkProfileLogout';b.type='button';b.textContent='🚪 Logout';
+ b.onclick=async function(){
+   if(!confirm('Are you sure you want to log out?'))return;
+   try{ await logout(); }
+   catch(e){ console.error('Logout failed:',e); alert('Logout failed. Please try again.'); }
+   finally{
+     document.getElementById('mobileBottomNav')?.style.setProperty('display','none','important');
+     document.getElementById('myProfileModal')?.classList.add('hidden');
+     document.getElementById('profileModal')?.classList.add('hidden');
+     document.getElementById('blockedAccountsModal')?.classList.add('hidden');
+     document.getElementById('notificationPanel')?.classList.add('hidden');
+     document.getElementById('chatModal')?.classList.add('hidden');
+     document.getElementById('botWindow')?.classList.add('hidden');
+     document.getElementById('app')?.classList.add('hidden');
+     document.getElementById('authScreen')?.classList.add('hidden');
+     document.getElementById('landingScreen')?.classList.remove('hidden');
+     window.scrollTo({top:0,behavior:'auto'});
+   }
+ };
+ box.appendChild(b);
+}
+function boot(){addLogout();}
+const obs=new MutationObserver(addLogout);
+function start(){const box=document.getElementById('myProfileContent');if(box)obs.observe(box,{childList:true,subtree:true});addLogout();setInterval(addLogout,500);}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(start,300));else setTimeout(start,300);
+})();
+</script>
 </body>
 </html>
