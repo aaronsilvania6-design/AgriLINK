@@ -9221,43 +9221,34 @@ setInterval(run,600);
 })();
 </script>
 
-<!-- FINAL BLOCK/UNBLOCK ATOMIC FIX -->
-<script id="agrilink-final-block-toggle-fix">
+<!-- FINAL PROFILE + MESSENGER RESPONSIVE FIX -->
+<style id="final-profile-messenger-fix">
+@media(min-width:701px){.profile-action-row .block-user-btn{display:block!important}}
+.final-chat-close{margin-left:auto;border:0;background:transparent;font-size:20px;cursor:pointer;padding:8px}
+</style>
+<script id="final-profile-messenger-fix-js">
 (function(){
 'use strict';
-const norm=v=>String(v??'').trim();
-window.toggleBlockUser=async function(otherId,otherName){
-  const me=norm(window.currentProfile?.id||currentProfile?.id), other=norm(otherId);
-  if(!me||!other||me===other){alert('Invalid account.');return;}
-  try{
-    // Always read the database first. Never trust the button's old state.
-    const {data:existing,error:readError}=await supabaseClient.from('user_blocks')
-      .select('id,blocker_id,blocked_id')
-      .eq('blocker_id',me).eq('blocked_id',other).maybeSingle();
-    if(readError)throw readError;
-    if(existing){
-      if(!confirm(`Unblock ${otherName||'this user'}?`))return;
-      const {error}=await supabaseClient.from('user_blocks').delete().eq('id',existing.id);
-      if(error)throw error;
-      alert(`${otherName||'User'} has been unblocked.`);
-    }else{
-      if(!confirm(`Block ${otherName||'this user'}?\n\nThey will not be able to message you, and if they are a farmer, their products will no longer appear for you.`))return;
-      const {error}=await supabaseClient.from('user_blocks').insert({blocker_id:me,blocked_id:other});
-      if(error){
-        // If another duplicate handler created the row between our read and insert,
-        // treat it as already blocked instead of showing a duplicate-key failure.
-        if(String(error.message||'').toLowerCase().includes('duplicate')||String(error.code||'')==='23505'){
-          const {data:nowThere}=await supabaseClient.from('user_blocks').select('id').eq('blocker_id',me).eq('blocked_id',other).maybeSingle();
-          if(nowThere) { alert(`${otherName||'User'} is already blocked.`); }
-          else throw error;
-        }else throw error;
-      }else alert(`${otherName||'User'} has been blocked.`);
-    }
-    if(typeof window.openUserProfile==='function')await window.openUserProfile(other);
-    if(typeof window.openBlockedAccounts==='function'&&document.getElementById('blockedAccountsModal')&&!document.getElementById('blockedAccountsModal').classList.contains('hidden'))await window.openBlockedAccounts();
-    if(typeof window.loadProducts==='function')await window.loadProducts();
-  }catch(e){console.error('Block/unblock:',e);alert('Could not update the block status. Please try again.');}
-};
+const $=id=>document.getElementById(id);
+function resetChatView(){
+ const m=$('chatModal'); if(!m)return;
+ m.classList.remove('chat-has-selection');
+ const w=$('chatWindow'); if(w)w.classList.remove('active');
+}
+function addClose(){
+ const m=$('chatModal'); if(!m)return;
+ const h=m.querySelector('.chat-header'); if(!h||h.querySelector('.final-chat-close'))return;
+ const b=document.createElement('button'); b.className='final-chat-close'; b.type='button'; b.textContent='✕'; b.title='Back to contacts'; b.onclick=resetChatView; h.appendChild(b);
+}
+function bindMessageNav(){
+ document.querySelectorAll('[data-mobile-nav="chat"]').forEach(b=>{
+  if(b.dataset.finalMsgFix)return; b.dataset.finalMsgFix='1';
+  b.addEventListener('click',()=>setTimeout(resetChatView,80),true);
+ });
+}
+function boot(){bindMessageNav();addClose()}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,300));else setTimeout(boot,300);
+setInterval(boot,700);
 })();
 </script>
 </body>
