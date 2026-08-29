@@ -8570,70 +8570,19 @@ AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
     if(typeof loadProducts==='function')await loadProducts();
   };
 
-
-  /* SAFE REPORT HANDLER - prevents duplicate clicks and endless waiting */
   window.reportUser=async function(otherId,otherName){
-    if(window.__agriReportBusy)return;
     if(!currentProfile||!otherId||same(otherId,currentProfile.id))return;
-
-    const reason=prompt(`Why are you reporting ${otherName||'this user'}?
-
-Examples: spam, fake profile, scam attempt, harassment, inappropriate content, or other.`);
+    const reason=prompt(`Why are you reporting ${otherName||'this user'}?\n\nExamples: spam, fake profile, scam attempt, harassment, inappropriate content, or other.`);
     if(reason===null)return;
-
     const clean=reason.trim()||'Other';
     const details=prompt('Optional: Add more details about this report.')||null;
-
-    window.__agriReportBusy=true;
-
-    const reportButtons=[...document.querySelectorAll('#profileModal .report-user-btn')];
-    reportButtons.forEach(btn=>{
-      btn.disabled=true;
-      btn.dataset.originalText=btn.textContent;
-      btn.textContent='Submitting...';
-    });
-
-    try{
-      const insertPromise=supabaseClient
-        .from('user_reports')
-        .insert({
-          reporter_id:String(currentProfile.id),
-          reported_user_id:String(otherId),
-          reason:clean,
-          description:details?.trim()||null,
-          status:'PENDING'
-        });
-
-      const timeoutPromise=new Promise((_,reject)=>{
-        setTimeout(()=>reject(new Error('Report request timed out. Please check your internet connection and try again.')),12000);
-      });
-
-      const result=await Promise.race([insertPromise,timeoutPromise]);
-      const error=result?.error;
-
-      if(error){
-        if(String(error.code)==='23505'||String(error.message||'').toLowerCase().includes('duplicate')){
-          alert('You already reported this account.');
-        }else{
-          alert('Could not submit report: '+error.message);
-        }
-        return;
-      }
-
-      alert('Report submitted successfully.');
-
-    }catch(error){
-      console.error('Report error:',error);
-      alert(error?.message||'Could not submit the report. Please try again.');
-
-    }finally{
-      window.__agriReportBusy=false;
-      reportButtons.forEach(btn=>{
-        btn.disabled=false;
-        btn.textContent=btn.dataset.originalText||'⚑ Report';
-        delete btn.dataset.originalText;
-      });
+    const {error}=await supabaseClient.from('user_reports').insert({reporter_id:String(currentProfile.id),reported_user_id:String(otherId),reason:clean,description:details?.trim()||null,status:'PENDING'});
+    if(error){
+      if(String(error.code)==='23505'||String(error.message).toLowerCase().includes('duplicate'))alert('You already reported this account.');
+      else alert(error.message);
+      return;
     }
+    alert('Report submitted successfully.');
   };
 
   window.messageUserFromProfile=async function(otherId){
@@ -8949,70 +8898,21 @@ Examples: spam, fake profile, scam attempt, harassment, inappropriate content, o
     if(typeof loadProducts==='function')await loadProducts();
   };
 
-
-  /* SAFE REPORT HANDLER - prevents duplicate clicks and endless waiting */
   window.reportUser=async function(otherId,otherName){
-    if(window.__agriReportBusy)return;
     if(!currentProfile||!otherId||same(otherId,currentProfile.id))return;
-
-    const reason=prompt(`Why are you reporting ${otherName||'this user'}?
-
-Examples: spam, fake profile, scam attempt, harassment, inappropriate content, or other.`);
+    const reason=prompt(`Why are you reporting ${otherName||'this user'}?\n\nExamples: spam, fake profile, suspicious activity, harassment, inappropriate content, or other.`);
     if(reason===null)return;
-
     const clean=reason.trim()||'Other';
     const details=prompt('Optional: Add more details about this report.')||null;
-
-    window.__agriReportBusy=true;
-
-    const reportButtons=[...document.querySelectorAll('#profileModal .report-user-btn')];
-    reportButtons.forEach(btn=>{
-      btn.disabled=true;
-      btn.dataset.originalText=btn.textContent;
-      btn.textContent='Submitting...';
+    const {error}=await supabaseClient.from('user_reports').insert({
+      reporter_id:sid(currentProfile.id),reported_user_id:sid(otherId),reason:clean,
+      description:details?.trim()||null,status:'PENDING'
     });
-
-    try{
-      const insertPromise=supabaseClient
-        .from('user_reports')
-        .insert({
-          reporter_id:String(currentProfile.id),
-          reported_user_id:String(otherId),
-          reason:clean,
-          description:details?.trim()||null,
-          status:'PENDING'
-        });
-
-      const timeoutPromise=new Promise((_,reject)=>{
-        setTimeout(()=>reject(new Error('Report request timed out. Please check your internet connection and try again.')),12000);
-      });
-
-      const result=await Promise.race([insertPromise,timeoutPromise]);
-      const error=result?.error;
-
-      if(error){
-        if(String(error.code)==='23505'||String(error.message||'').toLowerCase().includes('duplicate')){
-          alert('You already reported this account.');
-        }else{
-          alert('Could not submit report: '+error.message);
-        }
-        return;
-      }
-
-      alert('Report submitted successfully.');
-
-    }catch(error){
-      console.error('Report error:',error);
-      alert(error?.message||'Could not submit the report. Please try again.');
-
-    }finally{
-      window.__agriReportBusy=false;
-      reportButtons.forEach(btn=>{
-        btn.disabled=false;
-        btn.textContent=btn.dataset.originalText||'⚑ Report';
-        delete btn.dataset.originalText;
-      });
+    if(error){
+      if(String(error.code)==='23505'||String(error.message).toLowerCase().includes('duplicate'))alert('You already reported this account.');
+      else alert(error.message);return;
     }
+    alert('Report submitted successfully.');
   };
 
   /* ---------------- Products: disappear immediately for either-direction blocks ---------------- */
@@ -11185,5 +11085,90 @@ else setTimeout(boot,300);
 })();
 </script>
 
+
+
+<!-- =========================================================
+     INSTANT REPORT FIX - APPENDED ONLY
+     Keeps the original website intact. This final override removes
+     the extra details prompt and avoids awaiting the network request
+     on the UI click, so the page does not freeze while reporting.
+========================================================= -->
+<script id="AGRILINK_INSTANT_REPORT_FIX">
+(function(){
+  'use strict';
+
+  const reportBusy = new Set();
+  const sid = v => String(v ?? '');
+  const same = (a,b) => sid(a) === sid(b);
+
+  function getProfile(){
+    try{
+      if(typeof currentProfile !== 'undefined' && currentProfile) return currentProfile;
+    }catch(e){}
+    return window.currentProfile || null;
+  }
+
+  function setReportButtonsBusy(busy, text){
+    document.querySelectorAll('#profileModal .report-user-btn').forEach(btn=>{
+      btn.disabled = busy;
+      btn.style.pointerEvents = busy ? 'none' : '';
+      if(text) btn.textContent = text;
+    });
+  }
+
+  /* FINAL report handler. The original report handlers remain untouched,
+     but this is the last global definition used by existing onclick buttons. */
+  window.reportUser = function(otherId, otherName){
+    const me = getProfile();
+    const userId = sid(otherId);
+
+    if(!me || !userId || same(userId, me.id)) return;
+    if(reportBusy.has(userId)) return;
+
+    const name = otherName || 'this user';
+    const reason = prompt(
+      `Why are you reporting ${name}?\\n\\nExamples: spam, fake profile, suspicious activity, harassment, inappropriate content, or other.`
+    );
+
+    if(reason === null) return;
+
+    const cleanReason = reason.trim() || 'Other';
+    reportBusy.add(userId);
+    setReportButtonsBusy(true, 'Submitting...');
+
+    /* Start the Supabase request without blocking/re-rendering the UI. */
+    supabaseClient
+      .from('user_reports')
+      .insert({
+        reporter_id: sid(me.id),
+        reported_user_id: userId,
+        reason: cleanReason,
+        status: 'PENDING'
+      })
+      .then(({error})=>{
+        if(error){
+          const msg = String(error.message || '').toLowerCase();
+          if(String(error.code) === '23505' || msg.includes('duplicate')){
+            setReportButtonsBusy(true, '✓ Reported');
+            alert('You already reported this account.');
+          }else{
+            setReportButtonsBusy(false, '⚑ Report');
+            alert(error.message || 'Could not submit report.');
+          }
+          return;
+        }
+        setReportButtonsBusy(true, '✓ Reported');
+      })
+      .catch((error)=>{
+        console.error('Report error:', error);
+        setReportButtonsBusy(false, '⚑ Report');
+        alert('Could not submit report. Please try again.');
+      })
+      .finally(()=>{
+        reportBusy.delete(userId);
+      });
+  };
+})();
+</script>
 </body>
 </html>
