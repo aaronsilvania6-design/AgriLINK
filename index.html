@@ -9147,92 +9147,94 @@ AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
 </script>
 
 
-<!-- FINAL ROLE-SPECIFIC MESSENGER + FARMER MOBILE NAV FIX -->
-<style id="agrilink-role-messenger-final">
-@media(max-width:700px){
-  #mobileBottomNav .mobile-nav-item[data-mobile-nav="market"] .mobile-nav-label{font-size:0}
-  #mobileBottomNav .mobile-nav-item[data-mobile-nav="market"] .mobile-nav-label:after{content:"Marketplace";font-size:10px}
-  body.role-farmer #mobileBottomNav .mobile-nav-item[data-mobile-nav="market"] .mobile-nav-label:after{content:"My Products"}
-  #chatModal .chat-layout{display:flex!important;height:min(78vh,720px)!important}
-  #chatModal .conversation-list{width:100%!important;max-width:none!important;display:block!important}
-  #chatModal .chat-window{display:none!important}
-  #chatModal.chat-has-selection .conversation-list{display:none!important}
-  #chatModal.chat-has-selection .chat-window{display:flex!important;width:100%!important}
-  #chatModal .conversation-item{display:flex!important;align-items:center!important;gap:11px!important;border-bottom:1px solid #e7eee9!important}
-  #chatModal .conversation-item:before{content:'👤';width:40px;height:40px;border-radius:50%;background:#eaf7ee;display:grid;place-items:center;flex:none}
-  #chatModal .chat-list-header{font-size:16px!important;font-weight:900!important}
-  #chatModal .chat-list-header:after{content:'  •  Choose someone to message';font-size:11px;color:#7b887f;font-weight:600}
-  #chatModal .chat-header{display:flex!important}
-}
+<!-- ABSOLUTE FINAL MOBILE NAV + PROFILE BLOCK MANAGER -->
+<style id="absolute-mobile-fix">
+#mobileBottomNav{display:none!important}
+#app:not(.hidden) ~ #mobileBottomNav{display:grid!important}
+#absoluteManageBlocked,#absoluteLogout{display:block!important;width:100%!important;min-height:46px!important;margin:12px 0!important;padding:13px!important;border-radius:12px!important;font-weight:900!important;font-size:15px!important}
+#absoluteManageBlocked{background:#eef8f1!important;color:#176b45!important;border:1px solid #cfe5d5!important}
+#absoluteLogout{background:#fff5f5!important;color:#c62828!important;border:1px solid #e4c0c0!important}
+@media(max-width:700px){#mobileBottomNav{position:fixed!important;left:0!important;right:0!important;bottom:0!important;z-index:99999!important}}
 </style>
-<script id="agrilink-role-messenger-final-js">
+<script id="absolute-mobile-fix-js">
 (function(){
 'use strict';
 const $=id=>document.getElementById(id);
-const role=()=>String(window.currentProfile?.role||currentProfile?.role||'').toUpperCase();
-function syncRole(){document.body.classList.toggle('role-farmer',role()==='FARMER');const n=$('mobileBottomNav');const b=n?.querySelector('[data-mobile-nav="market"] .mobile-nav-label');if(b)b.textContent=role()==='FARMER'?'My Products':'Marketplace';}
-function messengerListOnly(){const m=$('chatModal');if(!m)return;m.classList.remove('chat-has-selection');const w=$('chatWindow');}
-function bindMessenger(){
- const m=$('chatModal');if(!m||m.dataset.roleMessengerFinal)return;m.dataset.roleMessengerFinal='1';
- const list=$('conversationList');
- list?.addEventListener('click',e=>{const item=e.target.closest('.conversation-item');if(item)setTimeout(()=>m.classList.add('chat-has-selection'),0)},true);
+function logged(){return !!$('app')&&!$('app').classList.contains('hidden')}
+function nav(){const n=$('mobileBottomNav');if(n)n.style.setProperty('display',logged()?'grid':'none','important')}
+function closePanels(){['notificationPanel','chatModal','profileModal','myProfileModal','blockedAccountsModal','botWindow'].forEach(id=>$(id)?.classList.add('hidden'))}
+function manageBlocked(){const b=$('absoluteManageBlocked');if(!b||!logged())return;if(typeof openBlockedAccounts==='function')openBlockedAccounts()}
+function ensureProfileButtons(){const box=$('myProfileContent'),modal=$('myProfileModal');if(!box||!modal||modal.classList.contains('hidden')||!logged())return;
+ if(!$('absoluteManageBlocked')){const b=document.createElement('button');b.id='absoluteManageBlocked';b.type='button';b.textContent='🛡️ Manage Blocked Accounts';b.onclick=manageBlocked;box.appendChild(b)}
+ if(!$('absoluteLogout')){const b=document.createElement('button');b.id='absoluteLogout';b.type='button';b.textContent='🚪 Logout';b.onclick=async()=>{if(!confirm('Are you sure you want to log out?'))return;try{if(typeof logout==='function')await logout();else await supabaseClient.auth.signOut()}catch(e){console.error(e)}finally{closePanels();$('mobileBottomNav')?.style.setProperty('display','none','important');$('app')?.classList.add('hidden');$('authScreen')?.classList.remove('hidden');$('landingScreen')?.classList.remove('hidden');window.scrollTo(0,0)}};box.appendChild(b)}
 }
-const oldOpen=window.openChat;
-if(typeof oldOpen==='function'&&!window.__roleMessengerOpenWrapped){
- window.__roleMessengerOpenWrapped=true;
- window.openChat=async function(){
-  const r=await oldOpen.apply(this,arguments);bindMessenger();messengerListOnly();syncRole();return r;
- };
-}
-const oldSelect=window.selectConversation;
-if(typeof oldSelect==='function'&&!window.__roleMessengerSelectWrapped){
- window.__roleMessengerSelectWrapped=true;
- window.selectConversation=async function(){const r=await oldSelect.apply(this,arguments);$('chatModal')?.classList.add('chat-has-selection');return r;};
-}
-function boot(){syncRole();bindMessenger();}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,400));else setTimeout(boot,400);
-setInterval(()=>{syncRole();bindMessenger()},1200);
+function bind(){const n=$('mobileBottomNav');if(!n||n.dataset.absoluteBound)return;n.dataset.absoluteBound='1';n.addEventListener('click',async e=>{const b=e.target.closest('[data-mobile-nav]');if(!b||!logged())return;e.preventDefault();e.stopImmediatePropagation();n.querySelectorAll('.mobile-nav-item').forEach(x=>x.classList.toggle('active',x===b));const a=b.dataset.mobileNav;closePanels();if(a==='home')window.scrollTo({top:0,behavior:'smooth'});else if(a==='market'){const farmer=String(window.currentProfile?.role||'').toUpperCase()==='FARMER';const t=farmer?($('products')||$('farmerDashboard')):($('buyerSearchSection')||$('products'));t?.scrollIntoView({behavior:'smooth',block:'start'})}else if(a==='chat'){if(typeof openChat==='function')await openChat()}else if(a==='notifications'){if(typeof toggleNotifications==='function')await toggleNotifications()}else if(a==='profile'){if(typeof openMyProfile==='function')await openMyProfile();setTimeout(ensureProfileButtons,100)}},true)}
+function boot(){nav();bind();ensureProfileButtons()}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,300));else setTimeout(boot,300)
+setInterval(boot,500)
 })();
 </script>
 
-<!-- FINAL PROFILE LOGOUT PERSISTENCE FIX -->
-<style id="agrilink-profile-logout-final">
-#agrilinkProfileLogout{display:block!important;width:100%!important;min-height:46px!important;margin:16px 0 6px!important;padding:13px 16px!important;border:1px solid #e2b8b8!important;border-radius:12px!important;background:#fff5f5!important;color:#c62828!important;font-weight:900!important;font-size:15px!important;cursor:pointer!important}
+<!-- LAST MOBILE / DESKTOP / CHAT CONTACT FIX -->
+<style id="agrilink-last-ui-fix">
+/* Never show mobile navigation before the authenticated app. Also hide any duplicate nav injected by older scripts. */
+body:not(:has(#app:not(.hidden))) #mobileBottomNav{display:none!important}
+@media(min-width:701px){
+  /* Desktop/tablet: remove Block from the profile action row. Block management stays in Profile. */
+  .profile-action-row .block-user-btn{display:none!important}
+}
+@media(max-width:700px){
+  /* Mobile: keep Block available on another user's profile, but keep management in My Profile. */
+  #absoluteManageBlocked,#agrilinkFinalBlockedManager{display:block!important}
+  #myProfileContent{padding-bottom:20px!important}
+}
 </style>
-<script id="agrilink-profile-logout-final-js">
+<script id="agrilink-last-ui-fix-js">
 (function(){
 'use strict';
-function addLogout(){
- const box=document.getElementById('myProfileContent');
- const modal=document.getElementById('myProfileModal');
- if(!box||!modal||modal.classList.contains('hidden'))return;
- if(document.getElementById('agrilinkProfileLogout'))return;
- const b=document.createElement('button');
- b.id='agrilinkProfileLogout';b.type='button';b.textContent='🚪 Logout';
- b.onclick=async function(){
-   if(!confirm('Are you sure you want to log out?'))return;
-   try{ await logout(); }
-   catch(e){ console.error('Logout failed:',e); alert('Logout failed. Please try again.'); }
-   finally{
-     document.getElementById('mobileBottomNav')?.style.setProperty('display','none','important');
-     document.getElementById('myProfileModal')?.classList.add('hidden');
-     document.getElementById('profileModal')?.classList.add('hidden');
-     document.getElementById('blockedAccountsModal')?.classList.add('hidden');
-     document.getElementById('notificationPanel')?.classList.add('hidden');
-     document.getElementById('chatModal')?.classList.add('hidden');
-     document.getElementById('botWindow')?.classList.add('hidden');
-     document.getElementById('app')?.classList.add('hidden');
-     document.getElementById('authScreen')?.classList.add('hidden');
-     document.getElementById('landingScreen')?.classList.remove('hidden');
-     window.scrollTo({top:0,behavior:'auto'});
-   }
- };
- box.appendChild(b);
+const $=id=>document.getElementById(id);
+function logged(){return !!$('app')&&!$('app').classList.contains('hidden')}
+function closePanels(except){['notificationPanel','chatModal','profileModal','myProfileModal','blockedAccountsModal','botWindow'].forEach(id=>{if(id!==except)$(id)?.classList.add('hidden')})}
+function ensureProfileTools(){
+ const box=$('myProfileContent'),modal=$('myProfileModal');
+ if(!box||!modal||modal.classList.contains('hidden')||!logged())return;
+ if(!$('absoluteManageBlocked')){const b=document.createElement('button');b.id='absoluteManageBlocked';b.type='button';b.textContent='🛡️ Manage Blocked Accounts';b.style.cssText='display:block!important;width:100%;min-height:46px;margin:12px 0;padding:13px;border-radius:12px;border:1px solid #cfe5d5;background:#eef8f1;color:#176b45;font-weight:900';b.onclick=()=>{closePanels('blockedAccountsModal');if(typeof openBlockedAccounts==='function')openBlockedAccounts()};box.appendChild(b)}
+ if(!$('absoluteLogout')){const b=document.createElement('button');b.id='absoluteLogout';b.type='button';b.textContent='🚪 Logout';b.style.cssText='display:block!important;width:100%;min-height:46px;margin:12px 0;padding:13px;border-radius:12px;border:1px solid #e4c0c0;background:#fff5f5;color:#c62828;font-weight:900';b.onclick=async()=>{if(!confirm('Are you sure you want to log out?'))return;try{if(typeof logout==='function')await logout();else await supabaseClient.auth.signOut()}finally{closePanels();$('mobileBottomNav')?.style.setProperty('display','none','important');$('app')?.classList.add('hidden');$('authScreen')?.classList.remove('hidden');$('landingScreen')?.classList.remove('hidden');window.scrollTo(0,0)}};box.appendChild(b)}
 }
-function boot(){addLogout();}
-const obs=new MutationObserver(addLogout);
-function start(){const box=document.getElementById('myProfileContent');if(box)obs.observe(box,{childList:true,subtree:true});addLogout();setInterval(addLogout,500);}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(start,300));else setTimeout(start,300);
+/* Delete/remove a contact means the next conversation starts clean: delete the old messages, then hide the conversation for this user. */
+window.finalHideConversation=async function(conversationId){
+ if(!window.currentProfile||!conversationId)return;
+ const side=String(currentProfile.role).toUpperCase()==='BUYER'?'buyer_hidden':'seller_hidden';
+ if(!confirm('Remove this contact?\n\nYour old messages will be deleted so the next chat with this person starts as a new conversation.'))return;
+ const {error:me}=await supabaseClient.from('messages').delete().eq('conversation_id',conversationId);
+ if(me){alert('Could not clear the old messages: '+me.message);return;}
+ const {error:ce}=await supabaseClient.from('conversations').update({[side]:true}).eq('id',conversationId);
+ if(ce){alert(ce.message);return;}
+ window.currentConversation=null;
+ if(typeof currentConversation!=='undefined')currentConversation=null;
+ if(typeof loadConversations==='function')await loadConversations();
+ if($('chatModal')){$('chatModal').classList.remove('chat-has-selection');$('chatModal').querySelector('.chat-window')?.classList.remove('active')}
+};
+/* If an old hidden conversation is selected for a new direct chat, clear its old messages before unhiding it. */
+window.prepareFreshConversation=async function(c){
+ if(!c||!currentProfile)return c;
+ const side=String(currentProfile.role).toUpperCase()==='BUYER'?'buyer_hidden':'seller_hidden';
+ if(c[side]){
+   await supabaseClient.from('messages').delete().eq('conversation_id',c.id);
+   const {data}=await supabaseClient.from('conversations').update({[side]:false}).eq('id',c.id).select('*').single();
+   return data||{...c,[side]:false};
+ }
+ return c;
+};
+/* Remove old mobile nav duplicates and enforce app-only visibility. */
+function cleanNav(){
+ document.querySelectorAll('#mobileBottomNav').forEach((n,i)=>{if(i>0)n.remove()});
+ const n=$('mobileBottomNav');if(n)n.style.setProperty('display',logged()?'grid':'none','important');
+}
+function boot(){cleanNav();ensureProfileTools()}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,300));else setTimeout(boot,300);
+setInterval(boot,700);
+const bodyObs=new MutationObserver(()=>{cleanNav();ensureProfileTools()});bodyObs.observe(document.body,{subtree:true,childList:true});
 })();
 </script>
 </body>
