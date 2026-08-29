@@ -1706,7 +1706,7 @@ body.modal-is-open{overscroll-behavior:none}
 @media(max-width:600px){#profileContent{padding-bottom:24px}}
 
 </style>
-<meta name="agrilink-build" content="FINAL-RATING-FK-FIX-2026-08-29">
+<meta name="agrilink-build" content="FINAL-RATING-CHAT-REALTIME-FIX-2026-08-29">
 </head>
 
 <body>
@@ -3471,6 +3471,12 @@ async function openFarmerProfile(farmerId){
         VERIFIED FARMER ACCOUNT
       </div>
 
+      <div id="publicFarmerRating" class="profile-rating">
+        <span class="stars">☆☆☆☆☆</span>
+        <span class="rating-number">New</span>
+        <span class="rating-label">0 reviews</span>
+      </div>
+
       <div class="profile-meta">
 
         <span>
@@ -3593,6 +3599,27 @@ async function openFarmerProfile(farmerId){
 
     </div>
   `;
+
+  // Load the farmer's real rating after the profile is rendered.
+  const {data:farmerReviews,error:farmerReviewsError}=await supabaseClient
+    .from("reviews")
+    .select("rating")
+    .eq("seller_id",farmerId);
+
+  if(!farmerReviewsError){
+    const ratings=farmerReviews||[];
+    const avg=ratings.length
+      ? ratings.reduce((sum,r)=>sum+Number(r.rating||0),0)/ratings.length
+      : 0;
+    const ratingBox=document.getElementById("publicFarmerRating");
+    if(ratingBox){
+      ratingBox.innerHTML=`
+        <span class="stars">${starString(avg)}</span>
+        <span class="rating-number">${avg?avg.toFixed(1):"New"}</span>
+        <span class="rating-label">${ratings.length} review${ratings.length===1?"":"s"}</span>
+      `;
+    }
+  }
 }
 
 
@@ -6798,30 +6825,66 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
   }
 
   async function finalLoadConversations(){
-    if(!currentProfile || !$('conversationList'))return;
+    if(!currentProfile || !$('conversationList')) return;
     const list=$('conversationList');
     list.innerHTML='<div class="chat-empty">Loading conversations...</div>';
-    const {data,error}=await supabaseClient.from('conversations').select(`*,buyer:buyer_id(id,full_name,role),seller:seller_id(id,full_name,role)`).or(`buyer_id.eq.${currentProfile.id},seller_id.eq.${currentProfile.id}`).order('updated_at',{ascending:false});
-    if(error){list.innerHTML=`<div class="chat-empty">${esc(error.message)}</div>`;return}
-    const visible=(data||[]).filter(c=>!hiddenFor(c));
-    if(!visible.length){list.innerHTML='<div class="chat-empty">No conversations yet.<br><br>Start a chat from a product.</div>';return}
-    const names=await getProductNames(visible);
+
+    // IMPORTANT: do NOT use PostgREST nested buyer/seller relations here.
+    // The app stores auth_user_id separately from users.id, and the nested
+    // relation can make the buyer side appear empty when the FK/RLS setup
+    // differs. Load conversation rows first, then load public user profiles.
+    const myId=String(currentProfile.id);
+    const {data:rows,error}=await supabaseClient
+      .from('conversations')
+      .select('*')
+      .or(`buyer_id.eq.${myId},seller_id.eq.${myId}`)
+      .order('updated_at',{ascending:false});
+
+    if(error){
+      list.innerHTML=`<div class="chat-empty">${esc(error.message)}</div>`;
+      return;
+    }
+
+    const visible=(rows||[]).filter(c=>!hiddenFor(c));
+    if(!visible.length){
+      list.innerHTML='<div class="chat-empty">No conversations yet.<br><br>Start a chat from a product.</div>';
+      return;
+    }
+
+    const userIds=[...new Set(visible.flatMap(c=>[c.buyer_id,c.seller_id]).filter(Boolean).map(String))];
+    const productIds=[...new Set(visible.map(c=>c.product_id).filter(Boolean).map(String))];
+
+    const [{data:users},{data:products}]=await Promise.all([
+      userIds.length ? supabaseClient.from('users').select('id,full_name,role').in('id',userIds) : Promise.resolve({data:[]}),
+      productIds.length ? supabaseClient.from('products').select('id,name').in('id',productIds) : Promise.resolve({data:[]})
+    ]);
+
+    const userMap=new Map((users||[]).map(u=>[String(u.id),u]));
+    const productMap=new Map((products||[]).map(p=>[String(p.id),p.name]));
+
     list.innerHTML='';
     visible.forEach(c=>{
-      const u=otherUser(c); const unread=unreadFor(c); const product=c.product_name||names.get(String(c.product_id))||'Product conversation';
+      const isBuyer=myId===String(c.buyer_id);
+      const otherId=isBuyer?c.seller_id:c.buyer_id;
+      const u=userMap.get(String(otherId))||{};
+      const unread=Number(isBuyer?c.buyer_unread:c.seller_unread)||0;
+      const product=c.product_name||productMap.get(String(c.product_id))||'Product conversation';
       const item=document.createElement('div');
       item.className='conversation-item'+(String(currentConversation?.id)===String(c.id)?' active':'');
       item.dataset.conversationId=c.id;
       item.innerHTML=`
         <div class="conversation-top">
-          <div class="conversation-person"><div class="conversation-avatar">${u?.role==='FARMER'?'👨‍🌾':'🛒'}</div><div class="conversation-name">${esc(u?.full_name||'User')}</div></div>
+          <div class="conversation-person">
+            <div class="conversation-avatar">${u.role==='FARMER'?'👨‍🌾':'🛒'}</div>
+            <div class="conversation-name">${esc(u.full_name||'User')}</div>
+          </div>
           ${unread?`<span class="conversation-unread">+${unread}</span>`:''}
         </div>
         <div class="conversation-product">🌾 ${esc(product)}</div>
         <div class="conversation-preview">${esc(c.last_message||'No messages yet')}</div>
         <div class="conversation-time">${shortTime(c.last_message_at||c.updated_at)}</div>
         <button class="conversation-remove" type="button">Remove</button>`;
-      item.addEventListener('click',()=>finalSelectConversation(c));
+      item.addEventListener('click',()=>finalSelectConversation({...c,buyer:userMap.get(String(c.buyer_id)),seller:userMap.get(String(c.seller_id)),product_name:product}));
       item.querySelector('.conversation-remove').addEventListener('click',e=>{e.stopPropagation();finalHideConversation(c.id)});
       list.appendChild(item);
     });
@@ -6869,7 +6932,12 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
   async function finalSelectConversation(c){
     if(!c||!currentProfile)return;
     currentConversation=c;
-    const u=otherUser(c);
+    let u=otherUser(c);
+    if(!u){
+      const otherId=String(c.buyer_id)===String(currentProfile.id)?c.seller_id:c.buyer_id;
+      const {data:profile}=await supabaseClient.from('users').select('id,full_name,role').eq('id',otherId).maybeSingle();
+      u=profile||{};
+    }
     $('chatUserName').textContent=u?.full_name||'User';
     let productName=c.product_name||'Product conversation';
     if(!c.product_name&&c.product_id){const {data}=await supabaseClient.from('products').select('name').eq('id',c.product_id).maybeSingle();productName=data?.name||productName}
@@ -6919,18 +6987,96 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
   async function finalSendMessage(e){
     e.preventDefault();
     if(!currentConversation){alert('Select a conversation first.');return}
-    const input=$('chatInput');const text=input.value.trim();if(!text)return;
+
+    const input=$('chatInput');
+    const text=input.value.trim();
+    if(!text)return;
+
     input.disabled=true;
-    const recipient=String(currentConversation.buyer_id)===String(currentProfile.id)?currentConversation.seller_id:currentConversation.buyer_id;
-    const {error}=await supabaseClient.from('messages').insert({conversation_id:currentConversation.id,sender_id:currentProfile.id,content:text});
-    input.disabled=false;
-    if(error){alert(error.message);return}
-    input.value='';
-    if(recipient && String(recipient)!==String(currentProfile.id)){
-      const product=currentConversation.product_name||'product';
-      await supabaseClient.from('notifications').insert({user_id:recipient,title:'New Chat Message',message:`${currentProfile.full_name||'Someone'} messaged you about ${product}.`,type:'CHAT'});
+
+    const me=String(currentProfile.id);
+    const isBuyer=String(currentConversation.buyer_id)===me;
+    const recipient= isBuyer ? currentConversation.seller_id : currentConversation.buyer_id;
+    const unreadField= isBuyer ? 'seller_unread' : 'buyer_unread';
+    const recipientHiddenField= isBuyer ? 'seller_hidden' : 'buyer_hidden';
+    const senderHiddenField= isBuyer ? 'buyer_hidden' : 'seller_hidden';
+
+    // Read the latest counter so +1 behaves like a normal chat badge.
+    const {data:latest,error:latestError}=await supabaseClient
+      .from('conversations')
+      .select(`buyer_unread,seller_unread,${senderHiddenField},${recipientHiddenField}`)
+      .eq('id',currentConversation.id)
+      .single();
+
+    if(latestError){
+      input.disabled=false;
+      alert(latestError.message);
+      return;
     }
-    await supabaseClient.from('conversations').update({updated_at:new Date().toISOString()}).eq('id',currentConversation.id);
+
+    const currentUnread=Number(latest?.[unreadField])||0;
+
+    const {data:inserted,error}=await supabaseClient
+      .from('messages')
+      .insert({
+        conversation_id:currentConversation.id,
+        sender_id:currentProfile.id,
+        content:text
+      })
+      .select('*')
+      .single();
+
+    if(error){
+      input.disabled=false;
+      alert(error.message);
+      return;
+    }
+
+    input.value='';
+    input.disabled=false;
+
+    const updatePayload={
+      updated_at:new Date().toISOString(),
+      last_message:text,
+      last_message_at:new Date().toISOString(),
+      [senderHiddenField]:false,
+      [recipientHiddenField]:false,
+      [unreadField]:currentUnread+1
+    };
+
+    // The sender is looking at this chat, so their own unread count stays zero.
+    const ownUnreadField=isBuyer?'buyer_unread':'seller_unread';
+    updatePayload[ownUnreadField]=0;
+
+    const {error:updateError}=await supabaseClient
+      .from('conversations')
+      .update(updatePayload)
+      .eq('id',currentConversation.id);
+
+    if(updateError){
+      console.warn('Conversation metadata update failed:',updateError.message);
+    }
+
+    // Insert a notification for the recipient.
+    if(recipient && String(recipient)!==me){
+      const product=currentConversation.product_name||'product';
+      await supabaseClient.from('notifications').insert({
+        user_id:recipient,
+        title:'New Chat Message',
+        message:`${currentProfile.full_name||'Someone'} messaged you about ${product}.`,
+        type:'CHAT'
+      });
+    }
+
+    // Show the sent message immediately even if Realtime is delayed.
+    if(inserted && $('chatMessages') && !$('message-'+sid(inserted.id))){
+      const empty=$('chatMessages').querySelector('.chat-empty');
+      if(empty)$('chatMessages').innerHTML='';
+      $('chatMessages').insertAdjacentHTML('beforeend',finalRenderMessage(inserted));
+      $('chatMessages').scrollTop=$('chatMessages').scrollHeight;
+    }
+
+    currentConversation={...currentConversation,...updatePayload};
     await finalLoadConversations();
     await refreshPersistentChatBadge();
   }
@@ -6984,6 +7130,10 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
     window.__agrilinkFinalGlobalChannel=supabaseClient.channel('final-global-chat-'+currentProfile.id+'-'+Date.now())
       .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},async payload=>{
         if(String(payload.new.sender_id)===String(currentProfile.id))return;
+        await refreshPersistentChatBadge();
+        if($('chatModal')&&!$('chatModal').classList.contains('hidden'))await finalLoadConversations();
+      })
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'conversations'},async()=>{
         await refreshPersistentChatBadge();
         if($('chatModal')&&!$('chatModal').classList.contains('hidden'))await finalLoadConversations();
       })
