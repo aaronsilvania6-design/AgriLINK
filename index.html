@@ -3408,6 +3408,15 @@ async function initializeApp(user){
     currentProfile =
       await getOrCreateProfile(user);
 
+    /* Normalize role so lowercase/legacy role values
+       can never show the wrong interface. */
+    currentProfile.role =
+      String(currentProfile.role || "BUYER").trim().toUpperCase();
+
+    if(!["BUYER","FARMER"].includes(currentProfile.role)){
+      currentProfile.role = "BUYER";
+    }
+
   }catch(error){
 
     showAuthMessage(
@@ -3454,6 +3463,13 @@ async function initializeApp(user){
       "hidden",
       !farmer
     );
+
+  const blockedButton =
+    document.querySelector(".blocked-open-btn");
+
+  if(blockedButton){
+    blockedButton.classList.toggle("hidden", farmer);
+  }
 
   document
     .getElementById("farmerDashboard")
@@ -4153,6 +4169,9 @@ ADD PRODUCT
 ========================================================= */
 
 function openAddProduct(){
+  if(!currentProfile || currentProfile.role !== "FARMER"){
+    return;
+  }
 
   document
     .getElementById("productModal")
@@ -6239,12 +6258,15 @@ function setupRoleHome(){
   const eyebrow = document.getElementById("roleHomeEyebrow");
   const actions = document.getElementById("roleHomeActions");
   const quick = document.getElementById("quickGrid");
+
   if(!title || !actions || !quick) return;
 
   eyebrow.textContent = farmer ? "FARMER SPACE" : "BUYER SPACE";
+
   title.textContent = farmer
     ? `Grow your farm business, ${currentProfile.full_name || "Farmer"}.`
     : `Find fresh products, ${currentProfile.full_name || "Buyer"}.`;
+
   text.textContent = farmer
     ? "Manage your listings, respond to orders, build trust and keep your customers coming back."
     : "Discover local products, connect with farmers, track your orders and share your experience.";
@@ -6256,69 +6278,42 @@ function setupRoleHome(){
   ` : `
     <button onclick="document.getElementById('buyerSearchSection').scrollIntoView({behavior:'smooth'})">🛒 Explore Marketplace</button>
     <button class="ghost" onclick="document.getElementById('buyerOrders').scrollIntoView({behavior:'smooth'})">Track Orders</button>
-    <button class="ghost" onclick="openMyProfile()">Edit Profile</button>
+    <button class="ghost" onclick="openChat()">💬 Message Farmers</button>
   `;
 
   quick.innerHTML = farmer ? `
-    <div class="quick-card" onclick="openAddProduct()"><div class="quick-icon">🌾</div><strong>List your harvest</strong><span>Publish fresh products with photos, price, stock and location.</span></div>
-    <div class="quick-card" onclick="document.getElementById('farmerTransactions').scrollIntoView({behavior:'smooth'})"><div class="quick-icon">📋</div><strong>Manage orders</strong><span>Accept, start and complete buyer transactions.</span></div>
-    <div class="quick-card" onclick="openMyProfile()"><div class="quick-icon">⭐</div><strong>Build trust</strong><span>Add a bio and let buyers see your ratings and profile.</span></div>
+    <div class="quick-card" onclick="openAddProduct()">
+      <div class="quick-icon">＋</div>
+      <strong>Add Product</strong>
+      <span>Publish a new farm listing.</span>
+    </div>
+    <div class="quick-card" onclick="loadOrders();document.getElementById('farmerTransactions').scrollIntoView({behavior:'smooth'})">
+      <div class="quick-icon">📦</div>
+      <strong>Manage Orders</strong>
+      <span>Review and update buyer orders.</span>
+    </div>
+    <div class="quick-card" onclick="openMyProfile()">
+      <div class="quick-icon">👨‍🌾</div>
+      <strong>My Profile</strong>
+      <span>Update your farmer information.</span>
+    </div>
   ` : `
-    <div class="quick-card" onclick="document.getElementById('buyerSearchSection').scrollIntoView({behavior:'smooth'})"><div class="quick-icon">🛍️</div><strong>Shop local</strong><span>Search agricultural products by name, location and price.</span></div>
-    <div class="quick-card" onclick="document.getElementById('buyerOrders').scrollIntoView({behavior:'smooth'})"><div class="quick-icon">📦</div><strong>Track purchases</strong><span>See your order status as it changes in real time.</span></div>
-    <div class="quick-card" onclick="openAgriBotWelcome()"><div class="quick-icon">🌱</div><strong>Ask AgriBot</strong><span>Get quick help with buying, selling, profiles and ratings.</span></div>
+    <div class="quick-card" onclick="document.getElementById('buyerSearchSection').scrollIntoView({behavior:'smooth'})">
+      <div class="quick-icon">🛒</div>
+      <strong>Marketplace</strong>
+      <span>Find fresh products from farmers.</span>
+    </div>
+    <div class="quick-card" onclick="document.getElementById('buyerOrders').scrollIntoView({behavior:'smooth'})">
+      <div class="quick-icon">📦</div>
+      <strong>My Orders</strong>
+      <span>Track your purchases.</span>
+    </div>
+    <div class="quick-card" onclick="openChat()">
+      <div class="quick-icon">💬</div>
+      <strong>Chat</strong>
+      <span>Message farmers directly.</span>
+    </div>
   `;
-}
-
-async function openMyProfile(){
-  if(!currentProfile) return;
-  const modal=document.getElementById("myProfileModal");
-  const box=document.getElementById("myProfileContent");
-  modal.classList.remove("hidden");
-  box.innerHTML='<div class="empty">Loading your profile...</div>';
-
-  const {data:orders=[]}=await supabaseClient.from("orders").select("status,total_amount,total_price").or(`buyer_id.eq.${currentProfile.id},seller_id.eq.${currentProfile.id}`);
-  const isFarmer=currentProfile.role==="FARMER";
-  const completed=(orders||[]).filter(o=>o.status==="COMPLETED").length;
-  const avatar=isFarmer?'👨‍🌾':'🛒';
-
-  let ratingHtml='';
-  if(isFarmer){
-    const {data:reviews}=await supabaseClient.from("reviews").select("rating").eq("seller_id",currentProfile.id);
-    const arr=reviews||[];
-    const avg=arr.length?arr.reduce((a,r)=>a+Number(r.rating),0)/arr.length:0;
-    ratingHtml=`<div class="profile-rating"><span class="stars">${starString(avg)}</span><span class="rating-number">${avg?avg.toFixed(1):'New'}</span><span class="rating-label">${arr.length} review${arr.length===1?'':'s'}</span></div>`;
-  }else{
-    ratingHtml=`<div class="profile-rating"><span class="stars">★</span><span>${completed}</span><span class="rating-muted">completed purchase${completed===1?'':'s'}</span></div>`;
-  }
-
-  box.innerHTML=`
-    <div class="profile-cover"></div>
-    <div class="profile-main">
-      <div class="profile-avatar">${avatar}</div>
-      <div class="profile-name">${escapeHtml(currentProfile.full_name||'AgriLink User')}</div>
-      <div class="profile-role">${escapeHtml(currentProfile.role||'USER')} ACCOUNT</div>
-      ${ratingHtml}
-      <div class="profile-meta">
-        <span>✉️ ${escapeHtml(currentProfile.email||currentUser?.email||'')}</span>
-        ${currentProfile.location?`<span>📍 ${escapeHtml(currentProfile.location)}</span>`:''}
-      </div>
-      <div class="profile-bio">${escapeHtml(currentProfile.bio||'Tell the AgriLink community a little about yourself.')}</div>
-      <form id="profileEditForm" style="margin-top:18px">
-        <div class="form-grid">
-          <div><label>Display Name</label><input id="editFullName" value="${escapeHtml(currentProfile.full_name||'') }" required></div>
-          <div><label>Location</label><input id="editLocation" value="${escapeHtml(currentProfile.location||'') }" placeholder="Municipality / Province"></div>
-        </div>
-        <label>About Me</label>
-        <textarea id="editBio" maxlength="500" placeholder="Write a short description about yourself...">${escapeHtml(currentProfile.bio||'')}</textarea>
-        <label>Contact Number <span style="font-size:11px;color:#718078">optional</span></label>
-        <input id="editPhone" value="${escapeHtml(currentProfile.phone||'')}" placeholder="09xx xxx xxxx">
-        <button class="primary-btn profile-edit-btn" type="submit">Save Profile</button>
-        <div id="profileEditMessage"></div>
-      </form>
-    </div>`;
-
-  document.getElementById("profileEditForm").addEventListener("submit",saveMyProfile);
 }
 
 function closeMyProfile(){document.getElementById("myProfileModal").classList.add("hidden")}
@@ -8095,6 +8090,158 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
   #chatModal .conversation-name{max-width:calc(100vw - 135px)!important}
   #chatModal .conversation-unread{margin-left:auto!important}
 }
+
+/* =========================================================
+   STRICT ROLE VISIBILITY + PHONE RESPONSIVE FIX
+   ========================================================= */
+body.role-farmer .blocked-open-btn{
+  display:none !important;
+}
+
+body.role-buyer #addProductButton,
+body.role-buyer #farmerDashboard,
+body.role-buyer #farmerTransactions{
+  display:none !important;
+}
+
+body.role-farmer #buyerSearchSection,
+body.role-farmer #buyerOrders{
+  display:none !important;
+}
+
+@media (max-width:800px){
+  .navbar{
+    padding:10px 12px !important;
+    gap:8px !important;
+  }
+
+  .nav-actions{
+    display:flex !important;
+    flex-wrap:wrap !important;
+    justify-content:flex-end !important;
+    gap:5px !important;
+  }
+
+  .nav-actions button{
+    padding:7px 9px !important;
+    font-size:10px !important;
+  }
+
+  body.role-farmer .nav-actions .blocked-open-btn{
+    display:none !important;
+  }
+
+  .container{
+    width:100% !important;
+    padding:12px !important;
+  }
+
+  .welcome,
+  .role-home,
+  .search-box{
+    border-radius:18px !important;
+    padding:18px !important;
+  }
+
+  .welcome h1{
+    font-size:25px !important;
+    line-height:1.15 !important;
+  }
+
+  .role-home h2{
+    font-size:22px !important;
+    line-height:1.2 !important;
+  }
+
+  .role-home-actions{
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    gap:8px !important;
+  }
+
+  .role-home-actions button{
+    width:100% !important;
+  }
+
+  .quick-grid{
+    grid-template-columns:1fr !important;
+    gap:10px !important;
+  }
+
+  .search-grid{
+    grid-template-columns:1fr !important;
+  }
+
+  .products{
+    grid-template-columns:1fr !important;
+    gap:12px !important;
+  }
+
+  .section-title{
+    flex-wrap:wrap !important;
+  }
+
+  .chat-modal .modal-card{
+    width:calc(100vw - 16px) !important;
+    max-width:none !important;
+    height:94vh !important;
+    margin:8px auto !important;
+    border-radius:18px !important;
+  }
+
+  .profile-modal-card,
+  #blockedAccountsModal .modal-card,
+  #productModal .modal-card{
+    width:calc(100vw - 16px) !important;
+    max-width:none !important;
+    max-height:94vh !important;
+    overflow-y:auto !important;
+    margin:8px auto !important;
+    border-radius:18px !important;
+  }
+
+  .blocked-user{
+    align-items:flex-start !important;
+  }
+}
+
+@media (max-width:480px){
+  .nav-brand small{
+    display:none !important;
+  }
+
+  .nav-actions .profile-nav-btn{
+    display:none !important;
+  }
+
+  .nav-actions button{
+    font-size:10px !important;
+    padding:7px 8px !important;
+  }
+
+  .container{
+    padding:9px !important;
+  }
+
+  .welcome,
+  .role-home,
+  .search-box{
+    padding:15px !important;
+  }
+
+  .welcome h1{
+    font-size:22px !important;
+  }
+
+  .product-content{
+    padding:12px !important;
+  }
+
+  .modal-card{
+    padding:14px !important;
+  }
+}
+
 </style>
 <script id="agrilink-message-badge-final-script">
 (function(){
@@ -8147,49 +8294,6 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
   const boot=()=>setTimeout(start,700);
   boot();
   setInterval(()=>{if(typeof currentProfile!=='undefined'&&currentProfile)refresh()},5000);
-})();
-</script>
-
-<style id="agrilink-block-rating-final-fix">
-.profile-rating-final{display:flex!important;align-items:center!important;gap:10px!important;margin:14px 0!important;padding:12px 14px!important;border:1px solid #f0e4bd!important;background:#fffdf4!important;border-radius:16px!important;width:fit-content!important}
-.profile-rating-final .stars{font-size:18px!important;letter-spacing:2px!important}.profile-rating-final .rating-number{font-size:19px!important;font-weight:950!important;color:#7a5100!important}.profile-rating-final .rating-label{font-size:11px!important;font-weight:800!important;color:#766b55!important}.rating-error-note{font-size:11px;color:#a33;margin-top:6px}
-</style>
-<script id="agrilink-block-rating-final-fix-script">
-(function(){
-'use strict'; if(window.__agrilinkBlockRatingFinalFix)return; window.__agrilinkBlockRatingFinalFix=true;
-const esc=window.escapeHtml||function(v){return String(v??'').replace(/[&<>\'"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]})};
-window.blockFarmerOnly=async function(farmerId,farmerName){
- if(!window.currentProfile||currentProfile.role!=='BUYER')return;
- const {data:existing,error:checkError}=await supabaseClient.from('user_blocks').select('id').eq('blocker_id',String(currentProfile.id)).eq('blocked_id',String(farmerId)).maybeSingle();
- if(checkError){alert(checkError.message);return} if(existing){alert('This farmer is already blocked.');return}
- if(!confirm('Block '+farmerName+'? Their products will be hidden from your marketplace, but NOT deleted.'))return;
- const {error}=await supabaseClient.from('user_blocks').insert({blocker_id:String(currentProfile.id),blocked_id:String(farmerId)});
- if(error){alert(error.message);return} document.getElementById('profileModal')?.classList.add('hidden'); if(typeof setModalScrollLock==='function')setModalScrollLock(false); await loadProducts();
-};
-window.unblockFarmerOnly=async function(farmerId,farmerName){
- if(!window.currentProfile||currentProfile.role!=='BUYER')return;
- if(!confirm('Unblock '+farmerName+'? Their active products will show in your marketplace again.'))return;
- const {error}=await supabaseClient.from('user_blocks').delete().eq('blocker_id',String(currentProfile.id)).eq('blocked_id',String(farmerId));
- if(error){alert(error.message);return} await loadProducts(); await openBlockedAccounts();
-};
-window.openBlockedAccounts=async function(){
- if(!window.currentProfile||currentProfile.role!=='BUYER'){alert('Blocked accounts are available for buyers.');return}
- const modal=document.getElementById('blockedAccountsModal'),content=document.getElementById('blockedAccountsContent'); if(!modal||!content)return;
- modal.classList.remove('hidden'); if(typeof setModalScrollLock==='function')setModalScrollLock(true); content.innerHTML='<div class="blocked-empty">Loading blocked accounts...</div>';
- const {data:blocks,error:blockError}=await supabaseClient.from('user_blocks').select('id,blocked_id').eq('blocker_id',String(currentProfile.id));
- if(blockError){content.innerHTML='<div class="message error">'+esc(blockError.message)+'</div>';return}
- if(!blocks?.length){content.innerHTML='<div class="blocked-empty"><div style="font-size:35px;margin-bottom:10px">🛡️</div><strong>No blocked accounts</strong><div style="font-size:12px;margin-top:5px">Farmers you block will appear here.</div></div>';return}
- const ids=blocks.map(x=>String(x.blocked_id)); const {data:users,error:userError}=await supabaseClient.from('users').select('id,full_name,role').in('id',ids);
- if(userError){content.innerHTML='<div class="message error">'+esc(userError.message)+'</div>';return}
- const map=new Map((users||[]).map(u=>[String(u.id),u]));
- content.innerHTML='<div class="blocked-list">'+blocks.map(b=>{const id=String(b.blocked_id),u=map.get(id),name=u?.full_name||'Farmer';return '<div class="blocked-user"><div class="blocked-user-info"><div class="blocked-avatar">👨‍🌾</div><div><div class="blocked-user-name">'+esc(name)+'</div><div class="blocked-user-role">'+esc(u?.role||'FARMER')+'</div></div></div><button type="button" class="unblock-btn" data-unblock-id="'+esc(id)+'">↩ Unblock</button></div>'}).join('')+'</div>';
- content.querySelectorAll('[data-unblock-id]').forEach(btn=>btn.addEventListener('click',()=>unblockFarmerOnly(btn.dataset.unblockId,map.get(btn.dataset.unblockId)?.full_name||'Farmer')));
-};
-window.closeBlockedAccounts=function(){document.getElementById('blockedAccountsModal')?.classList.add('hidden');if(typeof setModalScrollLock==='function')setModalScrollLock(false)};
-async function realRating(farmerId){const r=await supabaseClient.from('reviews').select('id,rating,review_text,created_at').eq('seller_id',String(farmerId)).order('created_at',{ascending:false});if(r.error){console.error('Rating query failed',r.error);return {reviews:[],avg:0,error:r.error}}const reviews=(r.data||[]).filter(x=>{const n=Number(x.rating);return Number.isFinite(n)&&n>=1&&n<=5});const avg=reviews.length?reviews.reduce((a,x)=>a+Number(x.rating),0)/reviews.length:0;return {reviews,avg,error:null}}
-const oldProfile=window.openFarmerProfile;
-if(oldProfile&&!oldProfile.__realRatingFix){const fixed=async function(farmerId){await oldProfile(farmerId);const main=document.querySelector('#profileContent .profile-main');if(!main)return;const d=await realRating(farmerId),reviews=d.reviews,avg=d.avg;main.querySelectorAll('.profile-rating,.profile-rating-final').forEach(x=>x.remove());const role=main.querySelector('.profile-role');if(role){const r=document.createElement('div');r.className='profile-rating-final';r.innerHTML='<span class="stars">'+(typeof starString==='function'?starString(avg):'★★★★★')+'</span><span class="rating-number">'+(avg?avg.toFixed(1):'New')+'</span><span class="rating-label">'+reviews.length+' review'+(reviews.length===1?'':'s')+'</span>';role.insertAdjacentElement('afterend',r)}const old=main.querySelector('.public-review-section');if(old)old.remove();const sec=document.createElement('div');sec.className='public-review-section';sec.innerHTML='<div class="section-title"><h2>Recent Reviews</h2><span class="review-count-pill">⭐ '+reviews.length+' total</span></div>';if(reviews.length){sec.insertAdjacentHTML('beforeend',reviews.slice(0,8).map(x=>'<div class="review-summary"><div class="review-card-head"><span class="stars">'+(typeof starString==='function'?starString(Number(x.rating)):'★★★★★')+'</span><span class="review-date">'+esc(x.created_at?new Date(x.created_at).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}):'')+'</span></div><div class="review-text">'+esc(x.review_text||'Great transaction!')+'</div><button class="review-report" type="button" data-review-id="'+esc(String(x.id))+'">🚩 Report</button></div>').join(''));sec.querySelectorAll('.review-report').forEach(b=>b.addEventListener('click',()=>typeof reportReview==='function'&&reportReview(b.dataset.reviewId)))}else sec.insertAdjacentHTML('beforeend','<div class="empty">No reviews yet. Complete a purchase to be the first to rate this farmer.</div>');main.appendChild(sec);if(d.error){const n=document.createElement('div');n.className='rating-error-note';n.textContent='Ratings could not be loaded. Check the Supabase reviews table permissions.';main.appendChild(n)}};fixed.__realRatingFix=true;window.openFarmerProfile=fixed}
-const oldSelect=window.selectConversation;if(oldSelect&&!oldSelect.__chatProfileFix){const fixedSelect=async function(c){const r=await oldSelect.apply(this,arguments),n=document.getElementById('chatUserName');if(n){const u=c?.buyer_id===currentProfile?.id?c?.seller:c?.buyer,id=u?.id||(c?.buyer_id===currentProfile?.id?c?.seller_id:c?.buyer_id);if(id){n.dataset.userId=String(id);n.classList.add('chat-user-clickable');n.onclick=()=>openFarmerProfile(String(id))}}return r};fixedSelect.__chatProfileFix=true;window.selectConversation=fixedSelect}
 })();
 </script>
 
