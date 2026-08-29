@@ -2944,8 +2944,12 @@ class="modal chat-modal hidden">
 
 <div class="conversation-list">
 
-<div class="chat-list-header">
-💬 Conversations
+<div class="chat-list-header agrilink-chat-list-header">
+  <div class="agrilink-chat-title">
+    <img class="agrilink-chat-logo" src="__AGRI_CHAT_LOGO__" alt="Lunduyan">
+    <span>Conversations</span>
+  </div>
+  <button type="button" class="chat-modal-close-btn" aria-label="Close messages" title="Close messages">×</button>
 </div>
 
 <div id="conversationList"></div>
@@ -2971,9 +2975,11 @@ Select a conversation
 </div>
 
 <button
-class="close"
-onclick="closeChat()">
-×
+class="close chat-window-control"
+type="button"
+aria-label="Back to contacts"
+title="Back to contacts">
+—
 </button>
 
 </div>
@@ -9929,6 +9935,314 @@ setInterval(run,600);
   }
 
   setInterval(boot,700);
+})();
+</script>
+
+
+<style id="AGRI_FINAL_V5_CHAT_BLOCK_FIX">
+/* ================= V5 CHAT HEADER ================= */
+#chatModal .chat-list-header{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:10px!important;
+  box-sizing:border-box!important;
+}
+#chatModal .agrilink-chat-title{
+  display:flex!important;
+  align-items:center!important;
+  gap:9px!important;
+  min-width:0!important;
+}
+#chatModal .agrilink-chat-logo{
+  width:34px!important;
+  height:34px!important;
+  border-radius:8px!important;
+  object-fit:cover!important;
+  flex:0 0 34px!important;
+}
+#chatModal .chat-modal-close-btn,
+#chatModal .chat-window-control{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  flex:0 0 38px!important;
+  width:38px!important;
+  height:38px!important;
+  min-width:38px!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:50%!important;
+  background:rgba(0,0,0,.07)!important;
+  color:#222!important;
+  font-size:25px!important;
+  line-height:1!important;
+  cursor:pointer!important;
+}
+#chatModal .chat-modal-close-btn:hover,
+#chatModal .chat-window-control:hover{
+  background:rgba(0,0,0,.12)!important;
+}
+#chatModal .chat-window-control{
+  background:rgba(255,255,255,.14)!important;
+  color:#fff!important;
+}
+
+/* Phone: make the contact header close button reachable and keep the
+   message composer visible after selecting a contact. */
+@media(max-width:700px){
+  #chatModal .chat-list-header{
+    min-height:58px!important;
+    padding:10px 12px!important;
+  }
+  #chatModal .chat-modal-close-btn,
+  #chatModal .chat-window-control{
+    width:40px!important;
+    height:40px!important;
+    min-width:40px!important;
+    flex-basis:40px!important;
+  }
+}
+
+/* ================= BLOCK STATE ================= */
+#profileModal .profile-action-row .message-user-btn[disabled]{
+  opacity:.45!important;
+  cursor:not-allowed!important;
+  pointer-events:none!important;
+}
+#profileModal .profile-action-row .block-user-btn{
+  display:inline-flex!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+}
+</style>
+
+<script id="AGRI_FINAL_V5_CHAT_BLOCK_FIX_JS">
+(function(){
+  'use strict';
+
+  const $=id=>document.getElementById(id);
+
+  function chatModal(){
+    return $('chatModal');
+  }
+
+  function selectedChat(){
+    const m=chatModal();
+    return !!m?.classList.contains('chat-has-selection');
+  }
+
+  function closeMessages(){
+    const m=chatModal();
+    if(!m)return;
+    if(typeof window.closeChat==='function'){
+      try{window.closeChat();}catch(_){}
+    }
+    m.classList.add('hidden');
+    m.classList.remove('chat-has-selection');
+    $('chatWindow')?.classList.remove('active');
+    m.querySelector('.chat-window-control')?.setAttribute('aria-label','Back to contacts');
+    m.querySelector('.chat-window-control')?.setAttribute('title','Back to contacts');
+  }
+
+  function backToContacts(){
+    const m=chatModal();
+    if(!m)return;
+
+    m.classList.remove('hidden');
+    m.classList.remove('chat-has-selection');
+    $('chatWindow')?.classList.remove('active');
+
+    if(typeof currentConversation!=='undefined')currentConversation=null;
+    try{
+      if(typeof chatSelectionKey==='function')localStorage.removeItem(chatSelectionKey());
+    }catch(_){}
+
+    const name=$('chatUserName');
+    if(name)name.textContent='Select a conversation';
+
+    const ctx=$('chatProductContext');
+    if(ctx)ctx.textContent='';
+
+    const messages=$('chatMessages');
+    if(messages)messages.innerHTML='<div class="chat-empty">Select a conversation to start chatting.</div>';
+
+    syncChatControls();
+  }
+
+  function syncChatControls(){
+    const m=chatModal();
+    if(!m)return;
+
+    const listClose=m.querySelector('.chat-modal-close-btn');
+    const chatClose=m.querySelector('.chat-window-control, .chat-header .close');
+
+    if(listClose){
+      listClose.textContent='×';
+      listClose.onclick=function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        closeMessages();
+      };
+    }
+
+    if(chatClose){
+      chatClose.textContent=selectedChat()?'—':'×';
+      chatClose.setAttribute('aria-label',selectedChat()?'Back to contacts':'Close messages');
+      chatClose.title=selectedChat()?'Back to contacts':'Close messages';
+      chatClose.onclick=function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        if(selectedChat())backToContacts();
+        else closeMessages();
+      };
+    }
+
+    /* Remove any accidental duplicate generated controls. */
+    m.querySelectorAll('.final-chat-close').forEach(x=>x.remove());
+  }
+
+  /* Observe chat state changes so the correct control is always present. */
+  const chatObserver=new MutationObserver(()=>syncChatControls());
+
+  function bootChat(){
+    const m=chatModal();
+    if(!m)return;
+    if(!m.__v5Observed){
+      m.__v5Observed=true;
+      chatObserver.observe(m,{attributes:true,subtree:true,childList:true,attributeFilter:['class','style']});
+    }
+    syncChatControls();
+  }
+
+  /* Make the existing finalSelectConversation expose the selected state,
+     without replacing its database logic. */
+  const waitForSelection=setInterval(()=>{
+    const m=chatModal();
+    if(!m)return;
+    syncChatControls();
+    if(m.classList.contains('chat-has-selection')){
+      $('chatWindow')?.classList.add('active');
+    }
+  },250);
+  setTimeout(()=>clearInterval(waitForSelection),30000);
+
+  /* ================= BLOCKING FIX ================= */
+
+  function setBlockButtonId(){
+    const pm=$('profileModal');
+    if(!pm)return;
+
+    const block=pm.querySelector('.profile-action-row .block-user-btn');
+    if(!block)return;
+
+    let onclick=block.getAttribute('onclick')||'';
+    let match=onclick.match(/toggleBlockUser\(['"]([^'"]+)['"]/);
+
+    if(match){
+      block.dataset.userId=match[1];
+    }
+  }
+
+  async function syncMessageButton(){
+    const pm=$('profileModal');
+    if(!pm || pm.classList.contains('hidden') || !window.currentProfile)return;
+
+    setBlockButtonId();
+
+    const block=pm.querySelector('.profile-action-row .block-user-btn');
+    const msg=pm.querySelector('.profile-action-row .message-user-btn');
+    if(!block || !msg)return;
+
+    const id=block.dataset.userId;
+    if(!id)return;
+
+    try{
+      const rel=await window.getBlockRelationship(id);
+      const blocked=!!rel.blocked;
+
+      msg.disabled=blocked;
+      msg.setAttribute('aria-disabled',blocked?'true':'false');
+      msg.style.pointerEvents=blocked?'none':'';
+      msg.title=blocked
+        ? (rel.byMe?'Unblock this user before messaging.':'This user has blocked you.')
+        : '';
+
+      block.textContent=rel.byMe?'↩ Unblock':'⛔ Block';
+      block.dataset.blocked=rel.byMe?'1':'0';
+      block.dataset.userId=String(id);
+    }catch(err){
+      console.warn('V5 block sync:',err);
+    }
+  }
+
+  /* Capture clicks BEFORE old inline onclick handlers. */
+  document.addEventListener('click',async function(e){
+    const msg=e.target.closest('#profileModal .profile-action-row .message-user-btn');
+    if(!msg)return;
+
+    setBlockButtonId();
+    const block=$('profileModal')?.querySelector('.profile-action-row .block-user-btn');
+    const id=block?.dataset.userId;
+
+    if(!id)return;
+
+    try{
+      const rel=await window.getBlockRelationship(id);
+      if(rel.blocked){
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        msg.disabled=true;
+        alert(rel.byMe
+          ? 'Unblock this user before messaging them.'
+          : 'This user has blocked you. Messaging is unavailable.');
+      }
+    }catch(_){}
+  },true);
+
+  /* After Block/Unblock, immediately re-read the relationship and re-render
+     the button state. */
+  const originalToggle=window.toggleBlockUser;
+  if(typeof originalToggle==='function' && !originalToggle.__v5Wrapped){
+    const wrapped=async function(){
+      const args=arguments;
+      const result=await originalToggle.apply(this,args);
+      setTimeout(syncMessageButton,100);
+      setTimeout(syncMessageButton,500);
+      return result;
+    };
+    wrapped.__v5Wrapped=true;
+    window.toggleBlockUser=wrapped;
+  }
+
+  const profileObserver=new MutationObserver(()=>{
+    setTimeout(syncMessageButton,50);
+  });
+
+  function bootProfile(){
+    const pm=$('profileModal');
+    if(pm && !pm.__v5ProfileObserved){
+      pm.__v5ProfileObserved=true;
+      profileObserver.observe(pm,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+    }
+    syncMessageButton();
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>{
+      setTimeout(bootChat,200);
+      setTimeout(bootProfile,200);
+    });
+  }else{
+    setTimeout(bootChat,200);
+    setTimeout(bootProfile,200);
+  }
+
+  setInterval(()=>{
+    syncChatControls();
+    syncMessageButton();
+  },700);
+
 })();
 </script>
 
