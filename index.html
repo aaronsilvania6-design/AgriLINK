@@ -1885,6 +1885,246 @@ body.modal-is-open{overscroll-behavior:none}
 </style>
 
 <meta name="agrilink-build" content="BUYER-MESSAGES-MOBILE-PERSIST-2026-08-29">
+
+<style id="agrilink-mobile-polish">
+/* =========================================================
+   FINAL MOBILE POLISH
+   Designed for narrow phones: no cramped 2-column cards,
+   no navbar overflow, comfortable tap targets, clean spacing.
+   ========================================================= */
+@media (max-width: 600px){
+  html,body{width:100%;max-width:100%;overflow-x:hidden!important}
+  *{box-sizing:border-box}
+
+  .navbar{
+    height:64px!important;
+    min-height:64px!important;
+    padding:0 8px!important;
+    gap:7px!important;
+    overflow:hidden!important;
+    position:sticky!important;
+  }
+
+  .nav-brand{
+    flex:0 0 42px!important;
+    width:42px!important;
+    min-width:42px!important;
+    justify-content:center!important;
+    gap:0!important;
+    font-size:0!important;
+  }
+  .nav-logo{
+    width:38px!important;
+    height:38px!important;
+    min-width:38px!important;
+    border-radius:11px!important;
+    font-size:21px!important;
+  }
+
+  .live-pill{
+    flex:0 0 auto!important;
+    margin:0 2px 0 0!important;
+    padding:7px 8px!important;
+    font-size:9px!important;
+    white-space:nowrap!important;
+  }
+
+  .nav-actions{
+    flex:1 1 auto!important;
+    min-width:0!important;
+    display:flex!important;
+    justify-content:flex-end!important;
+    gap:5px!important;
+    overflow:hidden!important;
+  }
+
+  .nav-actions button{
+    flex:0 0 38px!important;
+    width:38px!important;
+    min-width:38px!important;
+    height:38px!important;
+    padding:0!important;
+    border-radius:11px!important;
+    font-size:0!important;
+    display:grid!important;
+    place-items:center!important;
+    position:relative!important;
+    white-space:nowrap!important;
+  }
+
+  .nav-actions button:nth-child(1)::before{content:"🔔";font-size:18px}
+  .nav-actions button:nth-child(2)::before{content:"💬";font-size:18px}
+  .nav-actions button:nth-child(3)::before{content:"👤";font-size:18px}
+  .nav-actions button:nth-child(4)::before{content:"🌱";font-size:18px}
+  .nav-actions button:nth-child(5)::before{content:"＋";font-size:20px;font-weight:900}
+  .nav-actions button:nth-child(6)::before{content:"↪";font-size:20px;font-weight:900}
+
+  .notification-badge{
+    position:absolute!important;
+    top:-3px!important;
+    right:-3px!important;
+    min-width:17px!important;
+    height:17px!important;
+    padding:0 4px!important;
+    font-size:9px!important;
+    line-height:17px!important;
+    z-index:3!important;
+  }
+
+  .container{
+    width:100%!important;
+    max-width:100%!important;
+    margin:0!important;
+    padding:12px 10px 55px!important;
+  }
+
+  .welcome{
+    padding:20px 17px!important;
+    border-radius:18px!important;
+    margin-bottom:14px!important;
+  }
+  .welcome h1{font-size:22px!important;line-height:1.2!important}
+  .welcome p{font-size:13px!important;line-height:1.45!important}
+  .welcome:after{font-size:90px!important;right:10px!important;bottom:-20px!important}
+
+  .search-box{
+    padding:13px!important;
+    border-radius:15px!important;
+    margin-bottom:16px!important;
+  }
+  .search-grid{grid-template-columns:1fr!important;gap:8px!important}
+  .search-grid input,.search-grid select,.search-grid button{
+    width:100%!important;
+    min-height:44px!important;
+  }
+
+  .section{width:100%!important}
+  .section-title{margin-bottom:11px!important}
+  .section-title h2{font-size:21px!important}
+
+  /* ONE CLEAN COLUMN on phones. The old 2-column cards were too cramped. */
+  .products{
+    width:100%!important;
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:13px!important;
+  }
+
+  .product-card{
+    width:100%!important;
+    min-width:0!important;
+    border-radius:17px!important;
+  }
+  .product-image{
+    width:100%!important;
+    height:190px!important;
+    aspect-ratio:16/10!important;
+  }
+  .product-image img{
+    width:100%!important;
+    height:100%!important;
+    object-fit:cover!important;
+    display:block!important;
+  }
+  .product-content{padding:14px!important}
+  .product-content h3{font-size:17px!important;line-height:1.25!important;margin-bottom:6px!important}
+  .price{font-size:17px!important}
+  .product-description{font-size:13px!important;line-height:1.4!important}
+  .product-actions{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:8px!important;
+    margin-top:10px!important;
+  }
+  .product-actions button{
+    width:100%!important;
+    min-height:43px!important;
+    padding:10px 8px!important;
+  }
+
+  .farmer-dashboard{
+    grid-template-columns:1fr 1fr!important;
+    gap:8px!important;
+  }
+  .stat-card{padding:13px 10px!important}
+  .stat-value{font-size:20px!important}
+
+  /* Make transaction/order cards breathe on narrow screens. */
+  .orders{width:100%!important}
+  .order-card{width:100%!important;overflow:hidden!important}
+
+  /* Modals should fit the phone instead of looking like a desktop window. */
+  .modal{padding:7px!important}
+  .modal-card{
+    width:100%!important;
+    max-width:100%!important;
+    border-radius:17px!important;
+  }
+
+  .profile-modal-card{
+    width:100%!important;
+    height:94vh!important;
+    max-height:94vh!important;
+    border-radius:16px!important;
+  }
+
+  /* Chat: full-screen phone layout with its own scrolling area. */
+  .chat-modal .modal-card{
+    width:100%!important;
+    height:96vh!important;
+    max-height:96vh!important;
+    border-radius:16px!important;
+  }
+  .chat-layout{
+    display:flex!important;
+    flex-direction:column!important;
+    height:96vh!important;
+    min-height:0!important;
+  }
+  .conversation-list{
+    display:block!important;
+    flex:0 0 auto!important;
+    width:100%!important;
+    max-height:145px!important;
+    border-right:0!important;
+    border-bottom:1px solid var(--border)!important;
+    overflow:auto!important;
+  }
+  .chat-list-header{padding:12px 14px!important}
+  .conversation-item{padding:11px 13px!important}
+  .chat-window{min-height:0!important;flex:1 1 auto!important}
+  .chat-header{padding:12px 14px!important}
+  .chat-messages{
+    min-height:0!important;
+    padding:12px!important;
+    gap:8px!important;
+    overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+  .chat-bubble{max-width:82%!important;font-size:14px!important}
+
+  .notification-panel{
+    top:70px!important;
+    left:8px!important;
+    right:8px!important;
+    width:auto!important;
+    max-height:70vh!important;
+  }
+
+  .profile-product-grid{grid-template-columns:1fr!important}
+}
+
+@media (max-width:380px){
+  .navbar{padding:0 5px!important;gap:4px!important}
+  .nav-brand{flex-basis:38px!important;width:38px!important;min-width:38px!important}
+  .nav-logo{width:35px!important;height:35px!important}
+  .live-pill{padding:6px 6px!important;font-size:8px!important}
+  .nav-actions{gap:3px!important}
+  .nav-actions button{width:35px!important;min-width:35px!important;height:35px!important}
+  .product-image{height:165px!important}
+  .product-content{padding:12px!important}
+}
+</style>
 </head>
 
 <body>
