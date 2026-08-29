@@ -6349,29 +6349,44 @@ function starString(avg){
    ========================================================= */
 async function loadReviewState(){
   if(currentProfile?.role!=="BUYER") return;
-  const {data}=await supabaseClient.from("reviews").select("order_id");
-  reviewedOrderIds=new Set((data||[]).map(x=>x.order_id));
+  const {data,error}=await supabaseClient.from("reviews").select("id,order_id,rating,review_text").eq("buyer_id",currentProfile.id);
+  if(error){console.warn("Review state:",error.message);return;}
+  reviewedOrderIds=new Set((data||[]).map(x=>String(x.order_id)));
 }
 
 async function openReviewForOrder(orderId){
+  if(!currentProfile||currentProfile.role!=="BUYER") return;
   const {data:order,error}=await supabaseClient.from("orders").select(`*,products:product_id(name,unit),seller:seller_id(full_name)`).eq("id",orderId).eq("buyer_id",currentProfile.id).single();
   if(error||!order){alert(error?.message||"Order not found.");return;}
   openReviewModal(order);
 }
 
-function openReviewModal(order){
+async function openReviewModal(order){
   if(!order) return;
   if(order.status!=="COMPLETED"){
     alert("You can rate this purchase after the farmer marks the order as COMPLETED.");
     return;
   }
-  if(reviewedOrderIds.has(order.id)){alert("You already rated this purchase.");return}
-  reviewRating=0;
+
+  // Existing review = EDIT MODE. The buyer can change the stars/review anytime.
+  const {data:existing,error:existingError}=await supabaseClient
+    .from("reviews")
+    .select("id,rating,review_text")
+    .eq("order_id",order.id)
+    .eq("buyer_id",currentProfile.id)
+    .maybeSingle();
+  if(existingError){alert(existingError.message);return;}
+
+  reviewRating=Number(existing?.rating||0);
   document.getElementById("reviewOrderId").value=order.id;
   document.getElementById("reviewProductInfo").innerHTML=`<strong>${escapeHtml(order.products?.name||'Product')}</strong><br><span style="color:#718078">Purchased from ${escapeHtml(order.seller?.full_name||'Farmer')}</span>`;
-  document.getElementById("reviewText").value='';
-  setReviewRating(0);
+  document.getElementById("reviewText").value=existing?.review_text||'';
+  setReviewRating(reviewRating);
   document.getElementById("reviewMessage").innerHTML='';
+  const title=document.querySelector('#reviewModal h2');
+  if(title) title.textContent=existing?'Edit your rating':'Rate your purchase';
+  const submit=document.querySelector('#reviewForm button[type="submit"]');
+  if(submit) submit.textContent=existing?'Save Changes':'Submit Rating';
   document.getElementById("reviewModal").classList.remove("hidden");
   setModalScrollLock(true);
 }
@@ -6404,11 +6419,28 @@ document.getElementById("reviewForm").addEventListener("submit",async e=>{
     return;
   }
 
+  // If a review already exists, UPDATE it instead of blocking the buyer.
   if(existingReview){
-    reviewedOrderIds.add(order.id);
+    const {error:updateError}=await supabaseClient.from("reviews").update({
+      rating:reviewRating,
+      review_text:document.getElementById("reviewText").value.trim()||null,
+      updated_at:new Date().toISOString()
+    }).eq("id",existingReview.id).eq("buyer_id",currentProfile.id);
+    if(updateError){
+      document.getElementById("reviewMessage").innerHTML=
+        `<div class="message error">${escapeHtml(updateError.message)}</div>`;
+      return;
+    }
+    reviewedOrderIds.add(String(order.id));
     document.getElementById("reviewMessage").innerHTML=
-      '<div class="message error">You already rated this purchase.</div>';
-    setTimeout(()=>{closeReviewModal();loadOrders();},700);
+      '<div class="message success">Your rating has been updated.</div>';
+    await supabaseClient.from("notifications").insert({
+      user_id:order.seller_id,
+      title:"Rating Updated",
+      message:`A buyer updated their rating to ${reviewRating} stars.`,
+      type:"REVIEW"
+    });
+    setTimeout(()=>{closeReviewModal();loadOrders();},500);
     return;
   }
 
@@ -6460,8 +6492,10 @@ document.getElementById("reviewForm").addEventListener("submit",async e=>{
 const __renderOrderBase = renderOrder;
 renderOrder = function(order){
   let html=__renderOrderBase(order);
-  if(currentProfile?.role==="BUYER" && order.status==="COMPLETED" && !reviewedOrderIds.has(order.id)){
-    html=html.replace('<div class="order-actions">','<div class="order-actions"><button class="rate-purchase-btn" onclick="openReviewForOrder(\''+String(order.id).replace(/\'/g,'\\\'')+'\')">⭐ Rate Purchase</button>');
+  if(currentProfile?.role==="BUYER" && order.status==="COMPLETED"){
+    const hasReview=reviewedOrderIds.has(String(order.id));
+    const label=hasReview?'✏️ Edit Rating':'⭐ Rate Purchase';
+    html=html.replace('<div class="order-actions">','<div class="order-actions"><button class="rate-purchase-btn" onclick="openReviewForOrder(\''+String(order.id).replace(/\'/g,'\\\'')+'\')">'+label+'</button>');
   }
   return html;
 };
@@ -6722,7 +6756,7 @@ function botReply(text){
   const q=String(text).toLowerCase(); const farmer=currentProfile?.role==='FARMER'; let reply;
   if(q.includes('buy')) reply='To buy, open Marketplace, choose a product, set the quantity, then place the Competition Demo Order. No real money is charged.';
   else if(q.includes('sell')||q.includes('product')) reply=farmer?'Use + Product to publish a listing. Add a clear name, price, stock, location, description and photo.':'Only farmer accounts can publish products. You can contact a farmer through Chat.';
-  else if(q.includes('rating')||q.includes('review')||q.includes('star')) reply='After a completed purchase, the buyer gets a Rate Purchase button. Choose 1–5 stars and optionally write a review.';
+  else if(q.includes('rating')||q.includes('review')||q.includes('star')) reply='After a completed purchase, the buyer can rate the farmer from 1–5 stars. The same button changes to Edit Rating so the buyer can update the stars or review later.';
   else if(q.includes('profile')||q.includes('bio')) reply='Tap Profile in the top bar. You can edit your display name, location, short bio and optional contact number.';
   else if(q.includes('order')||q.includes('track')) reply='Your order status moves through the marketplace workflow. Realtime updates let both sides see status changes without refreshing.';
   else if(q.includes('farmer')) reply='Farmer accounts focus on listings, stock, orders, customer trust and their public farmer profile.';
