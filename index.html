@@ -9180,5 +9180,415 @@ AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
 })();
 </script>
 
+
+<!-- =========================================================
+     AGRILINK FINAL INTERACTION FIX
+     Chat + mobile navigation + block UI + blocked products
+========================================================= -->
+<style id="agrilink-final-interaction-fix">
+/* The chat input was being pushed below the mobile viewport. */
+#chatModal .chat-window{
+  display:flex!important;
+  flex-direction:column!important;
+  min-height:0!important;
+  height:100%!important;
+}
+#chatModal .chat-messages{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+}
+#chatModal #chatForm{
+  display:flex!important;
+  flex:0 0 auto!important;
+  min-height:60px!important;
+  position:relative!important;
+  z-index:20!important;
+  background:#fff!important;
+}
+#chatModal #chatInput{
+  display:block!important;
+  flex:1 1 auto!important;
+  min-width:0!important;
+  pointer-events:auto!important;
+}
+#chatModal #chatForm button{
+  display:block!important;
+  pointer-events:auto!important;
+}
+
+.mobile-view-hidden{display:none!important}
+
+@media(max-width:700px){
+  .mobile-bottom-nav{grid-template-columns:repeat(6,1fr)!important}
+  .mobile-nav-item{font-size:8px!important}
+  .mobile-nav-item .mobile-nav-icon{font-size:18px!important}
+  #chatModal .chat-window{display:flex!important;flex-direction:column!important}
+  #chatModal .chat-input{display:flex!important;position:sticky!important;bottom:0!important}
+}
+</style>
+
+<script id="agrilink-final-interaction-fix-js">
+(function(){
+  'use strict';
+  if(window.__agrilinkFinalInteractionFix) return;
+  window.__agrilinkFinalInteractionFix=true;
+
+  const $=id=>document.getElementById(id);
+  const sid=v=>String(v??'');
+  const same=(a,b)=>sid(a)===sid(b);
+  const esc=v=>typeof window.escapeHtml==='function'
+    ? window.escapeHtml(String(v??''))
+    : String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+
+  async function relationship(otherId){
+    if(!window.currentProfile || !otherId) return {blocked:false,byMe:false,byThem:false};
+    const me=sid(currentProfile.id), other=sid(otherId);
+    const {data,error}=await supabaseClient.from('user_blocks')
+      .select('blocker_id,blocked_id')
+      .or(`and(blocker_id.eq.${me},blocked_id.eq.${other}),and(blocker_id.eq.${other},blocked_id.eq.${me})`);
+    if(error) return {blocked:false,byMe:false,byThem:false};
+    const rows=data||[];
+    return {
+      blocked:rows.length>0,
+      byMe:rows.some(r=>same(r.blocker_id,me) && same(r.blocked_id,other)),
+      byThem:rows.some(r=>same(r.blocker_id,other) && same(r.blocked_id,me))
+    };
+  }
+
+  /* ------------------------------------------------------
+     CHAT: replace all old submit listeners with one handler
+     ------------------------------------------------------ */
+  function installChatFix(){
+    const old=$('chatForm');
+    if(!old || old.dataset.finalChatFix==='1') return;
+
+    const form=old.cloneNode(true);
+    old.replaceWith(form);
+    form.dataset.finalChatFix='1';
+
+    form.addEventListener('submit',async function(e){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      if(!window.currentProfile || !window.currentConversation){
+        alert('Select a conversation first.');
+        return;
+      }
+
+      const input=$('chatInput');
+      const button=form.querySelector('button[type="submit"]');
+      const content=(input?.value||'').trim();
+      if(!content) return;
+
+      const conversation=currentConversation;
+      const otherId=same(conversation.buyer_id,currentProfile.id)
+        ? conversation.seller_id
+        : conversation.buyer_id;
+
+      if(await relationship(otherId).then(x=>x.blocked)){
+        alert('You cannot send a message because one account has blocked the other.');
+        return;
+      }
+
+      input.disabled=true;
+      if(button) button.disabled=true;
+
+      try{
+        const {data,error}=await supabaseClient.from('messages')
+          .insert({
+            conversation_id:conversation.id,
+            sender_id:currentProfile.id,
+            content:content
+          })
+          .select('*')
+          .single();
+
+        if(error) throw error;
+
+        input.value='';
+
+        const box=$('chatMessages');
+        if(data && box){
+          const safeId=sid(data.id).replace(/[^a-zA-Z0-9_-]/g,'_');
+          if(!$('message-'+safeId)){
+            const empty=box.querySelector('.chat-empty');
+            if(empty) box.innerHTML='';
+            const time=data.created_at
+              ? new Date(data.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})
+              : '';
+            box.insertAdjacentHTML('beforeend',
+              `<div class="message-row mine" id="message-${safeId}"><div class="chat-bubble"><div>${esc(data.content)}</div><div class="chat-time">${time}</div></div></div>`);
+          }
+          box.scrollTop=box.scrollHeight;
+        }
+
+        const now=new Date().toISOString();
+        const isBuyer=same(conversation.buyer_id,currentProfile.id);
+        const unreadField=isBuyer?'seller_unread':'buyer_unread';
+        await supabaseClient.from('conversations')
+          .update({
+            last_message:content,
+            last_message_at:now,
+            updated_at:now
+          })
+          .eq('id',conversation.id);
+
+        /* Best effort unread increment without blocking the UI. */
+        try{
+          const {data:latest}=await supabaseClient.from('conversations')
+            .select('buyer_unread,seller_unread')
+            .eq('id',conversation.id).maybeSingle();
+          if(latest){
+            const next=(Number(latest[unreadField])||0)+1;
+            await supabaseClient.from('conversations')
+              .update({[unreadField]:next})
+              .eq('id',conversation.id);
+          }
+        }catch(_){}
+
+        if(typeof window.loadConversations==='function'){
+          window.loadConversations().catch(()=>{});
+        }
+
+      }catch(error){
+        console.error('Chat send error:',error);
+        alert(error?.message||'Unable to send message.');
+      }finally{
+        if(input) input.disabled=false;
+        if(button) button.disabled=false;
+        input?.focus();
+      }
+    });
+  }
+
+  /* ------------------------------------------------------
+     BLOCK: no freeze, immediate Block -> Unblock
+     Message is disabled while blocked.
+     ------------------------------------------------------ */
+  let blockBusy=false;
+  window.toggleBlockUser=async function(otherId,otherName){
+    if(blockBusy || !window.currentProfile || !otherId || same(otherId,currentProfile.id)) return;
+    blockBusy=true;
+
+    const modal=$('profileModal');
+    const blockBtn=modal?.querySelector('.block-user-btn');
+    const messageBtn=modal?.querySelector('.message-user-btn');
+
+    if(blockBtn) blockBtn.disabled=true;
+
+    try{
+      const rel=await relationship(otherId);
+      let nowBlocked=false;
+
+      if(rel.byMe){
+        if(!confirm(`Unblock ${otherName||'this user'}?`)) return;
+        const {error}=await supabaseClient.from('user_blocks')
+          .delete()
+          .eq('blocker_id',sid(currentProfile.id))
+          .eq('blocked_id',sid(otherId));
+        if(error) throw error;
+        nowBlocked=false;
+      }else{
+        if(!confirm(`Block ${otherName||'this user'}? Their products will be hidden and messaging will be unavailable until you unblock them.`)) return;
+        const {error}=await supabaseClient.from('user_blocks')
+          .upsert({
+            blocker_id:sid(currentProfile.id),
+            blocked_id:sid(otherId)
+          },{onConflict:'blocker_id,blocked_id',ignoreDuplicates:true});
+        if(error) throw error;
+        nowBlocked=true;
+      }
+
+      if(blockBtn){
+        blockBtn.textContent=nowBlocked?'↩ Unblock':'⛔ Block';
+        blockBtn.dataset.blocked=nowBlocked?'1':'0';
+      }
+      if(messageBtn) messageBtn.disabled=nowBlocked;
+
+      /* Refresh marketplace after the UI has already responded. */
+      if(typeof window.loadProducts==='function'){
+        window.loadProducts().catch(err=>console.warn('Product refresh:',err));
+      }
+      if($('blockedAccountsModal') && !$('blockedAccountsModal').classList.contains('hidden') && typeof window.openBlockedAccounts==='function'){
+        window.openBlockedAccounts().catch(()=>{});
+      }
+
+    }catch(error){
+      console.error('Block error:',error);
+      alert(error?.message||'Unable to update block status.');
+    }finally{
+      if(blockBtn) blockBtn.disabled=false;
+      blockBusy=false;
+    }
+  };
+
+  /* ------------------------------------------------------
+     HIDE PRODUCTS FROM ANY ACCOUNT BLOCKED BY EITHER SIDE
+     They return immediately after unblock.
+     ------------------------------------------------------ */
+  async function blockedIds(){
+    if(!window.currentProfile) return new Set();
+    const me=sid(currentProfile.id);
+    const {data,error}=await supabaseClient.from('user_blocks')
+      .select('blocker_id,blocked_id')
+      .or(`blocker_id.eq.${me},blocked_id.eq.${me}`);
+    if(error) return new Set();
+    const set=new Set();
+    (data||[]).forEach(row=>{
+      if(same(row.blocker_id,me)) set.add(sid(row.blocked_id));
+      if(same(row.blocked_id,me)) set.add(sid(row.blocker_id));
+    });
+    return set;
+  }
+
+  const originalLoadProducts=window.loadProducts;
+  if(typeof originalLoadProducts==='function'){
+    window.loadProducts=async function(){
+      const result=await originalLoadProducts.apply(this,arguments);
+      if(!window.currentProfile) return result;
+
+      const hidden=await blockedIds();
+      if(hidden.size && Array.isArray(window.allProducts||allProducts)){
+        const source=window.allProducts||allProducts;
+        const visible=source.filter(p=>!hidden.has(sid(p.seller_id)));
+        window.allProducts=visible;
+        try{ allProducts=visible; }catch(_){}
+        if(typeof window.renderProducts==='function') window.renderProducts(visible);
+      }
+      return result;
+    };
+  }
+
+  /* ------------------------------------------------------
+     MOBILE: show only the chosen main view and auto-scroll.
+     ------------------------------------------------------ */
+  function marketplaceSection(){
+    const products=$('products');
+    const section=products?.closest('section');
+    if(section && !section.id) section.id='marketplaceSection';
+    return section;
+  }
+
+  function setMainView(view){
+    const market=marketplaceSection();
+    const homeItems=[
+      document.querySelector('.welcome'),
+      $('roleHomePanel'),
+      $('quickGrid'),
+      $('farmerDashboard')
+    ].filter(Boolean);
+
+    const marketItems=[
+      $('buyerSearchSection'),
+      market
+    ].filter(Boolean);
+
+    const orderItems=[
+      $('farmerTransactions'),
+      $('buyerOrders')
+    ].filter(Boolean);
+
+    [...homeItems,...marketItems,...orderItems].forEach(el=>el.classList.remove('mobile-view-hidden'));
+
+    if(view==='home'){
+      [...marketItems,...orderItems].forEach(el=>el.classList.add('mobile-view-hidden'));
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    if(view==='market'){
+      [...homeItems,...orderItems].forEach(el=>el.classList.add('mobile-view-hidden'));
+      const target=String(window.currentProfile?.role||'').toUpperCase()==='FARMER'
+        ? market
+        : ($('buyerSearchSection')||market);
+      target?.scrollIntoView({behavior:'smooth',block:'start'});
+    }
+  }
+
+  function patchMobileNav(){
+    const nav=$('mobileBottomNav');
+    if(!nav || nav.dataset.finalNavFix==='1') return;
+
+    /* Add visible logout without changing desktop navigation. */
+    if(!nav.querySelector('[data-mobile-nav="logout"]')){
+      nav.insertAdjacentHTML('beforeend',
+        `<button class="mobile-nav-item" data-mobile-nav="logout" type="button"><span class="mobile-nav-icon">↪</span><span class="mobile-nav-label">Logout</span></button>`);
+    }
+
+    nav.dataset.finalNavFix='1';
+    const replacement=nav.cloneNode(true);
+    nav.replaceWith(replacement);
+
+    replacement.addEventListener('click',async e=>{
+      const button=e.target.closest('[data-mobile-nav]');
+      if(!button) return;
+
+      e.preventDefault();
+      const action=button.dataset.mobileNav;
+
+      replacement.querySelectorAll('.mobile-nav-item').forEach(x=>x.classList.remove('active'));
+      if(action!=='logout') button.classList.add('active');
+
+      if(action==='home'){
+        setMainView('home');
+      }else if(action==='market'){
+        setMainView('market');
+      }else if(action==='chat'){
+        if(typeof window.openChat==='function') await window.openChat();
+      }else if(action==='notifications'){
+        if(typeof window.toggleNotifications==='function') window.toggleNotifications();
+      }else if(action==='profile'){
+        if(typeof window.openMyProfile==='function') await window.openMyProfile();
+      }else if(action==='logout'){
+        if(typeof window.logout==='function') await window.logout();
+      }
+    });
+  }
+
+  /* Quick Marketplace/My Products actions always go to the product list. */
+  function patchRoleHome(){
+    const original=window.setupRoleHome;
+    if(typeof original==='function' && !window.__agrilinkRoleHomePatched){
+      window.__agrilinkRoleHomePatched=true;
+      window.setupRoleHome=function(){
+        const result=original.apply(this,arguments);
+        setTimeout(()=>{
+          document.querySelectorAll('.quick-card, #roleHomeActions button').forEach(btn=>{
+            const text=(btn.textContent||'').toLowerCase();
+            if(text.includes('marketplace') || text.includes('explore marketplace')){
+              btn.onclick=()=>setMainView('market');
+            }
+            if(text.includes('my products')){
+              btn.onclick=()=>setMainView('market');
+            }
+          });
+        },0);
+        return result;
+      };
+    }
+  }
+
+  function boot(){
+    installChatFix();
+    patchMobileNav();
+    patchRoleHome();
+
+    /* If mobile nav is created later by the existing script. */
+    let tries=0;
+    const timer=setInterval(()=>{
+      installChatFix();
+      patchMobileNav();
+      if(++tries>=20) clearInterval(timer);
+    },300);
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,500),{once:true});
+  }else{
+    setTimeout(boot,500);
+  }
+})();
+</script>
+
 </body>
 </html>
