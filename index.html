@@ -11085,5 +11085,111 @@ else setTimeout(boot,300);
 })();
 </script>
 
+
+
+<!-- =========================================================
+     CLEAN PROFILE ACTION FIX - APPENDED 2026-08-30
+========================================================= -->
+<style id="AGRILINK_PROFILE_ACTION_FIX_CSS">
+#profileModal .message-user-btn,#profileModal .block-user-btn,#profileModal .profile-block-btn,#profileModal .report-user-btn,#profileModal .profile-report-btn{pointer-events:auto!important;position:relative!important;z-index:9999!important;cursor:pointer!important}
+</style>
+<script id="AGRILINK_PROFILE_ACTION_FIX">
+(function(){
+'use strict';
+if(window.__AGRILINK_PROFILE_ACTION_FIX__) return;
+window.__AGRILINK_PROFILE_ACTION_FIX__=true;
+const $=id=>document.getElementById(id);
+const same=(a,b)=>String(a??'')===String(b??'');
+let blockBusy=false,reportBusy=false;
+function me(){return window.currentProfile||window.currentUser||null}
+async function rel(otherId){
+ const u=me(); if(!u||!otherId)return {byMe:false,byThem:false,blocked:false};
+ const my=String(u.id), other=String(otherId);
+ const {data,error}=await supabaseClient.from('user_blocks').select('id,blocker_id,blocked_id')
+  .or(`and(blocker_id.eq.${my},blocked_id.eq.${other}),and(blocker_id.eq.${other},blocked_id.eq.${my})`);
+ if(error) throw error;
+ const rows=data||[];
+ const byMe=rows.some(r=>same(r.blocker_id,my)&&same(r.blocked_id,other));
+ const byThem=rows.some(r=>same(r.blocker_id,other)&&same(r.blocked_id,my));
+ return {byMe,byThem,blocked:byMe||byThem};
+}
+async function refresh(otherId){
+ const modal=$('profileModal'); if(!modal||modal.classList.contains('hidden'))return;
+ const block=modal.querySelector('.block-user-btn,.profile-block-btn');
+ const msg=modal.querySelector('.message-user-btn');
+ if(!block||!otherId)return;
+ try{
+  const r=await rel(otherId);
+  block.textContent=r.byMe?'↩ Unblock':'⛔ Block';
+  block.dataset.blocked=r.byMe?'1':'0'; block.dataset.userId=String(otherId);
+  if(msg){msg.disabled=!!r.blocked;msg.setAttribute('aria-disabled',r.blocked?'true':'false');}
+ }catch(e){console.warn('Profile refresh:',e.message||e)}
+}
+window.toggleBlockUser=async function(otherId,otherName){
+ if(blockBusy)return;
+ const u=me(); if(!u||!otherId||same(u.id,otherId))return;
+ blockBusy=true;
+ try{
+  const r=await rel(otherId);
+  if(r.byMe){
+   if(!confirm(`Unblock ${otherName||'this user'}?`))return;
+   const {error}=await supabaseClient.from('user_blocks').delete().eq('blocker_id',String(u.id)).eq('blocked_id',String(otherId));
+   if(error)throw error; alert(`${otherName||'User'} has been unblocked.`);
+  }else{
+   if(!confirm(`Block ${otherName||'this user'}? You will no longer be able to message this account.`))return;
+   const {error}=await supabaseClient.from('user_blocks').upsert({blocker_id:String(u.id),blocked_id:String(otherId)},{onConflict:'blocker_id,blocked_id',ignoreDuplicates:true});
+   if(error)throw error; alert(`${otherName||'User'} has been blocked.`);
+  }
+  await refresh(otherId);
+  if(typeof window.loadProducts==='function') try{await window.loadProducts()}catch(_){}
+ }catch(e){console.error(e);alert('Could not update block status. '+(e.message||''));}
+ finally{blockBusy=false}
+};
+window.reportUser=async function(otherId,otherName){
+ if(reportBusy)return;
+ const u=me(); if(!u||!otherId||same(u.id,otherId))return;
+ reportBusy=true;
+ try{
+  const reason=prompt(`Why are you reporting ${otherName||'this user'}?\n\nExamples: spam, fake profile, suspicious activity, harassment, inappropriate content, or other.`);
+  if(reason===null)return;
+  const details=prompt('Optional: Add more details about this report.');
+  const {data:existing,error:checkError}=await supabaseClient.from('user_reports').select('id').eq('reporter_id',String(u.id)).eq('reported_user_id',String(otherId)).maybeSingle();
+  if(checkError)console.warn(checkError);
+  if(existing){alert('You already reported this account.');return;}
+  const payload={reporter_id:String(u.id),reported_user_id:String(otherId),reason:reason.trim()||'Other',status:'PENDING'};
+  if(details&&details.trim())payload.description=details.trim();
+  const {error}=await supabaseClient.from('user_reports').insert(payload);
+  if(error)throw error;
+  alert('Report submitted successfully.');
+ }catch(e){console.error(e);alert('Could not submit the report. '+(e.message||''));}
+ finally{reportBusy=false}
+};
+function getInfo(btn,action){
+ const row=btn.closest('.profile-action-row')||btn.parentElement;
+ const block=row?.querySelector('.block-user-btn,.profile-block-btn');
+ const src=block||btn;
+ let id=src?.dataset.userId||src?.getAttribute('data-user-id')||btn.dataset.userId||btn.getAttribute('data-user-id');
+ let name=src?.dataset.userName||btn.dataset.userName||'User';
+ if(!id){
+  const attr=btn.getAttribute('onclick')||src?.getAttribute('onclick')||'';
+  const re=action==='block'?/toggleBlockUser\\(['\"]([^'\"]+)['\"],?\s*['\"]?([^'\")]+)?/:/reportUser\\(['\"]([^'\"]+)['\"],?\s*['\"]?([^'\")]+)?/;
+  const m=attr.match(re); if(m){id=m[1];name=m[2]||name;}
+ }
+ return {id,name};
+}
+document.addEventListener('click',async e=>{
+ const block=e.target.closest('#profileModal .block-user-btn,#profileModal .profile-block-btn');
+ const report=e.target.closest('#profileModal .report-user-btn,#profileModal .profile-report-btn');
+ if(block){e.preventDefault();e.stopImmediatePropagation();const x=getInfo(block,'block');if(x.id)await window.toggleBlockUser(x.id,x.name);return;}
+ if(report){e.preventDefault();e.stopImmediatePropagation();const x=getInfo(report,'report');if(x.id)await window.reportUser(x.id,x.name);return;}
+},true);
+// One lightweight refresh only when profile opens/changes; no setInterval and no MutationObserver.
+document.addEventListener('click',e=>{
+ const target=e.target.closest('[data-user-id]'); if(!target)return;
+ if(target.closest('#profileModal')) refresh(target.dataset.userId);
+},false);
+})();
+</script>
+
 </body>
 </html>
