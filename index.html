@@ -7503,6 +7503,9 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
 
   async function finalSelectConversation(c){
     if(!c||!currentProfile)return;
+    const modal=$('chatModal');
+    if(modal)modal.classList.add('chat-has-selection');
+    $('chatWindow')?.classList.add('active');
     currentConversation=c;
     rememberChat(c.id);
     let u=otherUser(c);
@@ -7707,34 +7710,19 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
 
     modal.classList.remove('hidden');
 
+    // Messages opens on the CONTACTS list first.
+    currentConversation=null;
+    try{localStorage.removeItem(chatSelectionKey())}catch(_){}
+    modal.classList.remove('chat-has-selection');
+    $('chatWindow')?.classList.remove('active');
+
     const conversations=await finalLoadConversations();
     await refreshPersistentChatBadge();
 
-    if(!conversations?.length){
-      currentConversation=null;
-      $('chatUserName').textContent='Select a conversation';
-      $('chatMessages').innerHTML='<div class="chat-empty">No conversations yet.<br>Start a chat from a product.</div>';
-      return;
-    }
-
-    const remembered=rememberedChat();
-    let selected=null;
-
-    if(currentConversation){
-      selected=conversations.find(c=>String(c.id)===String(currentConversation.id))||null;
-    }
-
-    if(!selected && remembered){
-      selected=conversations.find(c=>String(c.id)===String(remembered))||null;
-    }
-
-    if(!selected){
-      selected=conversations[0];
-    }
-
-    if(selected){
-      await finalSelectConversation(selected);
-    }
+    $('chatUserName').textContent='Select a conversation';
+    $('chatMessages').innerHTML=conversations?.length
+      ? '<div class="chat-empty">Select a conversation to start chatting.</div>'
+      : '<div class="chat-empty">No conversations yet.<br>Start a chat from a product.</div>';
   };
 
   window.closeChat=function(){
@@ -9150,7 +9138,7 @@ AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
 #absoluteManageBlocked,#agrilinkFinalBlockedManager,#agrilinkProfileBlockedManager{display:none!important}
 .mobile-blocked-management{display:block!important;width:100%!important;margin-top:12px!important;padding-top:12px!important;border-top:1px solid var(--border,#e5ebe7)!important}
 .mobile-blocked-management button{display:block!important;width:100%!important;min-height:44px!important}
-@media(min-width:701px){.profile-action-row .block-user-btn{display:none!important}}
+@media(min-width:701px){.profile-action-row .block-user-btn{display:block!important}}
 </style>
 <script id="agrilink-definitive-profile-buttons-js">
 (function(){
@@ -9162,7 +9150,7 @@ function run(){
  if(box&&modal&&!modal.classList.contains('hidden')&&window.currentProfile&&!box.querySelector('.mobile-blocked-management')){
   const w=document.createElement('div');w.className='mobile-blocked-management';w.innerHTML='<button type="button" class="secondary-btn" onclick="openBlockedAccounts()">🛡️ Manage Blocked Accounts</button>';box.appendChild(w);
  }
- if(window.matchMedia('(min-width:701px)').matches)document.querySelectorAll('.profile-action-row .block-user-btn').forEach(b=>b.remove());
+ /* Block button must remain visible on desktop. */
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(run,300));else setTimeout(run,300);
 setInterval(run,700);
@@ -9234,11 +9222,28 @@ function resetChatView(){
  const m=$('chatModal'); if(!m)return;
  m.classList.remove('chat-has-selection');
  const w=$('chatWindow'); if(w)w.classList.remove('active');
+ const h=m.querySelector('.chat-header');
+ const close=h?.querySelector('.close');
+ if(close){
+   close.textContent='—';
+   close.title='Back to contacts';
+   close.onclick=resetChatView;
+ }
 }
 function addClose(){
  const m=$('chatModal'); if(!m)return;
- const h=m.querySelector('.chat-header'); if(!h||h.querySelector('.final-chat-close'))return;
- const b=document.createElement('button'); b.className='final-chat-close'; b.type='button'; b.textContent='✕'; b.title='Back to contacts'; b.onclick=resetChatView; h.appendChild(b);
+ const h=m.querySelector('.chat-header'); if(!h)return;
+
+ // Remove the injected duplicate close button from older versions.
+ h.querySelectorAll('.final-chat-close').forEach(b=>b.remove());
+
+ // Reuse the original single header button.
+ const b=h.querySelector('.close');
+ if(!b)return;
+ b.textContent='—';
+ b.title='Back to contacts';
+ b.setAttribute('aria-label','Back to contacts');
+ b.onclick=resetChatView;
 }
 function bindMessageNav(){
  document.querySelectorAll('[data-mobile-nav="chat"]').forEach(b=>{
@@ -9251,5 +9256,72 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 setInterval(boot,700);
 })();
 </script>
+
+<style id="agrilink-contacts-first-chat-fix">
+@media(max-width:700px){
+  #chatModal:not(.chat-has-selection) .chat-window{
+    display:none!important;
+  }
+  #chatModal.chat-has-selection .conversation-list{
+    display:none!important;
+  }
+  #chatModal:not(.chat-has-selection) .conversation-list{
+    display:block!important;
+    flex:1 1 auto!important;
+    max-height:none!important;
+    height:100%!important;
+    border-bottom:0!important;
+  }
+  #chatModal:not(.chat-has-selection) .chat-list-header{
+    position:sticky!important;
+    top:0!important;
+  }
+  #chatModal.chat-has-selection .chat-window{
+    display:flex!important;
+    flex:1 1 auto!important;
+  }
+  #chatModal .chat-input input{
+    display:block!important;
+    flex:1 1 auto!important;
+    min-width:0!important;
+    width:auto!important;
+    opacity:1!important;
+    visibility:visible!important;
+  }
+  #chatModal .chat-input button[type="submit"]{
+    display:block!important;
+    visibility:visible!important;
+    min-width:62px!important;
+  }
+}
+@media(min-width:701px){
+  .profile-action-row .block-user-btn{
+    display:block!important;
+    visibility:visible!important;
+  }
+}
+</style>
+
+
+<script id="agrilink-block-unblock-final-guard">
+(function(){
+  'use strict';
+  function syncProfileBlockButton(){
+    const row=document.querySelector('#profileModal .profile-action-row');
+    const btn=row?.querySelector('.block-user-btn');
+    if(!btn)return;
+    // Never hide/remove this button on PC.
+    btn.style.removeProperty('display');
+    btn.style.setProperty('display','block','important');
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(syncProfileBlockButton,200));
+  }else{
+    setTimeout(syncProfileBlockButton,200);
+  }
+  setInterval(syncProfileBlockButton,700);
+})();
+</script>
+
 </body>
 </html>
