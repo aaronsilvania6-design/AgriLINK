@@ -9659,5 +9659,278 @@ setInterval(run,600);
 })();
 </script>
 
+
+<style id="AGRI_FINAL_V4_CHAT_BLOCK_FIX">
+/* =========================================================
+   V4: CHAT BACK/CLOSE + BLOCKED PROFILE CONTROLS
+   ========================================================= */
+
+/* NO selected chat = contacts only. Selected chat = chat only on phone,
+   and chat window visible on desktop beside contacts. */
+@media(min-width:701px){
+  #chatModal:not(.chat-has-selection) .chat-window{
+    display:none!important;
+  }
+  #chatModal:not(.chat-has-selection) .conversation-list{
+    display:block!important;
+    width:100%!important;
+    max-width:none!important;
+    flex:1 1 100%!important;
+  }
+  #chatModal.chat-has-selection .conversation-list{
+    display:block!important;
+  }
+  #chatModal.chat-has-selection .chat-window{
+    display:flex!important;
+  }
+}
+
+@media(max-width:700px){
+  #chatModal:not(.chat-has-selection) .chat-window{
+    display:none!important;
+  }
+  #chatModal:not(.chat-has-selection) .conversation-list{
+    display:block!important;
+    width:100%!important;
+    max-width:none!important;
+    height:100%!important;
+    max-height:none!important;
+    flex:1 1 100%!important;
+    overflow-y:auto!important;
+  }
+  #chatModal.chat-has-selection .conversation-list{
+    display:none!important;
+  }
+  #chatModal.chat-has-selection .chat-window{
+    display:flex!important;
+    width:100%!important;
+    height:100%!important;
+    flex:1 1 100%!important;
+  }
+
+  #chatModal.chat-has-selection #chatForm,
+  #chatModal.chat-has-selection .chat-input{
+    display:flex!important;
+    visibility:visible!important;
+    opacity:1!important;
+    flex:0 0 auto!important;
+  }
+  #chatModal.chat-has-selection #chatInput{
+    display:block!important;
+    visibility:visible!important;
+    opacity:1!important;
+    flex:1 1 auto!important;
+    min-width:0!important;
+    width:auto!important;
+  }
+  #chatModal.chat-has-selection #chatForm button[type="submit"]{
+    display:block!important;
+    visibility:visible!important;
+    opacity:1!important;
+  }
+}
+
+/* Blocked profiles: Message must visibly look and behave disabled. */
+#profileModal .profile-action-row .message-user-btn[disabled]{
+  opacity:.48!important;
+  cursor:not-allowed!important;
+  pointer-events:none!important;
+  filter:grayscale(.35)!important;
+}
+
+/* Block button always stays visible. */
+#profileModal .profile-action-row .block-user-btn{
+  display:block!important;
+  visibility:visible!important;
+}
+</style>
+
+<script id="AGRI_FINAL_V4_CHAT_BLOCK_FIX_JS">
+(function(){
+  'use strict';
+
+  const $=id=>document.getElementById(id);
+  const modal=()=>$('chatModal');
+
+  function closeWholeChat(){
+    const m=modal();
+    if(!m)return;
+    m.classList.add('hidden');
+    m.classList.remove('chat-has-selection');
+    $('chatWindow')?.classList.remove('active');
+    if(typeof finalMessageChannel!=='undefined' && finalMessageChannel){
+      try{supabaseClient.removeChannel(finalMessageChannel)}catch(_){}
+      finalMessageChannel=null;
+    }
+    currentConversation=null;
+    try{
+      if(typeof chatSelectionKey==='function')localStorage.removeItem(chatSelectionKey());
+    }catch(_){}
+  }
+
+  function backToContacts(){
+    const m=modal();
+    if(!m)return;
+
+    /* This is the button behavior when a chat is currently open:
+       hide only the open chat, keep Contacts visible. */
+    m.classList.remove('chat-has-selection');
+    $('chatWindow')?.classList.remove('active');
+    currentConversation=null;
+
+    try{
+      if(typeof chatSelectionKey==='function')localStorage.removeItem(chatSelectionKey());
+    }catch(_){}
+
+    const name=$('chatUserName');
+    if(name){
+      name.textContent='Select a conversation';
+      name.classList.remove('chat-user-clickable');
+      name.onclick=null;
+      name.removeAttribute('data-user-id');
+    }
+
+    const ctx=$('chatProductContext');
+    if(ctx)ctx.textContent='';
+
+    const messages=$('chatMessages');
+    if(messages)messages.innerHTML='<div class="chat-empty">Select a conversation to start chatting.</div>';
+
+    ensureHeaderButton();
+  }
+
+  function ensureHeaderButton(){
+    const m=modal();
+    const header=m?.querySelector('.chat-header');
+    if(!header)return;
+
+    /* Remove every generated duplicate close button. */
+    header.querySelectorAll('.final-chat-close').forEach(x=>x.remove());
+
+    let btn=header.querySelector('button.close');
+    if(!btn){
+      btn=document.createElement('button');
+      btn.className='close';
+      btn.type='button';
+      header.appendChild(btn);
+    }
+
+    /* There must be exactly one header button. */
+    [...header.querySelectorAll('button')].forEach(x=>{
+      if(x!==btn)x.remove();
+    });
+
+    btn.textContent='—';
+    btn.title='Back to contacts';
+    btn.setAttribute('aria-label','Back to contacts');
+
+    btn.onclick=function(e){
+      e.preventDefault();
+      e.stopPropagation();
+
+      const m=modal();
+      if(m?.classList.contains('chat-has-selection')){
+        backToContacts();
+      }else{
+        closeWholeChat();
+      }
+    };
+  }
+
+  /* Keep the header control working even if another script changes it. */
+  function protectHeader(){
+    ensureHeaderButton();
+  }
+
+  /* Re-apply Message disabled state from the actual block relationship.
+     This covers both: I blocked them and they blocked me. */
+  async function refreshProfileMessageState(){
+    const m=$('profileModal');
+    const btn=m?.querySelector('.message-user-btn');
+    const block=m?.querySelector('.block-user-btn');
+    if(!m || m.classList.contains('hidden') || !currentProfile || !block)return;
+
+    const otherId=block.getAttribute('data-user-id') || block.dataset.userId;
+    if(!otherId)return;
+
+    try{
+      const rel=await getBlockRelationship(otherId);
+
+      btn.disabled=!!rel.blocked;
+      btn.setAttribute('aria-disabled',rel.blocked?'true':'false');
+      if(rel.blocked){
+        btn.title=rel.byMe
+          ? 'Unblock this user before messaging'
+          : 'This user has blocked you';
+      }else{
+        btn.title='';
+      }
+
+      block.textContent=rel.byMe?'↩ Unblock':'⛔ Block';
+      block.dataset.blocked=rel.byMe?'1':'0';
+      block.dataset.userId=String(otherId);
+    }catch(_){}
+  }
+
+  /* Capture profile Message clicks so a blocked user can never start chat,
+     even if an older onclick handler is still present. */
+  document.addEventListener('click',async function(e){
+    const msg=e.target.closest('#profileModal .message-user-btn');
+    if(!msg)return;
+
+    const block=e.target.closest('#profileModal .profile-action-row')?.querySelector('.block-user-btn');
+    const otherId=block?.dataset.userId || block?.getAttribute('data-user-id');
+
+    if(msg.disabled || !otherId || !currentProfile)return;
+
+    try{
+      const rel=await getBlockRelationship(otherId);
+      if(rel.blocked){
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        msg.disabled=true;
+        alert(rel.byMe
+          ? 'Unblock this user before messaging them.'
+          : 'This user has blocked you. Messaging is unavailable.');
+      }
+    }catch(_){}
+  },true);
+
+  /* When the profile is rendered, the block button gets its user id. */
+  const observer=new MutationObserver(()=>{
+    const block=$('profileModal')?.querySelector('.profile-block-btn');
+    if(block){
+      const onclick=block.getAttribute('onclick')||'';
+      const match=onclick.match(/toggleBlockUser\('([^']+)'/);
+      if(match)block.dataset.userId=match[1];
+    }
+    refreshProfileMessageState();
+  });
+
+  function boot(){
+    const m=modal();
+    if(m){
+      const header=m.querySelector('.chat-header');
+      if(header)ensureHeaderButton();
+    }
+
+    const pm=$('profileModal');
+    if(pm && !pm.__v4Observed){
+      pm.__v4Observed=true;
+      observer.observe(pm,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+    }
+    refreshProfileMessageState();
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,250));
+  }else{
+    setTimeout(boot,250);
+  }
+
+  setInterval(boot,700);
+})();
+</script>
+
 </body>
 </html>
