@@ -10450,5 +10450,182 @@ setInterval(run,600);
 })();
 </script>
 
+
+<style id="AGRI_V8_BLOCK_MARKET_FIX">
+/* Blocked accounts: make the disabled Message state unmistakable. */
+#profileModal .message-user-btn.blocked-by-final-fix,
+#profileModal .message-user-btn:disabled{
+  opacity:.42!important;
+  pointer-events:none!important;
+  cursor:not-allowed!important;
+  filter:grayscale(1)!important;
+}
+</style>
+<script id="AGRI_V8_BLOCK_MARKET_FIX_JS">
+(function(){
+  'use strict';
+  const $=id=>document.getElementById(id);
+  const sid=v=>String(v??'');
+
+  async function myBlockedSellerIds(){
+    const p=window.currentProfile || (typeof currentProfile!=='undefined'?currentProfile:null);
+    if(!p)return new Set();
+    const {data,error}=await supabaseClient.from('user_blocks')
+      .select('blocker_id,blocked_id')
+      .or(`blocker_id.eq.${sid(p.id)},blocked_id.eq.${sid(p.id)}`);
+    if(error){console.warn('Final blocked-products check:',error.message);return new Set();}
+    const out=new Set();
+    (data||[]).forEach(r=>{
+      if(sid(r.blocker_id)===sid(p.id))out.add(sid(r.blocked_id));
+      else if(sid(r.blocked_id)===sid(p.id))out.add(sid(r.blocker_id));
+    });
+    return out;
+  }
+
+  /* Remove blocked farmers' cards from the BUYER marketplace every time the
+     product area is rendered/updated. */
+  async function removeBlockedProductsFromScreen(){
+    const p=window.currentProfile || (typeof currentProfile!=='undefined'?currentProfile:null);
+    if(!p || String(p.role).toUpperCase()!=='BUYER')return;
+    const blocked=await myBlockedSellerIds();
+    if(!blocked.size)return;
+
+    document.querySelectorAll('[data-seller-id]').forEach(el=>{
+      if(blocked.has(sid(el.dataset.sellerId))){
+        const card=el.closest('.product-card,.product-item,.product-card-wrap');
+        if(card)card.remove();
+        else el.remove();
+      }
+    });
+
+    /* Also filter the JS product cache when it exists, so a later refresh
+       cannot immediately put the blocked farmer's products back. */
+    try{
+      if(Array.isArray(window.allProducts)){
+        window.allProducts=window.allProducts.filter(x=>!blocked.has(sid(x.seller_id)));
+      }
+      if(typeof allProducts!=='undefined' && Array.isArray(allProducts)){
+        allProducts=allProducts.filter(x=>!blocked.has(sid(x.seller_id)));
+      }
+    }catch(_){ }
+  }
+
+  /* Idempotent block/unblock. This is the only final handler exposed globally. */
+  window.toggleBlockUser=async function(otherId,otherName){
+    const p=window.currentProfile || (typeof currentProfile!=='undefined'?currentProfile:null);
+    if(!p||!otherId||sid(otherId)===sid(p.id))return;
+    const me=sid(p.id), other=sid(otherId), name=otherName||'User';
+
+    const {data:existing,error:checkError}=await supabaseClient.from('user_blocks')
+      .select('id')
+      .eq('blocker_id',me)
+      .eq('blocked_id',other)
+      .maybeSingle();
+    if(checkError){alert('Could not check block status. '+checkError.message);return;}
+
+    if(existing){
+      if(!confirm(`Unblock ${name}?`))return;
+      const {error}=await supabaseClient.from('user_blocks').delete()
+        .eq('blocker_id',me).eq('blocked_id',other);
+      if(error){alert('Could not unblock this user. '+error.message);return;}
+    }else{
+      if(!confirm(`Block ${name}? Their products will disappear from your marketplace and you will not be able to message them.`))return;
+      const {error}=await supabaseClient.from('user_blocks').upsert(
+        {blocker_id:me,blocked_id:other},
+        {onConflict:'blocker_id,blocked_id',ignoreDuplicates:true}
+      );
+      if(error){
+        const {data:confirmed}=await supabaseClient.from('user_blocks').select('id')
+          .eq('blocker_id',me).eq('blocked_id',other).maybeSingle();
+        if(!confirmed){alert('Could not block this user. '+error.message);return;}
+      }
+    }
+
+    /* Re-render the profile from the database. The renderer reads the fresh
+       relationship, so the button becomes Unblock and Message becomes disabled. */
+    if($('profileModal')&&!$('profileModal').classList.contains('hidden')&&typeof window.openUserProfile==='function'){
+      await window.openUserProfile(other);
+    }
+
+    /* Immediately hide this seller's products for buyers. */
+    await removeBlockedProductsFromScreen();
+
+    if(typeof loadProducts==='function'){
+      try{await loadProducts()}catch(_){ }
+      await removeBlockedProductsFromScreen();
+    }
+  };
+
+  /* Extra guard: a blocked Message button is disabled at the DOM level.
+     We intentionally do not replace the app's original message function here;
+     the profile renderer already supplies disabled=true for blocked users. */
+  function enforceBlockedMessageUI(){
+    const modal=$('profileModal');
+    if(!modal||modal.classList.contains('hidden'))return;
+    modal.querySelectorAll('.message-user-btn').forEach(btn=>{
+      if(btn.disabled){
+        btn.classList.add('blocked-by-final-fix');
+        btn.setAttribute('aria-disabled','true');
+        btn.style.pointerEvents='none';
+        btn.style.cursor='not-allowed';
+      }
+    });
+  }
+
+  /* Navigation helpers: Marketplace/My Products always jump to the actual
+     product section instead of merely changing state. */
+  window.goToMarketplace=async function(){
+    const p=window.currentProfile || (typeof currentProfile!=='undefined'?currentProfile:null);
+    const target=p && String(p.role).toUpperCase()==='FARMER' ? $('products') : ($('buyerSearchSection')||$('products'));
+    if(target)target.scrollIntoView({behavior:'smooth',block:'start'});
+    if(typeof loadProducts==='function'){
+      try{await loadProducts()}catch(_){ }
+      await removeBlockedProductsFromScreen();
+    }
+  };
+  window.goToMyProducts=async function(){
+    const target=$('products');
+    if(target)target.scrollIntoView({behavior:'smooth',block:'start'});
+    if(typeof loadProducts==='function')try{await loadProducts()}catch(_){ }
+  };
+
+  function patchNavigationLabels(){
+    document.querySelectorAll('button').forEach(btn=>{
+      const label=(btn.textContent||'').trim().toLowerCase();
+      if(label.includes('explore marketplace')||label==='marketplace'){
+        if(!btn.dataset.v8Market){
+          btn.dataset.v8Market='1';
+          btn.onclick=function(e){e.preventDefault();window.goToMarketplace();};
+        }
+      }
+      if(label.includes('my products')){
+        if(!btn.dataset.v8MyProducts){
+          btn.dataset.v8MyProducts='1';
+          btn.onclick=function(e){e.preventDefault();window.goToMyProducts();};
+        }
+      }
+    });
+  }
+
+  function patchMobileMarket(){
+    const btn=document.querySelector('[data-mobile-nav="market"]');
+    if(btn&&!btn.dataset.v8Market){
+      btn.dataset.v8Market='1';
+      btn.addEventListener('click',e=>{e.preventDefault();window.goToMarketplace();},true);
+    }
+  }
+
+  function boot(){
+    patchNavigationLabels();
+    patchMobileMarket();
+    removeBlockedProductsFromScreen();
+    enforceBlockedMessageUI();
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,300));
+  else setTimeout(boot,300);
+  setInterval(boot,1000);
+})();
+</script>
+
 </body>
 </html>
