@@ -616,6 +616,23 @@ MAIN
 /* =========================================================
 SEARCH
 ========================================================= */
+.nav-icon-btn{position:relative;min-width:44px}
+.nav-badge{position:absolute;top:-6px;right:-6px;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:#d93025;color:#fff;font-size:10px;font-weight:900;display:grid;place-items:center;border:2px solid #fff}
+#buyerSearchSection{scroll-margin-top:85px}
+#products{scroll-margin-top:90px}
+.conversation-item{position:relative;padding:13px 12px}
+.conversation-main{min-width:0;padding-right:30px}
+.conversation-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.conversation-product{font-size:11px;color:var(--green);font-weight:900;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conversation-preview{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:210px}
+.conversation-unread{min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:#d93025;color:#fff;font-size:10px;font-weight:900;display:grid;place-items:center;flex:0 0 auto}
+.conversation-delete{position:absolute;right:9px;top:9px;border:0;background:transparent;color:#9a9a9a;font-size:14px;width:24px;height:24px;border-radius:8px}
+.conversation-delete:hover{background:#ffebee;color:#b71c1c}
+.chat-context{font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:420px}
+.chat-header-actions{display:flex;align-items:center;gap:8px}
+.chat-clear-btn{border:1px solid var(--border);background:#fff;border-radius:9px;padding:7px 9px;font-size:11px;font-weight:800;color:#777}
+.chat-clear-btn:hover{background:#ffebee;color:#b71c1c}
+
 
 .search-box{
   background:white;
@@ -1295,11 +1312,23 @@ RESPONSIVE
 
   .chat-layout{
     grid-template-columns:1fr;
+    height:78vh;
+    min-height:0;
   }
 
   .conversation-list{
-    display:none;
+    display:block;
+    border-right:0;
+    border-bottom:1px solid var(--border);
+    max-height:180px;
+    overflow:auto;
   }
+
+  .chat-window{
+    min-height:0;
+  }
+
+  .conversation-preview{max-width:calc(100vw - 110px)}
 }
 
 @media(max-width:600px){
@@ -1959,15 +1988,15 @@ class="live-pill" style="margin-left:auto;margin-right:10px;font-size:11px;font-
 <div class="nav-actions">
 
 <button
-class="secondary-btn"
+class="secondary-btn nav-icon-btn"
 onclick="toggleNotifications()">
-🔔
+🔔<span id="notificationBadge" class="nav-badge hidden">0</span>
 </button>
 
 <button
-class="secondary-btn"
+class="secondary-btn nav-icon-btn"
 onclick="openChat()">
-💬 Chat
+💬 Chat<span id="chatBadge" class="nav-badge hidden">0</span>
 </button>
 
 <button
@@ -2033,45 +2062,7 @@ Your agricultural marketplace starts here.
 </section>
 
 
-<section id="buyerSearchSection"
-class="search-box">
 
-<div class="section-title">
-<h2>Find Products</h2>
-</div>
-
-<div class="search-grid">
-
-<input
-id="searchName"
-placeholder="Product name...">
-
-<input
-id="searchLocation"
-placeholder="Location...">
-
-<input
-id="searchPrice"
-type="number"
-min="0"
-placeholder="Max price">
-
-<button
-class="hero-primary"
-style="padding:12px 18px"
-onclick="searchProducts()">
-Search
-</button>
-
-<button
-class="secondary-btn"
-onclick="clearSearch()">
-Clear
-</button>
-
-</div>
-
-</section>
 
 
 <section id="roleHomePanel" class="role-home">
@@ -2105,6 +2096,50 @@ class="farmer-dashboard hidden">
 <div class="stat-card">
 <div class="stat-label">Completed</div>
 <div id="statCompleted" class="stat-value">0</div>
+</div>
+
+</section>
+
+
+<section id="buyerSearchSection"
+class="search-box">
+
+<div class="section-title">
+<h2>Find Products</h2>
+</div>
+
+<div class="search-grid">
+
+<input
+id="searchName"
+placeholder="Product name..."
+onkeydown="if(event.key==='Enter') searchProducts()">
+
+<input
+id="searchLocation"
+placeholder="Location..."
+onkeydown="if(event.key==='Enter') searchProducts()">
+
+<input
+id="searchPrice"
+type="number"
+min="0"
+placeholder="Max price"
+onkeydown="if(event.key==='Enter') searchProducts()">
+
+<button
+class="hero-primary"
+style="padding:12px 18px"
+onclick="searchProducts()">
+Search
+</button>
+
+<button
+class="secondary-btn"
+onclick="clearSearch()">
+Clear
+</button>
+
 </div>
 
 </section>
@@ -2490,18 +2525,17 @@ id="chatUserName"
 class="chat-user">
 Select a conversation
 </div>
-
+<div id="chatProductName" class="chat-context"></div>
 <div class="online">
 ● AgriLink Chat
 </div>
 
 </div>
 
-<button
-class="close"
-onclick="closeChat()">
-×
-</button>
+<div class="chat-header-actions">
+<button id="deleteCurrentContactBtn" class="chat-clear-btn" type="button" onclick="deleteCurrentContact()">Remove</button>
+<button class="close" onclick="closeChat()">×</button>
+</div>
 
 </div>
 
@@ -2565,6 +2599,8 @@ let currentConversation = null;
 let currentProduct = null;
 
 let messageChannel = null;
+let inboxMessageChannel = null;
+let conversationChannel = null;
 let orderChannel = null;
 let productChannel = null;
 let notificationChannel = null;
@@ -3024,6 +3060,7 @@ async function initializeApp(user){
 
   subscribeToOrders();
   subscribeToLiveData();
+  subscribeToInboxMessages();
 }
 
 
@@ -3093,6 +3130,7 @@ async function searchProducts(){
   }
 
   renderProducts(results);
+  requestAnimationFrame(()=>document.getElementById("products")?.scrollIntoView({behavior:"smooth",block:"start"}));
 }
 
 
@@ -3103,6 +3141,7 @@ function clearSearch(){
   document.getElementById("searchPrice").value="";
 
   renderProducts(allProducts);
+  requestAnimationFrame(()=>document.getElementById("products")?.scrollIntoView({behavior:"smooth",block:"start"}));
 }
 
 
@@ -4677,648 +4716,170 @@ async function updateOrderStatus(
 
 
 /* =========================================================
-CHAT
+CHAT — PRODUCT-SPECIFIC CONVERSATIONS
 ========================================================= */
-
-function openChat(){
-
-  document
-    .getElementById("chatModal")
-    .classList.remove("hidden");
-
-  loadConversations();
+function getConversationOtherUser(c){return c?.buyer_id===currentProfile?.id?c?.seller:c?.buyer;}
+function getConversationProductName(c){
+  const p=allProducts.find(x=>x.id===c?.product_id);
+  return p?.name||c?.product_name||"General conversation";
 }
+function getConversationUnread(c){
+  if(!c||!currentProfile)return 0;
+  return currentProfile.id===c.buyer_id?Number(c.buyer_unread||0):Number(c.seller_unread||0);
+}
+function getConversationHiddenField(){return currentProfile?.role==="BUYER"?"buyer_hidden":"seller_hidden";}
 
-
+function openChat(){document.getElementById("chatModal").classList.remove("hidden");loadConversations();}
 function closeChat(){
-
-  document
-    .getElementById("chatModal")
-    .classList.add("hidden");
-
-  if(messageChannel){
-
-    supabaseClient.removeChannel(
-      messageChannel
-    );
-
-    messageChannel = null;
-  }
-
-  currentConversation = null;
+  document.getElementById("chatModal").classList.add("hidden");
+  if(messageChannel){supabaseClient.removeChannel(messageChannel);messageChannel=null;}
+  currentConversation=null;
 }
 
+async function startChat(sellerId,productId){
+  if(!currentProfile){alert("Please login first.");return;}
+  if(sellerId===currentProfile.id){alert("You cannot chat with yourself.");return;}
+  if(currentProfile.role!=="BUYER"){alert("Farmers can reply to conversations started by buyers.");return;}
+  if(!productId){alert("This chat must be connected to a product.");return;}
 
-async function startChat(
-  sellerId,
-  productId
-){
-
-  if(!currentProfile){
-
-    alert(
-      "Please login first."
-    );
-
-    return;
-  }
-
-  if(
-    sellerId ===
-    currentProfile.id
-  ){
-
-    alert(
-      "You cannot chat with yourself."
-    );
-
-    return;
-  }
-
-  if(
-    currentProfile.role !==
-    "BUYER"
-  ){
-
-    alert(
-      "Farmers can reply to conversations started by buyers."
-    );
-
-    return;
-  }
-
-  let query =
-    supabaseClient
-      .from("conversations")
-      .select("*")
-      .eq(
-        "buyer_id",
-        currentProfile.id
-      )
-      .eq(
-        "seller_id",
-        sellerId
-      );
-
-  if(productId){
-
-    query =
-      query.eq(
-        "product_id",
-        productId
-      );
-  }
-
-  const {
-    data:existing,
-    error
-  } =
-    await query.maybeSingle();
-
-  if(error){
-
-    alert(
-      error.message
-    );
-
-    return;
-  }
-
-  let conversation =
-    existing;
-
+  const {data:existing,error}=await supabaseClient.from("conversations").select("*")
+    .eq("buyer_id",currentProfile.id).eq("seller_id",sellerId).eq("product_id",productId).maybeSingle();
+  if(error){alert(error.message);return;}
+  let conversation=existing;
+  const knownProduct=allProducts.find(p=>p.id===productId);
+  const productName=knownProduct?.name || "Product";
   if(!conversation){
-
-    const {
-      data:newConversation,
-      error:createError
-    } =
-      await supabaseClient
-        .from("conversations")
-        .insert({
-
-          buyer_id:
-            currentProfile.id,
-
-          seller_id:
-            sellerId,
-
-          product_id:
-            productId || null
-
-        })
-        .select("*")
-        .single();
-
-    if(createError){
-
-      alert(
-        createError.message
-      );
-
-      return;
-    }
-
-    conversation =
-      newConversation;
+    const {data:newConversation,error:createError}=await supabaseClient.from("conversations").insert({
+      buyer_id:currentProfile.id,seller_id:sellerId,product_id:productId,product_name:productName,
+      buyer_hidden:false,seller_hidden:false,buyer_unread:0,seller_unread:0
+    }).select("*").single();
+    if(createError){alert(createError.message);return;}
+    conversation=newConversation;
+  }else{
+    const {data:restored}=await supabaseClient.from("conversations").update({buyer_hidden:false,product_name:conversation.product_name||productName}).eq("id",conversation.id).select("*").single();
+    if(restored)conversation=restored;
   }
-
   openChat();
-
   await loadConversations();
-
-  setTimeout(()=>{
-    selectConversation(
-      conversation
-    );
-  },200);
+  setTimeout(()=>selectConversation(conversation),120);
 }
-
 
 async function loadConversations(){
-
-  if(!currentProfile){
-    return;
-  }
-
-  const list =
-    document.getElementById(
-      "conversationList"
-    );
-
-  list.innerHTML =
-    `<div class="chat-empty">
-      Loading...
-    </div>`;
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("conversations")
-      .select(`
-        *,
-        buyer:buyer_id(
-          id,
-          full_name,
-          role
-        ),
-        seller:seller_id(
-          id,
-          full_name,
-          role
-        )
-      `)
-      .or(
-        `buyer_id.eq.${currentProfile.id},seller_id.eq.${currentProfile.id}`
-      )
-      .order(
-        "updated_at",
-        {ascending:false}
-      );
-
-  if(error){
-
-    list.innerHTML =
-      `<div class="chat-empty">
-        ${escapeHtml(
-          error.message
-        )}
-      </div>`;
-
-    return;
-  }
-
-  if(!data?.length){
-
-    list.innerHTML =
-      `<div class="chat-empty">
-        No conversations yet.<br><br>
-        Start a chat from a product.
-      </div>`;
-
-    return;
-  }
-
-  list.innerHTML = "";
-
-  for(
-    const conversation of data
-  ){
-
-    const otherUser =
-      conversation.buyer_id ===
-      currentProfile.id
-      ?
-      conversation.seller
-      :
-      conversation.buyer;
-
-    const item =
-      document.createElement(
-        "div"
-      );
-
-    item.className =
-      "conversation-item";
-
-    item.innerHTML = `
-
-      <div class="conversation-name">
-        ${escapeHtml(
-          otherUser?.full_name ||
-          "User"
-        )}
-      </div>
-
-      <div class="conversation-preview">
-        ${escapeHtml(
-          otherUser?.role ||
-          ""
-        )}
-      </div>
-    `;
-
-    item.onclick =
-      ()=>selectConversation(
-        conversation
-      );
-
+  if(!currentProfile)return;
+  const list=document.getElementById("conversationList");
+  list.innerHTML='<div class="chat-empty">Loading conversations...</div>';
+  const {data,error}=await supabaseClient.from("conversations").select(`*,buyer:buyer_id(id,full_name,role),seller:seller_id(id,full_name,role)`)
+    .or(`buyer_id.eq.${currentProfile.id},seller_id.eq.${currentProfile.id}`).order("updated_at",{ascending:false});
+  if(error){list.innerHTML=`<div class="chat-empty">${escapeHtml(error.message)}</div>`;updateChatBadge(0);return;}
+  const hiddenField=getConversationHiddenField();
+  const visible=(data||[]).filter(c=>!c[hiddenField]);
+  updateChatBadge(visible.reduce((n,c)=>n+getConversationUnread(c),0));
+  if(!visible.length){list.innerHTML='<div class="chat-empty">No conversations yet.<br><br>Start a chat from a product.</div>';return;}
+  list.innerHTML="";
+  for(const c of visible){
+    const other=getConversationOtherUser(c), product=getConversationProductName(c), unread=getConversationUnread(c);
+    const item=document.createElement("div");
+    item.className="conversation-item"+(currentConversation?.id===c.id?" active":"");
+    item.innerHTML=`<div class="conversation-main"><div class="conversation-top"><div class="conversation-name">${escapeHtml(other?.full_name||"User")}</div>${unread?`<span class="conversation-unread">${unread>99?"99+":unread}</span>`:""}</div><div class="conversation-product">🌾 ${escapeHtml(product)}</div><div class="conversation-preview">${escapeHtml(c.last_message||"No messages yet.")}</div></div><button class="conversation-delete" title="Remove contact" aria-label="Remove contact">×</button>`;
+    item.addEventListener("click",()=>selectConversation(c));
+    item.querySelector(".conversation-delete").addEventListener("click",e=>{e.stopPropagation();deleteConversationContact(c.id);});
     list.appendChild(item);
   }
 }
+function updateChatBadge(count){const b=document.getElementById("chatBadge");if(!b)return;b.textContent=count>99?"99+":String(count||0);b.classList.toggle("hidden",!(count>0));}
 
-
-async function selectConversation(
-  conversation
-){
-
-  currentConversation =
-    conversation;
-
-  const otherUser =
-    conversation.buyer_id ===
-    currentProfile.id
-    ?
-    conversation.seller
-    :
-    conversation.buyer;
-
-  document
-    .getElementById(
-      "chatUserName"
-    )
-    .textContent =
-      otherUser?.full_name ||
-      "User";
-
-  await loadMessages();
-
-  subscribeToMessages();
+async function deleteConversationContact(id){
+  if(!currentProfile||!id)return;
+  if(!confirm("Remove this contact from your Messages list? The chat stays saved and can return when a new message arrives."))return;
+  const field=getConversationHiddenField();
+  const {error}=await supabaseClient.from("conversations").update({[field]:true}).eq("id",id);
+  if(error){alert(error.message);return;}
+  if(currentConversation?.id===id){
+    currentConversation=null;
+    if(messageChannel){supabaseClient.removeChannel(messageChannel);messageChannel=null;}
+    document.getElementById("chatUserName").textContent="Select a conversation";
+    document.getElementById("chatProductName").textContent="";
+    document.getElementById("chatMessages").innerHTML='<div class="chat-empty">Select a conversation to start chatting.</div>';
+  }
+  await loadConversations();
 }
+function deleteCurrentContact(){if(currentConversation)deleteConversationContact(currentConversation.id);}
 
+async function selectConversation(c){
+  currentConversation=c;
+  const other=getConversationOtherUser(c), product=getConversationProductName(c);
+  document.getElementById("chatUserName").textContent=other?.full_name||"User";
+  document.getElementById("chatProductName").textContent=`🌾 ${product}`;
+  const unreadField=currentProfile.id===c.buyer_id?"buyer_unread":"seller_unread";
+  const hiddenField=getConversationHiddenField();
+  const {data:updated}=await supabaseClient.from("conversations").update({[unreadField]:0,[hiddenField]:false}).eq("id",c.id).select("*").single();
+  if(updated)currentConversation={...c,...updated};
+  await loadMessages();subscribeToMessages();await loadConversations();
+}
 
 async function loadMessages(){
-
-  if(!currentConversation){
-    return;
-  }
-
-  const box =
-    document.getElementById(
-      "chatMessages"
-    );
-
-  box.innerHTML =
-    `<div class="chat-empty">
-      Loading messages...
-    </div>`;
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("messages")
-      .select("*")
-      .eq(
-        "conversation_id",
-        currentConversation.id
-      )
-      .order(
-        "created_at",
-        {ascending:true}
-      );
-
-  if(error){
-
-    box.innerHTML =
-      `<div class="chat-empty">
-        ${escapeHtml(
-          error.message
-        )}
-      </div>`;
-
-    return;
-  }
-
-  if(!data?.length){
-
-    box.innerHTML =
-      `<div class="chat-empty">
-        No messages yet.<br>
-        Say hello 👋
-      </div>`;
-
-    return;
-  }
-
-  box.innerHTML =
-    data.map(
-      renderMessage
-    ).join("");
-
-  box.scrollTop =
-    box.scrollHeight;
+  if(!currentConversation)return;
+  const box=document.getElementById("chatMessages");box.innerHTML='<div class="chat-empty">Loading messages...</div>';
+  const {data,error}=await supabaseClient.from("messages").select("*").eq("conversation_id",currentConversation.id).order("created_at",{ascending:true});
+  if(error){box.innerHTML=`<div class="chat-empty">${escapeHtml(error.message)}</div>`;return;}
+  if(!data?.length){box.innerHTML='<div class="chat-empty">No messages yet.<br>Say hello 👋</div>';return;}
+  box.innerHTML=data.map(renderMessage).join("");box.scrollTop=box.scrollHeight;
 }
-
-
-function renderMessage(message){
-
-  const mine =
-    message.sender_id ===
-    currentProfile.id;
-
-  const time =
-    message.created_at
-    ?
-    new Date(
-      message.created_at
-    ).toLocaleTimeString(
-      [],
-      {
-        hour:"2-digit",
-        minute:"2-digit"
-      }
-    )
-    :
-    "";
-
-  return `
-
-    <div
-      class="
-        message-row
-        ${mine ? "mine" : ""}
-      "
-      id="message-${message.id}">
-
-      <div class="chat-bubble">
-
-        <div>
-          ${escapeHtml(
-            message.content
-          )}
-        </div>
-
-        <div class="chat-time">
-
-          ${time}
-
-          ${
-            mine
-            ?
-            `
-              <button
-                class="message-delete"
-                onclick="deleteMessage(
-                  '${message.id}'
-                )">
-                Delete
-              </button>
-            `
-            :
-            ""
-          }
-
-        </div>
-
-      </div>
-
-    </div>
-  `;
+function renderMessage(m){
+  const mine=m.sender_id===currentProfile.id;
+  const time=m.created_at?new Date(m.created_at).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"";
+  const id=String(m.id).replace(/'/g,"\\'");
+  return `<div class="message-row ${mine?"mine":""}" id="message-${escapeHtml(m.id)}"><div class="chat-bubble"><div>${escapeHtml(m.content)}</div><div class="chat-time">${time} ${mine?`<button class="message-delete" onclick="deleteMessage('${id}')">Delete</button>`:""}</div></div></div>`;
 }
-
-
-/* =========================================================
-REALTIME MESSAGES
-========================================================= */
-
 function subscribeToMessages(){
-
-  if(!currentConversation){
-    return;
-  }
-
-  if(messageChannel){
-
-    supabaseClient.removeChannel(
-      messageChannel
-    );
-  }
-
-  messageChannel =
-    supabaseClient
-      .channel(
-        "conversation-" +
-        currentConversation.id +
-        "-" +
-        Date.now()
-      )
-
-      .on(
-        "postgres_changes",
-        {
-          event:"INSERT",
-          schema:"public",
-          table:"messages",
-          filter:
-            `conversation_id=eq.${currentConversation.id}`
-        },
-        payload=>{
-
-          const box =
-            document.getElementById(
-              "chatMessages"
-            );
-
-          const empty =
-            box.querySelector(
-              ".chat-empty"
-            );
-
-          if(empty){
-            box.innerHTML="";
-          }
-
-          if(
-            !document.getElementById(
-              "message-" +
-              payload.new.id
-            )
-          ){
-
-            box.insertAdjacentHTML(
-              "beforeend",
-              renderMessage(
-                payload.new
-              )
-            );
-
-          }
-
-          box.scrollTop =
-            box.scrollHeight;
-        }
-      )
-
-      .on(
-        "postgres_changes",
-        {
-          event:"DELETE",
-          schema:"public",
-          table:"messages",
-          filter:
-            `conversation_id=eq.${currentConversation.id}`
-        },
-        payload=>{
-
-          const element =
-            document.getElementById(
-              "message-" +
-              payload.old.id
-            );
-
-          if(element){
-            element.remove();
-          }
-        }
-      )
-
-      .subscribe();
-}
-
-
-/* =========================================================
-SEND MESSAGE
-========================================================= */
-
-document
-.getElementById("chatForm")
-.addEventListener("submit",async e=>{
-
-  e.preventDefault();
-
-  if(!currentConversation){
-
-    alert(
-      "Select a conversation first."
-    );
-
-    return;
-  }
-
-  const input =
-    document.getElementById(
-      "chatInput"
-    );
-
-  const text =
-    input.value.trim();
-
-  if(!text){
-    return;
-  }
-
-  input.disabled = true;
-
-  const {
-    error
-  } =
-    await supabaseClient
-      .from("messages")
-      .insert({
-
-        conversation_id:
-          currentConversation.id,
-
-        sender_id:
-          currentProfile.id,
-
-        content:
-          text
-
-      });
-
-  input.disabled = false;
-
-  if(error){
-
-    alert(
-      error.message
-    );
-
-    return;
-  }
-
-  input.value = "";
-
-  await supabaseClient
-    .from("conversations")
-    .update({
-      updated_at:
-        new Date().toISOString()
+  if(!currentConversation)return;
+  if(messageChannel)supabaseClient.removeChannel(messageChannel);
+  const cid=currentConversation.id;
+  messageChannel=supabaseClient.channel("conversation-"+cid+"-"+Date.now())
+    .on("postgres_changes",{event:"INSERT",schema:"public",table:"messages",filter:`conversation_id=eq.${cid}`},async payload=>{
+      const box=document.getElementById("chatMessages");
+      if(!document.getElementById("message-"+payload.new.id)){box.querySelector(".chat-empty")?.remove();box.insertAdjacentHTML("beforeend",renderMessage(payload.new));box.scrollTop=box.scrollHeight;}
+      await loadConversations();
     })
-    .eq(
-      "id",
-      currentConversation.id
-    );
-});
-
-
-/* =========================================================
-DELETE MESSAGE
-========================================================= */
-
-async function deleteMessage(id){
-
-  if(!confirm(
-    "Delete this message?"
-  )){
-    return;
-  }
-
-  const {
-    error
-  } =
-    await supabaseClient
-      .from("messages")
-      .delete()
-      .eq(
-        "id",
-        id
-      )
-      .eq(
-        "sender_id",
-        currentProfile.id
-      );
-
-  if(error){
-    alert(error.message);
-  }
+    .on("postgres_changes",{event:"DELETE",schema:"public",table:"messages",filter:`conversation_id=eq.${cid}`},payload=>document.getElementById("message-"+payload.old.id)?.remove())
+    .subscribe();
 }
 
+function subscribeToInboxMessages(){
+  if(!currentProfile)return;
+  if(inboxMessageChannel)supabaseClient.removeChannel(inboxMessageChannel);
+  inboxMessageChannel=supabaseClient.channel("inbox-"+currentProfile.id+"-"+Date.now())
+    .on("postgres_changes",{event:"INSERT",schema:"public",table:"messages"},async payload=>{
+      if(payload.new.sender_id===currentProfile.id)return;
+      await loadConversations();
+      if(currentConversation?.id===payload.new.conversation_id)return;
+      try{
+        const {data:c}=await supabaseClient.from("conversations").select("*").eq("id",payload.new.conversation_id).maybeSingle();
+        if(!c||!(c.buyer_id===currentProfile.id||c.seller_id===currentProfile.id))return;
+        const {data:u}=await supabaseClient.from("users").select("full_name").eq("id",payload.new.sender_id).maybeSingle();
+        showLiveNotification("💬 New message",`${u?.full_name||"Someone"} replied about ${getConversationProductName(c)}.`);
+      }catch(err){console.warn(err);}
+    }).subscribe();
+}
+
+document.getElementById("chatForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  if(!currentConversation){alert("Select a conversation first.");return;}
+  const input=document.getElementById("chatInput"),text=input.value.trim();if(!text)return;
+  input.disabled=true;
+  const {error}=await supabaseClient.from("messages").insert({conversation_id:currentConversation.id,sender_id:currentProfile.id,content:text});
+  if(error){input.disabled=false;alert(error.message);return;}
+  const buyer=currentProfile.id===currentConversation.buyer_id;
+  const recipientId=buyer?currentConversation.seller_id:currentConversation.buyer_id;
+  const unreadField=buyer?"seller_unread":"buyer_unread";
+  const senderHidden=buyer?"buyer_hidden":"seller_hidden";
+  const recipientHidden=buyer?"seller_hidden":"buyer_hidden";
+  const unread=Number(currentConversation[unreadField]||0);
+  await supabaseClient.from("conversations").update({last_message:text,last_message_at:new Date().toISOString(),updated_at:new Date().toISOString(),[unreadField]:unread+1,[senderHidden]:false,[recipientHidden]:false}).eq("id",currentConversation.id);
+  await supabaseClient.from("notifications").insert({user_id:recipientId,title:"💬 New message",message:`${currentProfile.full_name||"Someone"} sent you a message about ${getConversationProductName(currentConversation)}.`,type:"MESSAGE"});
+  input.value="";input.disabled=false;await loadConversations();
+});
+async function deleteMessage(id){if(!confirm("Delete this message?"))return;const {error}=await supabaseClient.from("messages").delete().eq("id",id).eq("sender_id",currentProfile.id);if(error)alert(error.message);}
 
 /* =========================================================
 NOTIFICATIONS
@@ -5365,6 +4926,12 @@ async function loadNotifications(){
         {ascending:false}
       )
       .limit(30);
+
+  if(!error){
+    const unreadCount=(data||[]).filter(n=>!n.is_read).length;
+    const badge=document.getElementById("notificationBadge");
+    if(badge){badge.textContent=unreadCount>99?"99+":String(unreadCount);badge.classList.toggle("hidden",unreadCount===0);}
+  }
 
   if(error){
 
@@ -5599,15 +5166,8 @@ LOGOUT
 
 async function logout(){
 
-  if(messageChannel){
-
-    await supabaseClient
-      .removeChannel(
-        messageChannel
-      );
-
-    messageChannel = null;
-  }
+  if(messageChannel){ await supabaseClient.removeChannel(messageChannel); messageChannel=null; }
+  if(inboxMessageChannel){ await supabaseClient.removeChannel(inboxMessageChannel); inboxMessageChannel=null; }
 
   if(orderChannel){
 
