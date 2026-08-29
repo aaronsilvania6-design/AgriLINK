@@ -3344,10 +3344,11 @@ async function loadProducts(){
           "seller_id",
           currentProfile.id
         )
-        .in(
+        .eq(
           "status",
-          ["ACTIVE","SOLD"]
-        );
+          "ACTIVE"
+        )
+        .gt("quantity",0);
 
   }else{
 
@@ -7419,6 +7420,263 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
   });
 
   setTimeout(()=>{moveSearchNearProducts();wireChatForm();wireSearch();if(currentProfile){finalLoadConversations();refreshPersistentChatBadge();subscribeFinalGlobal()}},300);
+})();
+</script>
+
+
+<style id="agrilink-final-chat-stock-fix">
+/* =========================================================
+   FINAL CHAT + MOBILE + PRODUCT STOCK FIX
+   ========================================================= */
+
+/* Desktop chat stays split. Phones get a compact contacts-first layout. */
+@media (max-width: 700px){
+  #chatModal{padding:0!important;align-items:stretch!important}
+  #chatModal .modal-card{
+    width:100%!important;max-width:none!important;height:100dvh!important;
+    max-height:100dvh!important;margin:0!important;border-radius:0!important;
+    overflow:hidden!important;
+  }
+  #chatModal .chat-layout{
+    display:flex!important;flex-direction:column!important;height:100%!important;
+    min-height:0!important;overflow:hidden!important;
+  }
+  #chatModal .conversation-list{
+    display:block!important;flex:0 0 auto!important;height:auto!important;
+    max-height:190px!important;overflow-y:auto!important;overflow-x:hidden!important;
+    -webkit-overflow-scrolling:touch!important;border-right:0!important;
+    border-bottom:1px solid var(--border)!important;background:#f8fbf9!important;
+  }
+  #chatModal .chat-list-header{
+    position:sticky!important;top:0!important;z-index:4!important;
+    padding:12px 14px!important;background:#f8fbf9!important;
+  }
+  #chatModal .conversation-item{padding:10px 12px!important;min-height:68px!important}
+  #chatModal .conversation-item.active{background:#eaf7ee!important;border-left:4px solid #16833b!important}
+  #chatModal .conversation-preview{max-width:calc(100vw - 95px)!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  #chatModal .conversation-product{white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  #chatModal .conversation-remove{padding:4px 7px!important;font-size:10px!important}
+  #chatModal .chat-window{flex:1 1 auto!important;min-height:0!important;overflow:hidden!important}
+  #chatModal .chat-header{flex:0 0 auto!important;padding:11px 13px!important;min-height:60px!important}
+  #chatModal .chat-messages{
+    flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch!important;padding:12px!important;
+  }
+  #chatModal .chat-input{
+    flex:0 0 auto!important;padding:9px!important;gap:7px!important;
+    padding-bottom:calc(9px + env(safe-area-inset-bottom))!important;
+  }
+  #chatModal .chat-input input{min-width:0!important;font-size:16px!important}
+  #chatModal .chat-input button{padding:10px 13px!important;min-width:62px!important}
+  #chatModal .chat-bubble{max-width:84%!important}
+}
+
+/* Make the product cards compact and keep the delete button usable on phones. */
+@media (max-width:700px){
+  .product-actions{gap:7px!important}
+  .product-actions button{min-height:42px!important}
+}
+</style>
+
+<script id="agrilink-final-chat-stock-script">
+(function(){
+  'use strict';
+
+  const $id = id => document.getElementById(id);
+
+  /* ---------------------------------------------------------
+     MESSAGE SENDING
+     Replaces the previous form listener with exactly one listener.
+     Shows the sent message immediately and refreshes the contact
+     preview without reopening/resetting the conversation.
+     --------------------------------------------------------- */
+  function installReliableChatForm(){
+    const oldForm=$id('chatForm');
+    if(!oldForm || oldForm.dataset.reliableChatInstalled==='1') return;
+
+    const form=oldForm.cloneNode(true);
+    oldForm.replaceWith(form);
+    form.dataset.reliableChatInstalled='1';
+
+    form.addEventListener('submit', async function(e){
+      e.preventDefault();
+      e.stopPropagation();
+
+      if(!currentProfile || !currentConversation){
+        alert('Select a conversation first.');
+        return;
+      }
+
+      const input=$id('chatInput');
+      if(!input) return;
+      const text=input.value.trim();
+      if(!text) return;
+
+      const conversation=currentConversation;
+      const senderId=String(currentProfile.id);
+      const conversationId=String(conversation.id);
+      const button=form.querySelector('button[type="submit"]');
+
+      input.disabled=true;
+      if(button) button.disabled=true;
+
+      try{
+        const {data:inserted,error}=await supabaseClient
+          .from('messages')
+          .insert({
+            conversation_id:conversation.id,
+            sender_id:currentProfile.id,
+            content:text
+          })
+          .select('*')
+          .single();
+
+        if(error) throw error;
+
+        input.value='';
+
+        /* Immediate local rendering. Realtime will ignore the duplicate. */
+        const box=$id('chatMessages');
+        if(inserted && box && !$id('message-'+String(inserted.id).replace(/[^a-zA-Z0-9_-]/g,'_'))){
+          const empty=box.querySelector('.chat-empty');
+          if(empty) box.innerHTML='';
+          const mine=String(inserted.sender_id)===String(currentProfile.id);
+          const time=inserted.created_at?new Date(inserted.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
+          const safeText=(typeof window.escapeHtml==='function'?window.escapeHtml(String(inserted.content||'')):String(inserted.content||'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])));
+          const safeId=String(inserted.id).replace(/[^a-zA-Z0-9_-]/g,'_');
+          box.insertAdjacentHTML('beforeend',`<div class="message-row ${mine?'mine':''}" id="message-${safeId}"><div class="chat-bubble"><div>${safeText}</div><div class="chat-time">${time}</div></div></div>`);
+          box.scrollTop=box.scrollHeight;
+        }
+
+        /* Explicit metadata update keeps the contact preview correct even
+           when the optional DB trigger is not installed yet. */
+        const now=new Date().toISOString();
+        const isBuyer=String(conversation.buyer_id)===senderId;
+        const recipient=isBuyer?conversation.seller_id:conversation.buyer_id;
+        const ownUnreadField=isBuyer?'buyer_unread':'seller_unread';
+        const senderHidden=isBuyer?'buyer_hidden':'seller_hidden';
+        const recipientHidden=isBuyer?'seller_hidden':'buyer_hidden';
+
+        /* The database message trigger owns the recipient +1 counter.
+           Do not increment it here or a trigger-enabled database would count twice. */
+        const payload={
+          last_message:text.slice(0,160),
+          last_message_at:now,
+          updated_at:now,
+          [senderHidden]:false,
+          [recipientHidden]:false,
+          [ownUnreadField]:0
+        };
+
+        const {error:updateError}=await supabaseClient
+          .from('conversations')
+          .update(payload)
+          .eq('id',conversation.id);
+
+        if(updateError) console.warn('Conversation preview update:',updateError.message);
+
+        if(recipient && String(recipient)!==senderId){
+          const {error:notifError}=await supabaseClient
+            .from('notifications')
+            .insert({
+              user_id:recipient,
+              title:'New Chat Message',
+              message:(currentProfile.full_name||'Someone')+' sent you a message about '+(conversation.product_name||'a product')+'.',
+              type:'CHAT'
+            });
+          if(notifError) console.warn('Chat notification:',notifError.message);
+        }
+
+        currentConversation={...conversation,...payload};
+        if(typeof window.finalLoadConversations==='function') await window.finalLoadConversations();
+        if(typeof window.refreshPersistentChatBadge==='function') await window.refreshPersistentChatBadge();
+
+      }catch(err){
+        console.error('Send message failed:',err);
+        alert('Message could not be sent. '+(err?.message||''));
+      }finally{
+        input.disabled=false;
+        if(button) button.disabled=false;
+        input.focus();
+      }
+    });
+  }
+
+  /* ---------------------------------------------------------
+     PRODUCT DELETE / REMOVE LISTING
+     A hard delete can fail when an order references the product.
+     We therefore archive it by setting SOLD + quantity 0. This makes
+     it disappear from BOTH buyer and farmer marketplace tabs while
+     keeping old orders safe.
+     --------------------------------------------------------- */
+  window.deleteProduct=async function(id){
+    if(!currentProfile || currentProfile.role!=='FARMER'){
+      alert('Only the farmer who owns this product can remove it.');
+      return;
+    }
+    if(!confirm('Remove this product from the marketplace?')) return;
+
+    const {error}=await supabaseClient
+      .from('products')
+      .update({status:'SOLD',quantity:0})
+      .eq('id',id)
+      .eq('seller_id',currentProfile.id);
+
+    if(error){
+      alert('Could not remove product: '+error.message);
+      return;
+    }
+
+    /* Immediately remove it locally, then let Realtime sync other devices. */
+    allProducts=(allProducts||[]).filter(p=>String(p.id)!==String(id));
+    if(typeof window.renderProducts==='function') window.renderProducts(allProducts);
+    if(typeof window.updateFarmerStats==='function') await window.updateFarmerStats();
+  };
+
+  /* ---------------------------------------------------------
+     FORCE BOTH ROLES TO SHOW ONLY ACTIVE + IN-STOCK LISTINGS.
+     The previous farmer query explicitly included SOLD products,
+     which is why out-of-stock items stayed visible to the farmer.
+     --------------------------------------------------------- */
+  const originalLoadProducts=window.loadProducts;
+  if(originalLoadProducts && !originalLoadProducts.__stockFixed){
+    const fixedLoadProducts=async function(){
+      const result=await originalLoadProducts.apply(this,arguments);
+      try{
+        if(currentProfile?.role==='FARMER' && Array.isArray(allProducts)){
+          allProducts=allProducts.filter(p=>String(p.status||'').toUpperCase()==='ACTIVE' && Number(p.quantity)>0);
+          if(typeof window.renderProducts==='function') window.renderProducts(allProducts);
+        }
+      }catch(e){console.warn('Stock visibility filter:',e)}
+      return result;
+    };
+    fixedLoadProducts.__stockFixed=true;
+    window.loadProducts=fixedLoadProducts;
+  }
+
+  /* ---------------------------------------------------------
+     Keep selected conversation stable when a realtime update rebuilds
+     the contact list. Re-select it only if the list still contains it.
+     --------------------------------------------------------- */
+  const originalOpenChat=window.openChat;
+  if(originalOpenChat && !originalOpenChat.__stableChat){
+    const stableOpenChat=async function(){
+      const remembered=currentConversation?.id || (typeof rememberedChat==='function'?rememberedChat():null);
+      const result=await originalOpenChat.apply(this,arguments);
+      if(remembered && currentConversation && String(currentConversation.id)===String(remembered)) return result;
+      return result;
+    };
+    stableOpenChat.__stableChat=true;
+    window.openChat=stableOpenChat;
+  }
+
+  /* Run after the existing final script has initialized its globals. */
+  function boot(){
+    installReliableChatForm();
+  }
+  setTimeout(boot,350);
+  setTimeout(boot,1200);
+
 })();
 </script>
 
