@@ -1707,6 +1707,184 @@ body.modal-is-open{overscroll-behavior:none}
 
 </style>
 <meta name="agrilink-build" content="FINAL-RATING-CHAT-REALTIME-FIX-2026-08-29">
+
+<style id="agrilink-buyer-chat-mobile-final">
+/* =========================================================
+   BUYER/FARMER CHAT — FINAL MOBILE LAYOUT
+   Keeps contacts visible on phones and prevents the chat
+   from looking empty/reset every time it opens.
+   ========================================================= */
+
+@media (max-width: 900px){
+  #chatModal{
+    padding:8px !important;
+    align-items:flex-start !important;
+  }
+
+  #chatModal .modal-card{
+    width:100% !important;
+    max-width:100% !important;
+    height:calc(100dvh - 16px) !important;
+    max-height:calc(100dvh - 16px) !important;
+    border-radius:18px !important;
+    overflow:hidden !important;
+    margin:0 !important;
+  }
+
+  #chatModal .chat-layout{
+    display:flex !important;
+    flex-direction:column !important;
+    grid-template-columns:none !important;
+    height:100% !important;
+    min-height:0 !important;
+    overflow:hidden !important;
+  }
+
+  /* IMPORTANT: older CSS was hiding this with display:none */
+  #chatModal .conversation-list{
+    display:block !important;
+    flex:0 0 auto !important;
+    height:auto !important;
+    min-height:0 !important;
+    max-height:210px !important;
+    overflow-y:auto !important;
+    overflow-x:hidden !important;
+    -webkit-overflow-scrolling:touch !important;
+    border-right:0 !important;
+    border-bottom:1px solid var(--border) !important;
+    background:#f7fbf8 !important;
+  }
+
+  #chatModal .chat-list-header{
+    position:sticky !important;
+    top:0 !important;
+    z-index:5 !important;
+    padding:12px 14px !important;
+    background:#f7fbf8 !important;
+    color:#176B45 !important;
+    border-bottom:1px solid #e1ece5 !important;
+    font-size:12px !important;
+  }
+
+  #chatModal .conversation-item{
+    padding:11px 12px !important;
+    min-height:72px !important;
+    background:#fff !important;
+  }
+
+  #chatModal .conversation-item.active{
+    background:#eaf7ee !important;
+    border-left:4px solid #176B45 !important;
+  }
+
+  #chatModal .conversation-avatar{
+    width:32px !important;
+    height:32px !important;
+    flex-basis:32px !important;
+    border-radius:10px !important;
+  }
+
+  #chatModal .conversation-product,
+  #chatModal .conversation-preview,
+  #chatModal .conversation-time{
+    margin-left:41px !important;
+  }
+
+  #chatModal .conversation-product{
+    margin-top:4px !important;
+  }
+
+  #chatModal .conversation-preview{
+    max-width:calc(100vw - 110px) !important;
+    padding-right:42px !important;
+  }
+
+  #chatModal .conversation-remove{
+    right:10px !important;
+    bottom:8px !important;
+    background:#fff1f1 !important;
+    color:#b23b3b !important;
+    border-radius:8px !important;
+    padding:5px 7px !important;
+  }
+
+  #chatModal .chat-window{
+    display:flex !important;
+    flex-direction:column !important;
+    flex:1 1 auto !important;
+    height:auto !important;
+    min-height:0 !important;
+    overflow:hidden !important;
+    background:#fff !important;
+  }
+
+  #chatModal .chat-header{
+    flex:0 0 auto !important;
+    min-height:66px !important;
+    padding:11px 13px !important;
+  }
+
+  #chatModal .chat-user{
+    font-size:14px !important;
+  }
+
+  #chatModal .chat-context-product{
+    max-width:calc(100vw - 110px) !important;
+    font-size:9px !important;
+  }
+
+  #chatModal .chat-messages{
+    flex:1 1 auto !important;
+    min-height:0 !important;
+    overflow-y:auto !important;
+    -webkit-overflow-scrolling:touch !important;
+    padding:12px !important;
+  }
+
+  #chatModal .chat-input{
+    flex:0 0 auto !important;
+    padding:10px !important;
+    gap:7px !important;
+    background:#fff !important;
+    border-top:1px solid var(--border) !important;
+  }
+
+  #chatModal .chat-input input{
+    min-width:0 !important;
+    font-size:16px !important; /* prevents iPhone zoom */
+  }
+
+  #chatModal .chat-input button{
+    flex:0 0 auto !important;
+    padding:11px 14px !important;
+  }
+
+  #chatModal .chat-empty{
+    padding:22px 12px !important;
+    font-size:12px !important;
+  }
+
+  #chatModal .chat-bubble{
+    max-width:82% !important;
+  }
+}
+
+@media (max-width: 420px){
+  #chatModal .conversation-list{
+    max-height:185px !important;
+  }
+
+  #chatModal .conversation-item{
+    min-height:68px !important;
+  }
+
+  #chatModal .chat-header{
+    min-height:62px !important;
+  }
+}
+</style>
+
+<meta name="agrilink-build" content="BUYER-MESSAGES-MOBILE-PERSIST-2026-08-29">
 </head>
 
 <body>
@@ -6811,6 +6989,24 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
   const esc=v=>escapeHtml(v);
   let finalMessageChannel=null;
 
+  function chatSelectionKey(){
+    return currentProfile?.id ? `agrilink:last-chat:${currentProfile.id}` : "agrilink:last-chat";
+  }
+
+  function rememberChat(id){
+    try{
+      if(id) localStorage.setItem(chatSelectionKey(), String(id));
+    }catch(_){}
+  }
+
+  function rememberedChat(){
+    try{
+      return localStorage.getItem(chatSelectionKey());
+    }catch(_){
+      return null;
+    }
+  }
+
   function mySide(c){return String(c.buyer_id)===String(currentProfile?.id)?'buyer':'seller'}
   function unreadFor(c){return Number(mySide(c)==='buyer'?c.buyer_unread:c.seller_unread)||0}
   function hiddenFor(c){return !!(mySide(c)==='buyer'?c.buyer_hidden:c.seller_hidden)}
@@ -6827,7 +7023,10 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
   async function finalLoadConversations(){
     if(!currentProfile || !$('conversationList')) return;
     const list=$('conversationList');
-    list.innerHTML='<div class="chat-empty">Loading conversations...</div>';
+    const previousScroll=list.scrollTop;
+    if(!list.children.length){
+      list.innerHTML='<div class="chat-empty">Loading conversations...</div>';
+    }
 
     // IMPORTANT: do NOT use PostgREST nested buyer/seller relations here.
     // The app stores auth_user_id separately from users.id, and the nested
@@ -6842,13 +7041,13 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
 
     if(error){
       list.innerHTML=`<div class="chat-empty">${esc(error.message)}</div>`;
-      return;
+      return [];
     }
 
     const visible=(rows||[]).filter(c=>!hiddenFor(c));
     if(!visible.length){
       list.innerHTML='<div class="chat-empty">No conversations yet.<br><br>Start a chat from a product.</div>';
-      return;
+      return [];
     }
 
     const userIds=[...new Set(visible.flatMap(c=>[c.buyer_id,c.seller_id]).filter(Boolean).map(String))];
@@ -6863,6 +7062,7 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
     const productMap=new Map((products||[]).map(p=>[String(p.id),p.name]));
 
     list.innerHTML='';
+    const enriched=[];
     visible.forEach(c=>{
       const isBuyer=myId===String(c.buyer_id);
       const otherId=isBuyer?c.seller_id:c.buyer_id;
@@ -6884,10 +7084,22 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
         <div class="conversation-preview">${esc(c.last_message||'No messages yet')}</div>
         <div class="conversation-time">${shortTime(c.last_message_at||c.updated_at)}</div>
         <button class="conversation-remove" type="button">Remove</button>`;
-      item.addEventListener('click',()=>finalSelectConversation({...c,buyer:userMap.get(String(c.buyer_id)),seller:userMap.get(String(c.seller_id)),product_name:product}));
+      const fullConversation={...c,buyer:userMap.get(String(c.buyer_id)),seller:userMap.get(String(c.seller_id)),product_name:product};
+      enriched.push(fullConversation);
+      item.addEventListener('click',()=>finalSelectConversation(fullConversation));
       item.querySelector('.conversation-remove').addEventListener('click',e=>{e.stopPropagation();finalHideConversation(c.id)});
       list.appendChild(item);
     });
+
+    requestAnimationFrame(()=>{
+      list.scrollTop=previousScroll;
+      const active=list.querySelector('.conversation-item.active');
+      if(active && previousScroll===0){
+        active.scrollIntoView({block:'nearest'});
+      }
+    });
+
+    return enriched;
   }
 
   async function finalHideConversation(id){
@@ -6897,7 +7109,13 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
     const field=currentProfile.role==='BUYER'?'buyer_hidden':'seller_hidden';
     const {error}=await supabaseClient.from('conversations').update({[field]:true}).eq('id',id);
     if(error){alert(error.message);return}
-    if(c){currentConversation=null;$('chatMessages').innerHTML='<div class="chat-empty">Select a conversation to start chatting.</div>';$('chatUserName').textContent='Select a conversation';const cp=$('chatProductContext');if(cp)cp.textContent=''}
+    if(c){
+      currentConversation=null;
+      try{localStorage.removeItem(chatSelectionKey())}catch(_){}
+      $('chatMessages').innerHTML='<div class="chat-empty">Select a conversation to start chatting.</div>';
+      $('chatUserName').textContent='Select a conversation';
+      const cp=$('chatProductContext');if(cp)cp.textContent='';
+    }
     await finalLoadConversations();
     await refreshPersistentChatBadge();
   }
@@ -6925,13 +7143,13 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
       if(c[side]) await supabaseClient.from('conversations').update({buyer_hidden:false,product_name:productName}).eq('id',c.id);
     }
     $('chatModal').classList.remove('hidden');
-    await finalLoadConversations();
     await finalSelectConversation(c);
   }
 
   async function finalSelectConversation(c){
     if(!c||!currentProfile)return;
     currentConversation=c;
+    rememberChat(c.id);
     let u=otherUser(c);
     if(!u){
       const otherId=String(c.buyer_id)===String(currentProfile.id)?c.seller_id:c.buyer_id;
@@ -6946,7 +7164,8 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
     ctx.innerHTML='🌾 Product: <b>'+esc(productName)+'</b>';
     const field=currentProfile.role==='BUYER'?'buyer_unread':'seller_unread';
     await supabaseClient.from('conversations').update({[field]:0}).eq('id',c.id);
-    currentConversation={...c,[field]:0};
+    currentConversation={...c,[field]:0,product_name:productName};
+    rememberChat(c.id);
     await finalLoadMessages();
     finalSubscribeCurrentMessages();
     await finalLoadConversations();
@@ -7119,8 +7338,53 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
 
   /* Public replacements */
   window.startChat=finalStartChat;
-  window.openChat=function(){ $('chatModal')?.classList.remove('hidden'); finalLoadConversations(); refreshPersistentChatBadge(); };
-  window.closeChat=function(){ $('chatModal')?.classList.add('hidden'); if(finalMessageChannel){supabaseClient.removeChannel(finalMessageChannel);finalMessageChannel=null} currentConversation=null; };
+
+  window.openChat=async function(){
+    const modal=$('chatModal');
+    if(!modal || !currentProfile)return;
+
+    modal.classList.remove('hidden');
+
+    const conversations=await finalLoadConversations();
+    await refreshPersistentChatBadge();
+
+    if(!conversations?.length){
+      currentConversation=null;
+      $('chatUserName').textContent='Select a conversation';
+      $('chatMessages').innerHTML='<div class="chat-empty">No conversations yet.<br>Start a chat from a product.</div>';
+      return;
+    }
+
+    const remembered=rememberedChat();
+    let selected=null;
+
+    if(currentConversation){
+      selected=conversations.find(c=>String(c.id)===String(currentConversation.id))||null;
+    }
+
+    if(!selected && remembered){
+      selected=conversations.find(c=>String(c.id)===String(remembered))||null;
+    }
+
+    if(!selected){
+      selected=conversations[0];
+    }
+
+    if(selected){
+      await finalSelectConversation(selected);
+    }
+  };
+
+  window.closeChat=function(){
+    $('chatModal')?.classList.add('hidden');
+    if(finalMessageChannel){
+      supabaseClient.removeChannel(finalMessageChannel);
+      finalMessageChannel=null;
+    }
+    // Do NOT clear currentConversation here.
+    // Keeping it prevents Buyer Messages from resetting every time the modal closes.
+  };
+
   window.loadConversations=finalLoadConversations;
   window.selectConversation=finalSelectConversation;
 
