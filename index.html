@@ -814,7 +814,7 @@ ORDERS
   color:#e65100
 }
 
-.status-ACCEPTED{
+.status-CONFIRMED{
   background:#e3f2fd;
   color:#1565c0
 }
@@ -1959,9 +1959,9 @@ class="live-pill" style="margin-left:auto;margin-right:10px;font-size:11px;font-
 <div class="nav-actions">
 
 <button
-class="secondary-btn nav-icon-btn"
+class="secondary-btn"
 onclick="toggleNotifications()">
-🔔 <span id="notificationBadge" class="notification-badge hidden">0</span>
+🔔
 </button>
 
 <button
@@ -2242,17 +2242,6 @@ placeholder="Fresh Tomatoes">
 <textarea
 id="productDescription"
 placeholder="Describe your product"></textarea>
-
-<label>Category</label>
-
-<select id="productCategory">
-<option value="Vegetables">Vegetables</option>
-<option value="Fruits">Fruits</option>
-<option value="Rice & Grains">Rice & Grains</option>
-<option value="Livestock">Livestock</option>
-<option value="Seeds & Plants">Seeds & Plants</option>
-<option value="Other">Other</option>
-</select>
 
 <label>Price</label>
 
@@ -3251,7 +3240,7 @@ function renderProducts(products){
 
       return `
 
-      <div class="product-card" data-seller-id="${escapeHtml(String(product.seller_id))}">
+      <div class="product-card">
 
         <div class="product-image">
           ${image}
@@ -3645,7 +3634,7 @@ async function updateFarmerStats(){
     .textContent =
       list.filter(
         x =>
-          x.status==="ACCEPTED" ||
+          x.status==="CONFIRMED" ||
           x.status==="ONGOING"
       ).length;
 
@@ -3834,11 +3823,6 @@ document
               "productDescription"
             )
             .value.trim() || null,
-
-        category:
-          document
-            .getElementById("productCategory")
-            ?.value || "Other",
 
         price:price,
 
@@ -4404,7 +4388,7 @@ function renderOrder(order){
           class="accept-btn"
           onclick="updateOrderStatus(
             '${order.id}',
-            'ACCEPTED'
+            'CONFIRMED'
           )">
           Accept
         </button>
@@ -4421,7 +4405,7 @@ function renderOrder(order){
 
     }
 
-    if(status === "ACCEPTED"){
+    if(status === "CONFIRMED"){
 
       actions += `
         <button
@@ -4455,7 +4439,7 @@ function renderOrder(order){
 
     if(
       status === "PENDING" ||
-      status === "ACCEPTED"
+      status === "CONFIRMED"
     ){
 
       actions += `
@@ -5290,11 +5274,6 @@ document
 
   input.value = "";
 
-  const messageRecipient = currentConversation.buyer_id === currentProfile.id ? currentConversation.seller_id : currentConversation.buyer_id;
-  if(messageRecipient && String(messageRecipient)!==String(currentProfile.id)){
-    await supabaseClient.from('notifications').insert({user_id:messageRecipient,title:'New Chat Message',message:`${currentProfile.full_name||'Someone'} sent you a new message.`,type:'CHAT'});
-  }
-
   await supabaseClient
     .from("conversations")
     .update({
@@ -5837,8 +5816,7 @@ async function saveMyProfile(e){
     full_name:document.getElementById("editFullName").value.trim(),
     bio:document.getElementById("editBio").value.trim()||null,
     location:document.getElementById("editLocation").value.trim()||null,
-    phone:document.getElementById("editPhone").value.trim()||null,
-    updated_at:new Date().toISOString()
+    phone:document.getElementById("editPhone").value.trim()||null
   };
   if(!payload.full_name){msg.innerHTML='<div class="message error">Name is required.</div>';return}
   const {data,error}=await supabaseClient.from("users").update(payload).eq("id",currentProfile.id).select("*").single();
@@ -5861,7 +5839,15 @@ function starString(avg){
    ========================================================= */
 async function loadReviewState(){
   if(currentProfile?.role!=="BUYER") return;
-  const {data}=await supabaseClient.from("reviews").select("order_id");
+  const {data,error}=await supabaseClient
+    .from("reviews")
+    .select("order_id")
+    .eq("buyer_id", currentProfile.id);
+  if(error){
+    console.warn("Could not load review state:", error.message);
+    reviewedOrderIds=new Set();
+    return;
+  }
   reviewedOrderIds=new Set((data||[]).map(x=>x.order_id));
 }
 
@@ -5902,9 +5888,16 @@ document.getElementById("reviewForm").addEventListener("submit",async e=>{
   const orderId=document.getElementById("reviewOrderId").value;
   const {data:order,error:orderError}=await supabaseClient.from("orders").select("*").eq("id",orderId).eq("buyer_id",currentProfile.id).eq("status","COMPLETED").single();
   if(orderError||!order){document.getElementById("reviewMessage").innerHTML='<div class="message error">This completed order could not be found.</div>';return}
-  const {error}=await supabaseClient.from("reviews").insert({order_id:order.id,buyer_id:currentProfile.id,reviewer_id:currentProfile.id,seller_id:order.seller_id,product_id:order.product_id,rating:reviewRating,review_text:document.getElementById("reviewText").value.trim()||null});
+  const {error}=await supabaseClient.from("reviews").insert({
+    order_id: order.id,
+    buyer_id: currentProfile.id,
+    reviewer_id: currentProfile.id,
+    seller_id: order.seller_id,
+    product_id: order.product_id,
+    rating: reviewRating,
+    review_text: document.getElementById("reviewText").value.trim() || null
+  });
   if(error){document.getElementById("reviewMessage").innerHTML=`<div class="message error">${escapeHtml(error.message)}</div>`;return}
-  await supabaseClient.from('notifications').insert({user_id:order.seller_id,title:'New Rating Received',message:`You received a ${reviewRating}-star rating for ${order.products?.name||'a purchase'}.`,type:'REVIEW'});
   reviewedOrderIds.add(order.id);
   document.getElementById("reviewMessage").innerHTML='<div class="message success">Thank you! Your rating was submitted.</div>';
   setTimeout(()=>{closeReviewModal();loadOrders();},500);
@@ -5929,158 +5922,36 @@ loadOrders = async function(){
 /* =========================================================
    PUBLIC FARMER PROFILE RATING ENHANCEMENT
    ========================================================= */
-/* =========================================================
-   PUBLIC FARMER PROFILE: RATINGS + PRODUCTS + BLOCK/REPORT
-   ========================================================= */
 const __openFarmerProfileBase = openFarmerProfile;
 openFarmerProfile = async function(farmerId){
   await __openFarmerProfileBase(farmerId);
   const box=document.getElementById("profileContent");
-  if(!box) return;
-  const main=box.querySelector('.profile-main');
-  if(!main) return;
-
+  if(!box || box.innerHTML.includes('profile-rating')) return;
   const {data:farmer}=await supabaseClient.from("users").select("bio,location,phone,full_name,role,email").eq("id",farmerId).maybeSingle();
   const {data:reviews}=await supabaseClient.from("reviews").select("id,rating,review_text,created_at").eq("seller_id",farmerId).order("created_at",{ascending:false}).limit(8);
-  const arr=reviews||[];
-  const avg=arr.length?arr.reduce((a,r)=>a+Number(r.rating),0)/arr.length:0;
-
-  const bio=main.querySelector('.profile-bio');
-  if(bio) bio.innerHTML=escapeHtml(farmer?.bio||'This farmer has not added a description yet.')+(farmer?.location?`<br><span style="font-size:12px;color:#718078">📍 ${escapeHtml(farmer.location)}</span>`:'');
-
-  const role=main.querySelector('.profile-role');
-  if(role){
-    const rating=document.createElement('div');
-    rating.className='profile-rating';
-    rating.innerHTML=`<span class="stars">${starString(avg)}</span><span class="rating-number">${avg?avg.toFixed(1):'New'}</span><span class="rating-label">${arr.length} review${arr.length===1?'':'s'}</span>`;
-    role.insertAdjacentElement('afterend',rating);
-
-    if(currentProfile?.role==='BUYER' && String(farmerId)!==String(currentProfile.id)){
-      const safety=document.createElement('div');
-      safety.className='profile-safety-actions';
-      safety.innerHTML=`<div class="profile-safety-label">Account controls</div><div class="profile-safety-buttons"><button type="button" class="profile-block-btn">⚫ Block</button><button type="button" class="profile-report-btn">🚩 Report Account</button></div>`;
-      rating.insertAdjacentElement('afterend',safety);
-      safety.querySelector('.profile-block-btn').addEventListener('click',()=>toggleBlockFarmer(String(farmerId),String(farmer?.full_name||'Farmer')));
-      safety.querySelector('.profile-report-btn').addEventListener('click',()=>reportFarmer(String(farmerId),String(farmer?.full_name||'Farmer')));
-      await refreshBlockButton(String(farmerId));
-    }
-  }
-
-  /* Every product shown on a farmer profile is a direct buying entry point. */
-  main.querySelectorAll('.mini-product').forEach(card=>{
-    const onclickMatch=card.getAttribute('onclick');
-    if(onclickMatch) return;
-    const productName=card.querySelector('.mini-product-name')?.textContent?.trim();
-    const productList=main.querySelectorAll('.mini-product');
-    const idx=Array.from(productList).indexOf(card);
-    const ids=window.__agrilinkProfileProductIds||[];
-    if(ids[idx]){
-      card.setAttribute('role','button');
-      card.setAttribute('tabindex','0');
-      card.addEventListener('click',()=>openBuyModal(ids[idx]));
-      card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openBuyModal(ids[idx]);}});
-    }
-  });
-
-  if(!main.querySelector('.public-review-section')){
-    const section=document.createElement('div');
-    section.className='public-review-section';
-    section.innerHTML=`<div class="section-title"><h2>Recent Reviews</h2><span class="review-count-pill">⭐ ${arr.length} total</span></div>`;
+  const arr=reviews||[]; const avg=arr.length?arr.reduce((a,r)=>a+Number(r.rating),0)/arr.length:0;
+  const main=box.querySelector('.profile-main');
+  if(main){
+    const bio=main.querySelector('.profile-bio');
+    if(bio) bio.innerHTML=escapeHtml(farmer?.bio||'This farmer has not added a description yet.') + (farmer?.location?`<br><span style="font-size:12px;color:#718078">📍 ${escapeHtml(farmer.location)}</span>`:'');
+    const rating=document.createElement('div'); rating.className='profile-rating'; rating.innerHTML=`<span class="stars">${starString(avg)}</span><span>${avg?avg.toFixed(1):'New'}</span><span class="rating-muted">${arr.length} review${arr.length===1?'':'s'}</span>`;
+    const role=main.querySelector('.profile-role'); if(role) role.after(rating);
     if(arr.length){
-      section.insertAdjacentHTML('beforeend',arr.slice(0,4).map(r=>`<div class="review-summary"><div class="review-card-head"><span class="stars">${starString(r.rating)}</span><span class="review-date">${new Date(r.created_at).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'})}</span></div><div class="review-text">${escapeHtml(r.review_text||'Great transaction!')}</div><button class="review-report" type="button" data-review-id="${escapeHtml(String(r.id))}">🚩 Report</button></div>`).join(''));
-      section.querySelectorAll('.review-report').forEach(btn=>btn.addEventListener('click',()=>reportReview(btn.dataset.reviewId)));
-    }else{
-      section.insertAdjacentHTML('beforeend','<div class="empty">No reviews yet. Complete a purchase to be the first to rate this farmer.</div>');
+      const section=document.createElement('div'); section.style.marginTop='18px'; section.innerHTML=`<h3 style="margin-bottom:10px">Recent Reviews</h3>`+arr.slice(0,4).map(r=>`<div class="review-summary"><div class="review-card-head"><span class="stars">${starString(r.rating)}</span><span class="review-date">${new Date(r.created_at).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'})}</span></div><div class="review-text">${escapeHtml(r.review_text||'Great transaction!')}</div><button class="review-report" type="button" onclick="reportReview(\'${String(r.id).replace(/\'/g,"\\\'")}\')">🚩 Report</button></div>`).join(''); main.appendChild(section);
     }
-    main.appendChild(section);
   }
-};
-
-/* Keep product IDs available for profile cards without changing the base marketplace. */
-const __openFarmerProfileProductCapture = openFarmerProfile;
-openFarmerProfile = async function(farmerId){
-  await __openFarmerProfileProductCapture(farmerId);
-  const cards=document.querySelectorAll('#profileContent .mini-product');
-  const ids=[];
-  const {data:products}=await supabaseClient.from('products').select('id').eq('seller_id',farmerId).eq('status','ACTIVE').gt('quantity',0).order('created_at',{ascending:false});
-  (products||[]).forEach(p=>ids.push(p.id));
-  window.__agrilinkProfileProductIds=ids;
-  cards.forEach((card,i)=>{
-    if(!ids[i]) return;
-    card.classList.add('profile-product-clickable');
-    card.setAttribute('role','button');
-    card.setAttribute('tabindex','0');
-    card.onclick=()=>openBuyModal(ids[i]);
-    card.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openBuyModal(ids[i]);}};
-  });
-};
-
-async function refreshBlockButton(farmerId){
-  const btn=document.querySelector('#profileContent .profile-block-btn');
-  if(!btn || !currentProfile) return;
-  const {data}=await supabaseClient.from('user_blocks').select('id').eq('blocker_id',String(currentProfile.id)).eq('blocked_id',String(farmerId)).maybeSingle();
-  btn.textContent=data?'↩ Unblock':'⚫ Block';
-  btn.dataset.blocked=data?'1':'0';
-}
-
-async function toggleBlockFarmer(farmerId,farmerName){
-  if(!currentProfile || currentProfile.role!=='BUYER') return;
-  const btn=document.querySelector('#profileContent .profile-block-btn');
-  const isBlocked=btn?.dataset.blocked==='1';
-  if(!isBlocked && !confirm(`Block ${farmerName}? Their products will be hidden from your marketplace.`)) return;
-  let error;
-  if(isBlocked){
-    ({error}=await supabaseClient.from('user_blocks').delete().eq('blocker_id',String(currentProfile.id)).eq('blocked_id',String(farmerId)));
-  }else{
-    ({error}=await supabaseClient.from('user_blocks').insert({blocker_id:String(currentProfile.id),blocked_id:String(farmerId)}));
-  }
-  if(error){alert(error.message);return;}
-  if(isBlocked){
-    await refreshBlockButton(farmerId);
-    alert('Farmer unblocked.');
-  }else{
-    document.getElementById('profileModal')?.classList.add('hidden');
-    alert('Farmer blocked. Their products will no longer appear in your marketplace.');
-    if(typeof loadProducts==='function') await loadProducts();
-  }
-}
-
-async function reportFarmer(farmerId,farmerName){
-  if(!currentProfile || !farmerId) return;
-  const reason=prompt(`Why are you reporting ${farmerName}?\n\nExamples: spam, fake profile, suspicious activity, inappropriate content, or other.`);
-  if(reason===null) return;
-  const cleanReason=reason.trim()||'Other';
-  const {error}=await supabaseClient.from('user_reports').insert({reported_user_id:String(farmerId),reporter_id:String(currentProfile.id),reason:cleanReason});
-  if(error){
-    if(String(error.message).toLowerCase().includes('duplicate')||String(error.code)==='23505'){
-      alert('You already reported this account.');
-    }else alert(error.message);
-    return;
-  }
-  alert('Report submitted. Thank you for helping keep AgriLink trustworthy.');
-}
-
-const __loadProductsWithBlocksBase = loadProducts;
-loadProducts = async function(){
-  await __loadProductsWithBlocksBase();
-  if(currentProfile?.role!=='BUYER') return;
-  const {data:blocks}=await supabaseClient.from('user_blocks').select('blocked_id').eq('blocker_id',String(currentProfile.id));
-  const blocked=new Set((blocks||[]).map(x=>String(x.blocked_id)));
-  document.querySelectorAll('[data-seller-id]').forEach(el=>{if(blocked.has(String(el.dataset.sellerId))) el.closest('.product-card')?.remove();});
 };
 
 async function reportReview(reviewId){
   if(!currentProfile || !reviewId) return;
-  const reason=prompt('Why are you reporting this review?\n\nExamples: spam, harassment, misleading, inappropriate, or other.');
+  const reason=prompt("Why are you reporting this review?\n\nExamples: spam, harassment, misleading, inappropriate, or other.");
   if(reason===null) return;
-  const cleanReason=reason.trim()||'Other';
-  const {error}=await supabaseClient.from('review_reports').insert({review_id:String(reviewId),reporter_id:currentProfile.id,reason:cleanReason});
-  if(error){
-    if(String(error.message).toLowerCase().includes('duplicate')||String(error.code)==='23505') alert('You already reported this review.');
-    else alert(error.message);
-    return;
-  }
-  alert('Report submitted. Thank you for helping keep AgriLink trustworthy.');
+  const cleanReason=reason.trim() || "Other";
+  const {error}=await supabaseClient.from("review_reports").insert({
+    review_id:String(reviewId), reporter_id:currentProfile.id, reason:cleanReason
+  });
+  if(error){ alert(error.message); return; }
+  alert("Report submitted. Thank you for helping keep AgriLink trustworthy.");
 }
 
 /* =========================================================
@@ -6115,13 +5986,27 @@ function botReply(text){
 document.getElementById('botForm').addEventListener('submit',e=>{e.preventDefault();const input=document.getElementById('botInput');const t=input.value.trim();if(!t)return;input.value='';askAgriBot(t)});
 
 /* Realtime products + notifications + reviews */
+function showLiveNotification(title, body){
+  try{
+    const panel=document.getElementById('notificationPanel');
+    if(panel && !panel.classList.contains('hidden')){
+      const item=document.createElement('div');
+      item.className='notification-item';
+      item.innerHTML=`<strong>${escapeHtml(title)}</strong><span>${escapeHtml(body)}</span>`;
+      panel.prepend(item);
+    }
+  }catch(e){ console.warn('Notification UI error:',e); }
+}
 let reviewChannel = null;
 function subscribeReviewRealtime(){
   if(!currentProfile)return;
   if(reviewChannel){ supabaseClient.removeChannel(reviewChannel); reviewChannel=null; }
   reviewChannel=supabaseClient.channel('reviews-live-'+currentProfile.id+'-'+Date.now())
-    .on('postgres_changes',{event:'*',schema:'public',table:'reviews'},async()=>{
-      if(currentProfile?.role==='FARMER') await openMyProfile();
+    .on('postgres_changes',{event:'*',schema:'public',table:'reviews'},async(payload)=>{
+      if(currentProfile?.role==='FARMER'){
+        await openMyProfile();
+        showLiveNotification('⭐ New rating received', 'Your farmer profile rating was updated in real time.');
+      }
       if(currentProfile?.role==='BUYER') await loadOrders();
     })
     .subscribe();
@@ -6136,542 +6021,10 @@ initializeApp=async function(user){await __initEnhancedBase(user);setupRoleHome(
 <script>
 (function(){
   const sync=()=>document.body.classList.toggle('modal-open',!!document.querySelector('.modal:not(.hidden)'));
-  const obs=new MutationObserver(sync);
-  obs.observe(document.body,{subtree:true,attributes:true,attributeFilter:['class']});
-  sync();
+  const obs=new MutationObserver(sync); obs.observe(document.body,{subtree:true,attributes:true,attributeFilter:['class']}); sync();
+  document.addEventListener('touchmove',e=>{const m=e.target.closest('.modal-card'); if(!m) e.preventDefault();},{passive:false});
 })();
 </script>
-<style>body.modal-open{overflow:hidden;touch-action:none}.modal-card{touch-action:auto}
-/* FINAL VISUAL POLISH: one green chrome/title-bar system */
-:root{--titlebar-green:#176B45;--titlebar-green-dark:#0F5133}
-.navbar,.modal-header,.profile-modal-header,.chat-header,.notification-header,.landing-nav{background:var(--titlebar-green)!important;color:#fff!important;border-color:var(--titlebar-green)!important}
-.navbar{box-shadow:0 8px 28px rgba(23,107,69,.22)!important}
-.navbar .nav-brand,.navbar .nav-brand *,.navbar button,.navbar .secondary-btn,.navbar .profile-nav-btn,.navbar .live-pill{color:#fff!important}
-.navbar .secondary-btn,.navbar .profile-nav-btn,.navbar .live-pill{background:rgba(255,255,255,.13)!important;border-color:rgba(255,255,255,.22)!important}
-.navbar .danger-btn{background:#111!important;color:#fff!important;border-color:#111!important}
-.nav-logo{background:#fff!important;color:var(--titlebar-green)!important}
-.modal-header h2,.modal-header h3,.profile-modal-header h2,.profile-modal-header h3,.chat-header h2,.chat-header h3,.notification-header h2,.notification-header h3{color:#fff!important}
-.profile-modal-card .profile-modal-header{position:sticky;top:0;z-index:20;background:var(--titlebar-green)!important;color:#fff!important}
-.modal-card .modal-header{position:sticky;top:0;z-index:20;background:var(--titlebar-green)!important;color:#fff!important;padding:16px 0 12px}
-.modal-card .modal-header .close,.profile-modal-header .close{background:rgba(255,255,255,.16)!important;color:#fff!important;border:1px solid rgba(255,255,255,.2)!important}
-.landing-nav{box-shadow:0 8px 25px rgba(23,107,69,.16)!important}
-.landing-nav .brand,.landing-nav .brand small,.landing-nav a{color:#fff!important}
-.landing-nav .brand-icon{background:#fff!important;color:var(--titlebar-green)!important}
-.landing-nav button{background:#111!important;color:#fff!important}
-.panel-title,.section-title,.card-title{color:var(--titlebar-green)}
-
-/* public profile safety controls */
-.profile-safety-actions{margin:14px 0 4px;padding:13px 14px;border:1px solid #e5ebe7;border-radius:15px;background:#fafcfb}
-.profile-safety-label{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#6f7d75;margin-bottom:9px}
-.profile-safety-buttons{display:flex;gap:8px;flex-wrap:wrap}
-.profile-safety-buttons button{border:0;border-radius:10px;padding:10px 13px;font-weight:850;cursor:pointer}
-.profile-block-btn{background:#111!important;color:#fff!important}
-.profile-report-btn{background:#fff!important;color:#8b3f3f!important;border:1px solid #ead4d4!important}
-.profile-product-clickable{cursor:pointer;transition:.2s!important}
-.profile-product-clickable:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(23,107,69,.12);border-color:#b9d8c8}
-.profile-product-clickable:focus{outline:3px solid rgba(23,107,69,.18);outline-offset:2px}
-.public-review-section{margin-top:24px}
-.review-count-pill{font-size:11px;font-weight:850;background:#eef7f1;color:var(--titlebar-green);padding:7px 10px;border-radius:20px}
-.review-summary{position:relative}
-.review-report{color:#7f3e3e!important}
-
-/* consistent green modal action buttons, with special black reject preserved */
-.modal-card .primary-btn,.modal-card .profile-edit-btn{background:linear-gradient(135deg,#176B45,#23845A)!important}
-.reject-btn,.danger-btn{background:#111!important;color:#fff!important}
-
-@media(max-width:700px){
-  .profile-safety-buttons{display:grid;grid-template-columns:1fr 1fr}
-  .profile-safety-buttons button{width:100%}
-}
-
-/* FINAL COMPETITION POLISH */
-:root{--titlebar-green:#176B45;--titlebar-green-dark:#0F5133}
-.navbar,.modal-header,.profile-modal-header,.chat-header,.notification-header,.landing-nav{background:var(--titlebar-green)!important;color:#fff!important;border-color:var(--titlebar-green)!important}
-.profile-modal-card .profile-modal-header,.modal-card .modal-header{position:sticky;top:0;z-index:30;background:var(--titlebar-green)!important;color:#fff!important}
-.navbar .nav-brand,.navbar .nav-brand *,.navbar button,.navbar .secondary-btn,.navbar .profile-nav-btn,.navbar .live-pill,.modal-header h2,.modal-header h3,.profile-modal-header h2,.profile-modal-header h3,.chat-header h2,.chat-header h3,.notification-header h2,.notification-header h3{color:#fff!important}
-.navbar .secondary-btn,.navbar .profile-nav-btn,.navbar .live-pill,.modal-card .close,.profile-modal-header .close{background:rgba(255,255,255,.14)!important;color:#fff!important;border-color:rgba(255,255,255,.25)!important}
-.navbar .danger-btn,.reject-btn{background:#111!important;color:#fff!important;border-color:#111!important}
-.nav-logo,.landing-nav .brand-icon{background:#fff!important;color:var(--titlebar-green)!important}
-.landing-nav .brand,.landing-nav .brand small,.landing-nav a{color:#fff!important}
-.landing-nav button{background:#111!important;color:#fff!important}
-.profile-safety-actions{margin:14px 0 4px;padding:13px 14px;border:1px solid #e5ebe7;border-radius:15px;background:#fafcfb}
-.profile-safety-label{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#6f7d75;margin-bottom:9px}
-.profile-safety-buttons{display:flex;gap:8px;flex-wrap:wrap}
-.profile-safety-buttons button{border:0;border-radius:10px;padding:10px 13px;font-weight:850;cursor:pointer}
-.profile-block-btn{background:#111!important;color:#fff!important}
-.profile-report-btn{background:#fff!important;color:#8b3f3f!important;border:1px solid #ead4d4!important}
-.profile-product-clickable{cursor:pointer!important}
-.profile-product-clickable:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(23,107,69,.12);border-color:#b9d8c8}
-.profile-product-clickable:focus{outline:3px solid rgba(23,107,69,.18);outline-offset:2px}
-.public-review-section{margin-top:24px}
-.review-count-pill{font-size:11px;font-weight:850;background:#eef7f1;color:var(--titlebar-green);padding:7px 10px;border-radius:20px}
-.modal,.profile-modal-card,#profileContent{overscroll-behavior:contain!important}
-@media(max-width:700px){.profile-safety-buttons{display:grid;grid-template-columns:1fr 1fr}.profile-safety-buttons button{width:100%}}
-
-/* FINAL MOBILE SCROLL FIX: lock the background, never the modal content */
-html.modal-is-open, body.modal-is-open{overflow:hidden!important;height:100%!important;touch-action:auto!important}
-body.modal-open{overflow:hidden!important;touch-action:auto!important}
-.modal{touch-action:auto!important}
-.modal-card{touch-action:pan-y!important}
-.profile-modal-card{height:min(92vh,900px)!important;max-height:92vh!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;touch-action:pan-y!important}
-#profileContent{flex:1 1 auto!important;min-height:0!important;height:auto!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;touch-action:pan-y!important;padding-bottom:28px!important}
-@media(max-width:700px){.profile-modal-card{height:94vh!important;max-height:94vh!important;margin:0!important}.modal{padding:10px!important}}
-</style>
-
-<style>
-/* =========================================================
-   AGRILINK ALL-IN ENHANCEMENTS
-   ========================================================= */
-:root{
-  --titlebar-green:#176B45;
-  --titlebar-green-dark:#0F5133;
-  --accent-blue:#2563eb;
-  --accent-gold:#e6a400;
-}
-/* one calm green chrome everywhere */
-.navbar,.modal-header,.profile-modal-header,.chat-header,.notification-header,.landing-nav{
-  background:var(--titlebar-green)!important;color:#fff!important;border-color:var(--titlebar-green)!important;
-}
-.navbar{box-shadow:0 8px 28px rgba(23,107,69,.22)!important}
-.nav-icon-btn{position:relative!important;min-width:48px}
-.notification-badge,.chat-unread-badge{
-  display:inline-grid;place-items:center;min-width:19px;height:19px;padding:0 5px;border-radius:999px;
-  background:#d93025;color:#fff;font-size:10px;font-weight:950;line-height:1;border:2px solid var(--titlebar-green);
-}
-.nav-icon-btn .notification-badge{position:absolute;right:4px;top:2px}
-.chat-nav-wrap{position:relative;display:inline-flex}
-.chat-unread-badge{position:absolute;right:-3px;top:-4px}
-
-/* filters */
-.enhanced-filter-row{display:grid;grid-template-columns:1.2fr 1.2fr 1fr 1fr auto auto;gap:9px;margin-top:9px}
-.filter-label{font-size:10px;font-weight:900;color:#718078;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
-.category-pill{display:inline-flex;align-items:center;padding:5px 8px;border-radius:999px;background:var(--role-soft);color:var(--role-primary);font-size:9px;font-weight:900;margin-bottom:8px}
-.product-card{position:relative}
-.favorite-btn{position:absolute;right:10px;top:10px;z-index:4;width:38px;height:38px;border:1px solid rgba(255,255,255,.7);border-radius:12px;background:rgba(255,255,255,.94);box-shadow:0 8px 20px rgba(18,53,31,.10);font-size:18px;color:#87928c}
-.favorite-btn.active{color:#d93025;background:#fff5f4}
-.favorite-btn:hover{transform:scale(1.05)}
-.stock-warning{display:inline-flex;margin-top:6px;padding:5px 8px;border-radius:999px;background:#fff5df;color:#9b6500;font-size:10px;font-weight:900}
-
-/* favorites */
-.favorites-section{margin-top:26px}
-.favorites-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
-.favorites-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
-.favorite-mini{background:#fff;border:1px solid #e4ece6;border-radius:17px;padding:15px;box-shadow:0 8px 24px rgba(18,53,31,.05);cursor:pointer;transition:.2s}
-.favorite-mini:hover{transform:translateY(-3px);box-shadow:0 15px 32px rgba(18,53,31,.09)}
-.favorite-mini .mini-top{display:flex;justify-content:space-between;gap:10px}.favorite-mini h4{margin:6px 0;font-size:15px}.favorite-mini p{font-size:11px;color:#718078}.favorite-mini strong{color:var(--role-primary)}
-
-/* analytics */
-.analytics-panel{margin-top:20px;background:linear-gradient(135deg,#fff,#f7fbf8);border:1px solid #e0ebe3;border-radius:22px;padding:18px;box-shadow:0 12px 30px rgba(18,53,31,.05)}
-.analytics-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}.analytics-head h3{font-size:18px}.analytics-head span{font-size:10px;color:#718078;font-weight:800}
-.analytics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.analytics-stat{background:#fff;border:1px solid #e6eee8;border-radius:15px;padding:14px}.analytics-stat small{display:block;color:#718078;font-size:10px;font-weight:800}.analytics-stat strong{display:block;font-size:22px;margin-top:5px;color:var(--role-primary)}
-.badges-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.trust-badge{padding:6px 9px;border-radius:999px;background:var(--role-soft);color:var(--role-primary);font-size:10px;font-weight:900;border:1px solid color-mix(in srgb,var(--role-primary) 15%,transparent)}
-
-/* order timeline */
-.order-timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:14px 0 2px}
-.timeline-step{position:relative;text-align:center;font-size:9px;font-weight:850;color:#a0aaa4}.timeline-step:before{content:"";display:block;width:16px;height:16px;margin:0 auto 6px;border-radius:50%;background:#e8eeea;border:3px solid #fff;box-shadow:0 0 0 1px #dce6df}.timeline-step.done{color:var(--role-primary)}.timeline-step.done:before{background:var(--role-primary);box-shadow:0 0 0 1px var(--role-primary)}
-.order-details-btn{background:#eef7f1!important;color:var(--role-dark)!important}
-
-/* better notifications */
-.notification-summary{padding:10px 14px;background:#f7fbf8;border-bottom:1px solid #e6eee8;font-size:11px;color:#718078;display:flex;justify-content:space-between;gap:10px}
-.notification-summary button{border:0;background:transparent;color:var(--role-primary);font-size:11px;font-weight:900;cursor:pointer}
-.notification-item.unread{background:#f0f8f3!important;box-shadow:inset 3px 0 var(--role-primary)}
-.notification-item{cursor:pointer;transition:.15s}.notification-item:hover{background:#f7fbf8}
-
-/* profile badges */
-.profile-badges{margin:8px 0 4px}
-
-/* modal scroll: background locked, content scrolls */
-html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;height:100%!important;touch-action:auto!important}
-.modal{overflow-y:auto!important;overscroll-behavior:contain!important;touch-action:auto!important;-webkit-overflow-scrolling:touch!important}
-.modal-card{touch-action:pan-y!important}
-.profile-modal-card{height:min(92vh,900px)!important;max-height:92vh!important;overflow:hidden!important;display:flex!important;flex-direction:column!important}
-#profileContent{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;touch-action:pan-y!important}
-
-/* bot feels like an actual in-app assistant */
-.bot-header{background:linear-gradient(135deg,var(--titlebar-green-dark),var(--titlebar-green))!important}
-.bot-context{padding:8px 12px;background:#f7fbf8;border-bottom:1px solid #e6ece8;font-size:10px;color:#66756d}
-.bot-action{border:1px solid #dce7df!important;background:#fff!important;color:var(--role-dark)!important;border-radius:10px!important;padding:8px 10px!important;font-size:11px!important;font-weight:800!important;cursor:pointer}
-
-@media(max-width:900px){.enhanced-filter-row{grid-template-columns:1fr 1fr}.analytics-grid{grid-template-columns:1fr 1fr}.order-timeline{grid-template-columns:repeat(2,1fr);row-gap:12px}}
-@media(max-width:600px){.enhanced-filter-row{grid-template-columns:1fr}.analytics-grid{grid-template-columns:1fr 1fr}.favorites-grid{grid-template-columns:1fr 1fr}.favorite-btn{width:34px;height:34px}.order-timeline{grid-template-columns:1fr 1fr}.bot-window{height:min(560px,75vh)!important;right:12px!important;bottom:86px!important}.profile-modal-card{height:94vh!important;max-height:94vh!important}.navbar{padding:0 10px!important}.nav-actions{gap:4px!important}.nav-actions .secondary-btn{padding:9px 9px!important}.nav-brand{font-size:16px!important}}
-</style>
-
-<script>
-/* =========================================================
-   AGRILINK ALL-IN ENHANCEMENTS JS
-   ========================================================= */
-(function(){
-  if(window.__agrilinkAllEnhancementsLoaded) return;
-  window.__agrilinkAllEnhancementsLoaded=true;
-
-  const $=id=>document.getElementById(id);
-  const safeId=v=>String(v||'').replace(/[^a-zA-Z0-9_-]/g,'_');
-  const role=()=>currentProfile?.role==='FARMER'?'FARMER':'BUYER';
-  const money=v=>formatMoney(v);
-
-  let favoriteIds=new Set();
-  let favoriteProducts=[];
-  let globalMessageChannel=null;
-  let unreadChats=new Set();
-  let profileRealtimeChannel=null;
-
-  /* ---------- small UI builders ---------- */
-  function ensureNotificationBadge(){
-    const btn=document.querySelector('[onclick="toggleNotifications()"]');
-    if(btn && !$('notificationBadge')){
-      const b=document.createElement('span'); b.id='notificationBadge'; b.className='notification-badge hidden'; b.textContent='0'; btn.appendChild(b);
-    }
-  }
-  function updateChatBadge(){
-    const btn=[...document.querySelectorAll('.nav-actions button')].find(b=>(b.textContent||'').includes('Chat'));
-    if(!btn) return;
-    btn.style.position='relative';
-    let b=btn.querySelector('.chat-unread-badge');
-    if(!unreadChats.size){if(b)b.classList.add('hidden');return;}
-    if(!b){b=document.createElement('span');b.className='chat-unread-badge';btn.appendChild(b)}
-    b.textContent=String(unreadChats.size);b.classList.remove('hidden');
-  }
-
-  function ensureSearchControls(){
-    const grid=document.querySelector('.search-grid');
-    if(!grid || $('enhancedFilterRow')) return;
-    const row=document.createElement('div'); row.id='enhancedFilterRow'; row.className='enhanced-filter-row';
-    row.innerHTML=`
-      <div><div class="filter-label">Category</div><select id="searchCategory"><option value="">All categories</option><option>Vegetables</option><option>Fruits</option><option>Rice & Grains</option><option>Livestock</option><option>Seeds & Plants</option><option>Other</option></select></div>
-      <div><div class="filter-label">Sort by</div><select id="searchSort"><option value="newest">Newest</option><option value="price_low">Price: Low to High</option><option value="price_high">Price: High to Low</option><option value="rating">Highest Rated Farmer</option></select></div>`;
-    grid.parentElement.appendChild(row);
-  }
-
-  function ensureFavoritesSection(){
-    if(role()!=='BUYER' || $('favoritesSection')) return;
-    const marketplace=document.querySelector('#products')?.closest('.section');
-    if(!marketplace) return;
-    const section=document.createElement('section'); section.id='favoritesSection';section.className='section favorites-section';
-    section.innerHTML=`<div class="favorites-head"><div><h2>❤️ Saved Products</h2><p style="font-size:12px;color:#718078;margin-top:3px">Keep products you want to check again.</p></div><button class="secondary-btn" onclick="renderFavorites()">Refresh</button></div><div id="favoritesGrid" class="favorites-grid"></div>`;
-    marketplace.parentElement.insertBefore(section,marketplace);
-  }
-
-  function ensureAnalyticsSection(){
-    if(!$('analyticsPanel')){
-      const farmerStats=$('farmerDashboard');
-      const panel=document.createElement('section');panel.id='analyticsPanel';panel.className='analytics-panel';
-      panel.innerHTML=`<div class="analytics-head"><div><h3>📊 Activity Overview</h3><span id="analyticsSubtitle">Your live AgriLink activity</span></div><button class="secondary-btn" onclick="loadAnalytics()">Refresh</button></div><div id="analyticsGrid" class="analytics-grid"></div><div id="profileBadges" class="badges-row"></div>`;
-      if(farmerStats) farmerStats.insertAdjacentElement('afterend',panel);
-      else $('roleHomePanel')?.insertAdjacentElement('afterend',panel);
-    }
-  }
-
-  function ensureOrderDetailsModal(){
-    if($('orderDetailsModal')) return;
-    document.body.insertAdjacentHTML('beforeend',`<div id="orderDetailsModal" class="modal hidden"><div class="modal-card" style="max-width:620px"><div class="modal-header"><h2>Order Details</h2><button class="close" onclick="closeOrderDetails()">×</button></div><div id="orderDetailsContent"></div></div></div>`);
-  }
-
-  function ensureBotActions(){
-    const suggestions=document.querySelector('.bot-suggestions');
-    if(!suggestions || suggestions.dataset.enhanced) return;
-    suggestions.dataset.enhanced='1';
-    suggestions.insertAdjacentHTML('beforeend',`<button class="bot-action" onclick="askAgriBot('Show my orders')">My orders</button><button class="bot-action" onclick="askAgriBot('What is low stock?')">Low stock</button><button class="bot-action" onclick="askAgriBot('Show my saved products')">Saved</button>`);
-  }
-
-  /* ---------- favorites ---------- */
-  async function loadFavorites(){
-    favoriteIds=new Set(); favoriteProducts=[];
-    if(role()!=='BUYER') return;
-    const {data,error}=await supabaseClient.from('favorites').select('product_id').eq('user_id',String(currentProfile.id));
-    if(error){
-      console.warn('Favorites unavailable:',error.message);
-      return;
-    }
-    favoriteIds=new Set((data||[]).map(x=>String(x.product_id)));
-    if(favoriteIds.size){
-      const ids=[...favoriteIds];
-      const {data:products}=await supabaseClient.from('products').select('id,name,price,unit,quantity,location,image_url,category,seller_id,users:seller_id(full_name)').in('id',ids);
-      favoriteProducts=products||[];
-    }
-    renderFavorites();
-  }
-  window.toggleFavorite=async function(productId){
-    if(role()!=='BUYER'){alert('Favorites are available for buyer accounts.');return;}
-    const id=String(productId); let error;
-    if(favoriteIds.has(id)){
-      ({error}=await supabaseClient.from('favorites').delete().eq('user_id',String(currentProfile.id)).eq('product_id',id));
-      if(!error) favoriteIds.delete(id);
-    }else{
-      ({error}=await supabaseClient.from('favorites').insert({user_id:String(currentProfile.id),product_id:id}));
-      if(!error){
-        favoriteIds.add(id);
-        const {data:fp}=await supabaseClient.from('products').select('seller_id,name').eq('id',id).maybeSingle();
-        if(fp?.seller_id && String(fp.seller_id)!==String(currentProfile.id)){
-          await supabaseClient.from('notifications').insert({user_id:fp.seller_id,title:'Product Saved',message:`A buyer saved your product: ${fp.name||'listing'}.`,type:'PRODUCT'});
-        }
-      }
-    }
-    if(error){alert(error.message);return;}
-    document.querySelectorAll(`.favorite-btn[data-product-id="${CSS.escape(id)}"]`).forEach(b=>{b.classList.toggle('active',favoriteIds.has(id));b.textContent=favoriteIds.has(id)?'♥':'♡';});
-    await loadFavorites();
-  };
-  window.renderFavorites=function(){
-    const grid=$('favoritesGrid'); if(!grid) return;
-    if(!favoriteProducts.length){grid.innerHTML='<div class="empty">No saved products yet.<br><small>Tap ♡ on a product to save it here.</small></div>';return;}
-    grid.innerHTML=favoriteProducts.map(p=>`<div class="favorite-mini" onclick="openBuyModal('${safeId(p.id)}')"><div class="mini-top"><span class="category-pill">${escapeHtml(p.category||'Other')}</span><span style="font-size:16px">♥</span></div><h4>${escapeHtml(p.name)}</h4><p>${escapeHtml(p.users?.full_name||'Farmer')} · ${escapeHtml(p.location||'Location not specified')}</p><div style="margin-top:10px"><strong>₱${money(p.price)}</strong> / ${escapeHtml(p.unit||'unit')} <span style="float:right;font-size:10px;color:#718078">${escapeHtml(p.quantity)} left</span></div></div>`).join('');
-  };
-
-  /* ---------- product decoration + category search ---------- */
-  const baseRenderProducts=renderProducts;
-  renderProducts=function(products){
-    baseRenderProducts(products);
-    const list=products||[];
-    document.querySelectorAll('#products .product-card').forEach((card,i)=>{
-      const p=list[i]; if(!p) return;
-      if(role()==='BUYER' && p.seller_id!==currentProfile?.id){
-        const btn=document.createElement('button');btn.type='button';btn.className='favorite-btn'+(favoriteIds.has(String(p.id))?' active':'');btn.dataset.productId=String(p.id);btn.textContent=favoriteIds.has(String(p.id))?'♥':'♡';btn.title='Save product';btn.onclick=e=>{e.stopPropagation();toggleFavorite(p.id)};card.appendChild(btn);
-      }
-      const content=card.querySelector('.product-content');
-      if(content){
-        const price=content.querySelector('.price');
-        if(price && p.category && !content.querySelector('.category-pill')) price.insertAdjacentHTML('beforebegin',`<span class="category-pill">${escapeHtml(p.category)}</span>`);
-        if(Number(p.quantity)>0 && Number(p.quantity)<=5 && !content.querySelector('.stock-warning')) content.insertAdjacentHTML('beforeend',`<span class="stock-warning">⚠ Only ${escapeHtml(p.quantity)} left</span>`);
-      }
-    });
-  };
-
-  const baseLoadProducts=loadProducts;
-  loadProducts=async function(){
-    await baseLoadProducts();
-    if(!allProducts?.length){await loadFavorites();return;}
-    try{
-      const ids=allProducts.map(p=>p.id).filter(Boolean);
-      if(ids.length){
-        const {data:cats}=await supabaseClient.from('products').select('id,category').in('id',ids);
-        const map=new Map((cats||[]).map(x=>[String(x.id),x.category]));
-        const inferCategory=name=>{const n=String(name||'').toLowerCase();if(/tomato|lettuce|carrot|onion|potato|cabbage|pechay|vegetable|corn/.test(n))return n.includes('corn')?'Rice & Grains':'Vegetables';if(/mango|banana|apple|orange|papaya|pineapple|fruit/.test(n))return 'Fruits';if(/rice|grain|palay|sack of rice|corn/.test(n))return 'Rice & Grains';if(/chicken|pig|pork|cow|goat|livestock|duck|egg/.test(n))return 'Livestock';if(/seed|seedling|plant/.test(n))return 'Seeds & Plants';return 'Other'};
-        allProducts=allProducts.map(p=>({...p,category:map.get(String(p.id))||p.category||inferCategory(p.name)}));
-      }
-      const sellerIds=[...new Set(allProducts.map(p=>p.seller_id).filter(Boolean).map(String))];
-      if(sellerIds.length){
-        const {data:reviews}=await supabaseClient.from('reviews').select('seller_id,rating').in('seller_id',sellerIds);
-        const sums=new Map(),counts=new Map();
-        (reviews||[]).forEach(r=>{const k=String(r.seller_id);sums.set(k,(sums.get(k)||0)+Number(r.rating||0));counts.set(k,(counts.get(k)||0)+1)});
-        allProducts=allProducts.map(p=>{const k=String(p.seller_id);return {...p,__sellerRating:counts.get(k)?sums.get(k)/counts.get(k):0}});
-      }
-    }catch(e){console.warn('Product enrichment failed:',e.message)}
-    await loadFavorites();
-    renderProducts(allProducts);
-    updateFarmerStats();
-  };
-
-  window.searchProducts=function(){
-    const name=($('searchName')?.value||'').trim().toLowerCase();
-    const location=($('searchLocation')?.value||'').trim().toLowerCase();
-    const maxRaw=$('searchPrice')?.value||''; const max=maxRaw===''?null:Number(maxRaw);
-    const category=$('searchCategory')?.value||''; const sort=$('searchSort')?.value||'newest';
-    let results=[...allProducts];
-    if(name) results=results.filter(p=>String(p.name||'').toLowerCase().includes(name));
-    if(location) results=results.filter(p=>String(p.location||'').toLowerCase().includes(location));
-    if(max!==null && Number.isFinite(max)) results=results.filter(p=>Number(p.price||0)<=max);
-    if(category) results=results.filter(p=>(p.category||'Other')===category);
-    if(sort==='price_low') results.sort((a,b)=>Number(a.price||0)-Number(b.price||0));
-    else if(sort==='price_high') results.sort((a,b)=>Number(b.price||0)-Number(a.price||0));
-    else if(sort==='rating'){
-      // Rating sorting is computed from the currently available seller review rows.
-      results.sort((a,b)=>Number(b.__sellerRating||0)-Number(a.__sellerRating||0));
-    } else results.sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
-    renderProducts(results);
-  };
-  const baseClearSearch=clearSearch;
-  clearSearch=function(){baseClearSearch();if($('searchCategory'))$('searchCategory').value='';if($('searchSort'))$('searchSort').value='newest';renderProducts(allProducts)};
-
-  /* ---------- live analytics ---------- */
-  window.loadAnalytics=async function(){
-    if(!currentProfile)return;
-    const grid=$('analyticsGrid');if(!grid)return;
-    grid.innerHTML='<div class="empty">Updating live activity...</div>';
-    const id=String(currentProfile.id), farmer=role()==='FARMER';
-    const [ordersRes,productsRes,reviewsRes,favRes]=await Promise.all([
-      supabaseClient.from('orders').select('status,total_amount,total_price,quantity').or(`buyer_id.eq.${id},seller_id.eq.${id}`),
-      supabaseClient.from('products').select('id,quantity,status').eq('seller_id',id),
-      supabaseClient.from('reviews').select('rating').eq('seller_id',id),
-      supabaseClient.from('favorites').select('product_id').eq('user_id',id)
-    ]);
-    const orders=ordersRes.data||[],products=productsRes.data||[],reviews=reviewsRes.data||[];
-    const completed=orders.filter(o=>o.status==='COMPLETED');
-    if(farmer){
-      const revenue=completed.reduce((a,o)=>a+Number(o.total_amount??o.total_price??0),0);
-      const avg=reviews.length?reviews.reduce((a,r)=>a+Number(r.rating),0)/reviews.length:0;
-      grid.innerHTML=`<div class="analytics-stat"><small>Completed Sales</small><strong>${completed.length}</strong></div><div class="analytics-stat"><small>Demo Sales Value</small><strong>₱${money(revenue)}</strong></div><div class="analytics-stat"><small>Average Rating</small><strong>${avg?avg.toFixed(1):'New'} ⭐</strong></div><div class="analytics-stat"><small>Low Stock</small><strong>${products.filter(p=>Number(p.quantity)>0&&Number(p.quantity)<=5).length}</strong></div>`;
-      $('analyticsSubtitle').textContent='Live farmer performance and inventory health';
-    }else{
-      const spend=completed.reduce((a,o)=>a+Number(o.total_amount??o.total_price??0),0);
-      grid.innerHTML=`<div class="analytics-stat"><small>Completed Purchases</small><strong>${completed.length}</strong></div><div class="analytics-stat"><small>Demo Spend</small><strong>₱${money(spend)}</strong></div><div class="analytics-stat"><small>Saved Products</small><strong>${(favRes.data||[]).length}</strong></div><div class="analytics-stat"><small>Active Orders</small><strong>${orders.filter(o=>['PENDING','ACCEPTED','ONGOING'].includes(o.status)).length}</strong></div>`;
-      $('analyticsSubtitle').textContent='Live buyer activity and saved products';
-    }
-    renderTrustBadges({orders,products,reviews,favorites:favRes.data||[]});
-  };
-  function renderTrustBadges(data){
-    const box=$('profileBadges');if(!box)return;
-    const badges=[];
-    if(role()==='FARMER'){
-      if(data.orders.filter(o=>o.status==='COMPLETED').length>=5)badges.push('✓ 5+ Completed Orders');
-      if(data.reviews.length>=3){const avg=data.reviews.reduce((a,r)=>a+Number(r.rating),0)/data.reviews.length;if(avg>=4)badges.push('★ Highly Rated')}
-      if(data.products.length>=1)badges.push('🌾 Active Seller');
-      if(!badges.length)badges.push('🌱 New Seller');
-    }else{
-      if(data.orders.filter(o=>o.status==='COMPLETED').length>=3)badges.push('✓ Active Buyer');
-      if(data.favorites.length>=3)badges.push('♥ Product Saver');
-      if(data.orders.length>=1)badges.push('🛒 Shopper');
-      if(!badges.length)badges.push('🌱 New Buyer');
-    }
-    box.innerHTML=badges.map(b=>`<span class="trust-badge">${escapeHtml(b)}</span>`).join('');
-  }
-
-  /* ---------- order timeline + details ---------- */
-  function timelineHtml(status){
-    const order=['PENDING','ACCEPTED','ONGOING','COMPLETED'];
-    const index=order.indexOf(status);
-    return `<div class="order-timeline">${order.map((s,i)=>`<div class="timeline-step ${i<=index?'done':''}">${s==='PENDING'?'Placed':s==='ACCEPTED'?'Accepted':s==='ONGOING'?'In progress':'Completed'}</div>`).join('')}</div>`;
-  }
-  const baseRenderOrder=renderOrder;
-  renderOrder=function(order){
-    let html=baseRenderOrder(order);
-    const cardStart=html.indexOf('<div class="order-card">');
-    if(cardStart>=0){
-      const marker='<div class="order-actions">';
-      const pos=html.indexOf(marker,cardStart);
-      if(pos>=0){
-        const status=order.status||'PENDING';
-        const button=`<button class="order-details-btn" onclick="openOrderDetails('${safeId(order.id)}')">View Timeline</button>`;
-        html=html.slice(0,pos)+timelineHtml(status)+html.slice(pos);
-        const newPos=html.indexOf(marker,cardStart);
-        html=html.slice(0,newPos+marker.length)+button+html.slice(newPos+marker.length);
-      }
-    }
-    return html;
-  };
-  window.openOrderDetails=async function(orderId){
-    ensureOrderDetailsModal();const box=$('orderDetailsContent');$('orderDetailsModal').classList.remove('hidden');setModalScrollLock(true);box.innerHTML='<div class="empty">Loading order...</div>';
-    const {data:o,error}=await supabaseClient.from('orders').select(`*,products:product_id(name,unit),buyer:buyer_id(full_name),seller:seller_id(full_name)`).eq('id',orderId).single();
-    if(error||!o){box.innerHTML=`<div class="message error">${escapeHtml(error?.message||'Order not found.')}</div>`;return;}
-    const status=o.status||'PENDING';
-    box.innerHTML=`<div style="padding:4px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><h3>${escapeHtml(o.products?.name||'Product')}</h3><p style="color:#718078;font-size:12px;margin-top:4px">Order #${escapeHtml(String(o.id).slice(0,8))}</p></div><span class="order-status status-${escapeHtml(status)}">${escapeHtml(status)}</span></div>${timelineHtml(status)}<div class="review-summary"><b>${role()==='FARMER'?'Buyer':'Farmer'}:</b> ${escapeHtml(role()==='FARMER'?(o.buyer?.full_name||'Buyer'):(o.seller?.full_name||'Farmer'))}<br><b>Quantity:</b> ${escapeHtml(o.quantity)} ${escapeHtml(o.products?.unit||'unit')}<br><b>Total:</b> ₱${money(o.total_amount??o.total_price)}<br><b>Payment:</b> ${escapeHtml(formatPaymentMethod(o.payment_method,o.demo_mode===true))}<br><b>Created:</b> ${new Date(o.created_at).toLocaleString()}</div></div>`;
-  };
-  window.closeOrderDetails=function(){$('orderDetailsModal')?.classList.add('hidden');setModalScrollLock(false)};
-
-  /* ---------- notifications: unread badge + mark all ---------- */
-  window.updateNotificationBadge=async function(){
-    if(!currentProfile)return;ensureNotificationBadge();
-    const {count}=await supabaseClient.from('notifications').select('id',{count:'exact',head:true}).eq('user_id',String(currentProfile.id)).eq('is_read',false);
-    const b=$('notificationBadge');if(!b)return;const n=Number(count||0);b.textContent=n>99?'99+':String(n);b.classList.toggle('hidden',n===0);
-  };
-  const baseLoadNotifications=loadNotifications;
-  loadNotifications=async function(){
-    await baseLoadNotifications();
-    const box=$('notifications');if(box && currentProfile){
-      const items=[...box.querySelectorAll('.notification-item')];
-      const unread=items.filter(x=>x.classList.contains('unread')).length;
-      if(items.length){
-        const summary=document.createElement('div');summary.className='notification-summary';summary.innerHTML=`<span>${unread} unread notification${unread===1?'':'s'}</span><button onclick="markAllNotificationsRead()">Mark all as read</button>`;box.prepend(summary);
-      }
-    }
-    updateNotificationBadge();
-  };
-  window.markAllNotificationsRead=async function(){
-    if(!currentProfile)return;
-    await supabaseClient.from('notifications').update({is_read:true}).eq('user_id',String(currentProfile.id)).eq('is_read',false);
-    await loadNotifications();
-  };
-  const baseMarkNotificationRead=markNotificationRead;
-  markNotificationRead=async function(id){await baseMarkNotificationRead(id);updateNotificationBadge()};
-
-  /* ---------- realtime messages outside currently-open chat ---------- */
-  async function subscribeGlobalMessages(){
-    if(!currentProfile)return;
-    if(globalMessageChannel)await supabaseClient.removeChannel(globalMessageChannel);
-    globalMessageChannel=supabaseClient.channel('messages-badge-'+currentProfile.id+'-'+Date.now())
-      .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},async payload=>{
-        if(String(payload.new.sender_id)===String(currentProfile.id))return;
-        const {data:conv}=await supabaseClient.from('conversations').select('id,buyer_id,seller_id').eq('id',payload.new.conversation_id).maybeSingle();
-        if(!conv)return;
-        if(String(conv.buyer_id)!==String(currentProfile.id)&&String(conv.seller_id)!==String(currentProfile.id))return;
-        if(String(currentConversation?.id)!==String(conv.id)){unreadChats.add(String(conv.id));updateChatBadge();}
-      }).subscribe();
-  }
-  const baseSelectConversation=selectConversation;
-  selectConversation=async function(conversation){unreadChats.delete(String(conversation.id));updateChatBadge();await baseSelectConversation(conversation)};
-
-  /* ---------- realtime profile updates ---------- */
-  function subscribeProfileRealtime(){
-    if(!currentProfile)return;
-    if(profileRealtimeChannel)supabaseClient.removeChannel(profileRealtimeChannel);
-    profileRealtimeChannel=supabaseClient.channel('profile-live-'+currentProfile.id+'-'+Date.now())
-      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'users',filter:`id=eq.${currentProfile.id}`},payload=>{
-        currentProfile=payload.new;
-        $('userName').textContent=currentProfile.full_name||'User';
-        setupRoleHome();
-        if(!$('myProfileModal')?.classList.contains('hidden')) openMyProfile();
-      }).subscribe();
-  }
-
-  /* ---------- better AgriBot: uses live app data ---------- */
-  const originalBotReply=botReply;
-  botReply=async function(text){
-    const q=String(text).toLowerCase();
-    if(!currentProfile){originalBotReply(text);return;}
-    if(q.includes('my order')||q.includes('how many order')||q.includes('active order')){
-      const {data}=await supabaseClient.from('orders').select('status').or(`buyer_id.eq.${currentProfile.id},seller_id.eq.${currentProfile.id}`);
-      const orders=data||[],active=orders.filter(o=>['PENDING','ACCEPTED','ONGOING'].includes(o.status)).length,done=orders.filter(o=>o.status==='COMPLETED').length;
-      botSay(`You currently have ${active} active order${active===1?'':'s'} and ${done} completed order${done===1?'':'s'}.`);return;
-    }
-    if(q.includes('low stock')){
-      const {data}=await supabaseClient.from('products').select('name,quantity,unit').eq('seller_id',currentProfile.id).gt('quantity',0).lte('quantity',5);
-      if(currentProfile.role!=='FARMER'){botSay('Low-stock tracking is available for farmer listings.');return;}
-      botSay(data?.length?`You have ${data.length} low-stock listing${data.length===1?'':'s'}: ${data.map(p=>`${p.name} (${p.quantity} ${p.unit||'unit'})`).join(', ')}.`:'Good news — none of your active listings are at 5 units or below.');return;
-    }
-    if(q.includes('saved product')||q.includes('favorites')||q.includes('favourite')){
-      if(currentProfile.role!=='BUYER'){botSay('Saved Products is a buyer feature.');return;}
-      const {count}=await supabaseClient.from('favorites').select('product_id',{count:'exact',head:true}).eq('user_id',currentProfile.id);botSay(`You have ${Number(count||0)} saved product${Number(count||0)===1?'':'s'}.`);return;
-    }
-    if(q.includes('analytics')||q.includes('statistics')||q.includes('stats')){loadAnalytics();botSay('I refreshed your Activity Overview using the latest data.');return;}
-    originalBotReply(text);
-  };
-
-  /* ---------- public profile realtime refresh ---------- */
-  const baseOpenFarmerProfile=openFarmerProfile;
-  openFarmerProfile=async function(farmerId){
-    await baseOpenFarmerProfile(farmerId);
-    // The existing profile renderer already adds ratings, reports, blocks and clickable products.
-    // Add a visible live indicator without changing its structure.
-    const main=document.querySelector('#profileContent .profile-main');
-    if(main && !main.querySelector('.live-profile-indicator')){
-      const el=document.createElement('div');el.className='live-profile-indicator';el.style.cssText='font-size:10px;color:#176B45;font-weight:900;margin-top:8px';el.textContent='● LIVE PROFILE DATA';
-      main.querySelector('.profile-meta')?.insertAdjacentElement('afterend',el);
-    }
-  };
-
-  /* ---------- my profile refresh + badges ---------- */
-  const baseOpenMyProfile=openMyProfile;
-  openMyProfile=async function(){await baseOpenMyProfile();ensureAnalyticsSection();await loadAnalytics();};
-
-  /* ---------- initialize all enhancements after the existing app boot ---------- */
-  const baseInitializeApp=initializeApp;
-  initializeApp=async function(user){
-    await baseInitializeApp(user);
-    ensureSearchControls();ensureFavoritesSection();ensureAnalyticsSection();ensureOrderDetailsModal();ensureBotActions();
-    await loadFavorites();await loadAnalytics();updateNotificationBadge();updateChatBadge();subscribeGlobalMessages();subscribeProfileRealtime();
-  };
-
-  /* Fix accidental background touch suppression from the older scroll patch. */
-  document.addEventListener('touchmove',e=>{
-    const modal=e.target.closest('.modal');
-    if(modal && !modal.classList.contains('hidden')) return;
-    if(document.querySelector('.modal:not(.hidden)')) e.preventDefault();
-  },{passive:false});
-
-  // If the page is already initialized, upgrade it immediately.
-  setTimeout(()=>{
-    ensureSearchControls();ensureFavoritesSection();ensureAnalyticsSection();ensureOrderDetailsModal();ensureBotActions();
-    if(currentProfile){loadFavorites();loadAnalytics();updateNotificationBadge();updateChatBadge();subscribeGlobalMessages();subscribeProfileRealtime();}
-  },50);
-})();
-</script>
+<style>body.modal-open{overflow:hidden;touch-action:none}.modal-card{touch-action:auto}</style>
 </body>
 </html>
