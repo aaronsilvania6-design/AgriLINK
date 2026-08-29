@@ -1706,6 +1706,7 @@ body.modal-is-open{overscroll-behavior:none}
 @media(max-width:600px){#profileContent{padding-bottom:24px}}
 
 </style>
+<meta name="agrilink-build" content="FINAL-RATING-FK-FIX-2026-08-29">
 </head>
 
 <body>
@@ -3909,12 +3910,17 @@ async function deleteProduct(id){
     return;
   }
 
+  // Keep the product row because orders reference products.id.
+  // Hiding the listing is safer than physically deleting it.
   const {
     error
   } =
     await supabaseClient
       .from("products")
-      .delete()
+      .update({
+        status:"SOLD",
+        quantity:0
+      })
       .eq("id",id)
       .eq(
         "seller_id",
@@ -5902,11 +5908,69 @@ document.getElementById("reviewForm").addEventListener("submit",async e=>{
   const orderId=document.getElementById("reviewOrderId").value;
   const {data:order,error:orderError}=await supabaseClient.from("orders").select("*").eq("id",orderId).eq("buyer_id",currentProfile.id).eq("status","COMPLETED").single();
   if(orderError||!order){document.getElementById("reviewMessage").innerHTML='<div class="message error">This completed order could not be found.</div>';return}
-  const {error}=await supabaseClient.from("reviews").insert({order_id:order.id,buyer_id:currentProfile.id,reviewer_id:currentProfile.id,seller_id:order.seller_id,product_id:order.product_id,rating:reviewRating,review_text:document.getElementById("reviewText").value.trim()||null});
-  if(error){document.getElementById("reviewMessage").innerHTML=`<div class="message error">${escapeHtml(error.message)}</div>`;return}
-  await supabaseClient.from('notifications').insert({user_id:order.seller_id,title:'New Rating Received',message:`You received a ${reviewRating}-star rating for ${order.products?.name||'a purchase'}.`,type:'REVIEW'});
+  // Only one review is allowed per order.
+  // Check first so an existing/test review does not produce a raw duplicate-key error.
+  const {data:existingReview,error:existingReviewError}=await supabaseClient
+    .from("reviews")
+    .select("id")
+    .eq("order_id",order.id)
+    .maybeSingle();
+
+  if(existingReviewError){
+    document.getElementById("reviewMessage").innerHTML=
+      `<div class="message error">${escapeHtml(existingReviewError.message)}</div>`;
+    return;
+  }
+
+  if(existingReview){
+    reviewedOrderIds.add(order.id);
+    document.getElementById("reviewMessage").innerHTML=
+      '<div class="message error">You already rated this purchase.</div>';
+    setTimeout(()=>{closeReviewModal();loadOrders();},700);
+    return;
+  }
+
+  const {data:productRow}=await supabaseClient
+    .from("products")
+    .select("name")
+    .eq("id",order.product_id)
+    .maybeSingle();
+
+  const productName=productRow?.name||"your purchase";
+
+  const {error}=await supabaseClient.from("reviews").insert({
+    order_id:order.id,
+    buyer_id:currentProfile.id,
+    reviewer_id:currentProfile.id,
+    seller_id:order.seller_id,
+    product_id:order.product_id,
+    rating:reviewRating,
+    review_text:document.getElementById("reviewText").value.trim()||null
+  });
+
+  if(error){
+    // Also catch a simultaneous second submit against UNIQUE(order_id).
+    if(error.code==="23505" || String(error.message||"").includes("reviews_order_id_key")){
+      reviewedOrderIds.add(order.id);
+      document.getElementById("reviewMessage").innerHTML=
+        '<div class="message error">You already rated this purchase.</div>';
+    }else{
+      document.getElementById("reviewMessage").innerHTML=
+        `<div class="message error">${escapeHtml(error.message)}</div>`;
+    }
+    return;
+  }
+
+  await supabaseClient.from("notifications").insert({
+    user_id:order.seller_id,
+    title:"New Rating Received",
+    message:`You received a ${reviewRating}-star rating for ${productName}.`,
+    type:"REVIEW"
+  });
+
   reviewedOrderIds.add(order.id);
-  document.getElementById("reviewMessage").innerHTML='<div class="message success">Thank you! Your rating was submitted.</div>';
+  document.getElementById("reviewMessage").innerHTML=
+    '<div class="message success">Thank you! Your rating was submitted.</div>';
   setTimeout(()=>{closeReviewModal();loadOrders();},500);
 });
 
