@@ -6623,11 +6623,7 @@ loadProducts = async function(){
 };
 
 async function openBlockedAccounts(){
-  if(!currentProfile || currentProfile.role !== "BUYER"){
-    return;
-  }
   if(!currentProfile){alert('Please login first.');return;}
-  if(currentProfile.role!=='BUYER'){alert('Blocked accounts are available for buyers.');return;}
 
   const modal=document.getElementById('blockedAccountsModal');
   const content=document.getElementById('blockedAccountsContent');
@@ -9143,6 +9139,245 @@ AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
     const n=$('notificationBadge');setMobileBadge('mobileNotifBadge',n&&!n.classList.contains('hidden')?Number(n.textContent)||0:0);
     const c=document.querySelector('.chat-unread-badge');setMobileBadge('mobileChatBadge',c&&!c.classList.contains('hidden')?Number(String(c.textContent).replace('+',''))||0:0);
   },1500);
+})();
+</script>
+
+
+<!-- =========================================================
+     AGRILINK FINAL BLOCK + AGRIBOT FIX
+     Replaces conflicting earlier block overrides.
+     ========================================================= -->
+<style id="agrilink-final-block-fix">
+  .agrilink-block-manager-btn{
+    display:inline-flex!important;align-items:center;justify-content:center;gap:8px;
+    min-height:44px;padding:11px 15px!important;border:1px solid #d7e4db!important;
+    border-radius:11px!important;background:#fff!important;color:#173b24!important;
+    font-weight:900!important;cursor:pointer!important;
+  }
+  .agrilink-block-manager-btn:hover{background:#eef8f1!important;border-color:#16833b!important}
+  .agrilink-block-count{display:inline-flex;min-width:20px;height:20px;padding:0 6px;align-items:center;justify-content:center;border-radius:999px;background:#16833b;color:#fff;font-size:10px;font-weight:900}
+  .agrilink-block-empty{padding:35px 18px;text-align:center;color:#718078;border:1px dashed #cbd8cf;border-radius:15px;background:#fbfdfb}
+  .agrilink-block-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px;border:1px solid #e1e9e3;border-radius:15px;background:#fff}
+  .agrilink-block-person{display:flex;align-items:center;gap:11px;min-width:0}
+  .agrilink-block-avatar{width:44px;height:44px;flex:0 0 44px;display:grid;place-items:center;border-radius:13px;background:#eef8f1;font-size:21px}
+  .agrilink-block-name{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .agrilink-block-role{font-size:11px;color:#718078;margin-top:3px}
+  .agrilink-unblock{border:0;border-radius:10px;background:#16833b;color:#fff;padding:10px 13px;font-weight:900;white-space:nowrap;cursor:pointer}
+  .agrilink-unblock:hover{background:#106b2f}
+  .agrilink-profile-block{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}
+  .agrilink-profile-block button{min-height:44px;border:0;border-radius:10px;padding:10px 13px;font-weight:900}
+  @media(max-width:600px){
+    .agrilink-block-row{align-items:flex-start}
+    .agrilink-unblock{min-height:44px}
+  }
+</style>
+<script id="agrilink-final-block-fix-js">
+(function(){
+  'use strict';
+  const $=id=>document.getElementById(id);
+  const sid=v=>String(v??'');
+  const esc=v=>typeof window.escapeHtml==='function'?window.escapeHtml(v):String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const meId=()=>sid(window.currentProfile?.id);
+  const role=()=>String(window.currentProfile?.role||'BUYER').toUpperCase();
+  const isFarmer=()=>role()==='FARMER';
+
+  async function getMyBlockedIds(){
+    if(!window.currentProfile||!window.supabaseClient)return new Set();
+    const {data,error}=await window.supabaseClient.from('user_blocks').select('blocked_id').eq('blocker_id',meId());
+    if(error){console.warn('Blocked accounts:',error.message);return new Set();}
+    return new Set((data||[]).map(x=>sid(x.blocked_id)));
+  }
+  async function getRelation(otherId){
+    if(!window.currentProfile||!otherId)return {blocked:false,byMe:false,byThem:false};
+    const me=meId(),other=sid(otherId);
+    const {data,error}=await window.supabaseClient.from('user_blocks').select('blocker_id,blocked_id')
+      .or(`and(blocker_id.eq.${me},blocked_id.eq.${other}),and(blocker_id.eq.${other},blocked_id.eq.${me})`);
+    if(error){console.warn('Block relation:',error.message);return {blocked:false,byMe:false,byThem:false};}
+    const rows=data||[];
+    return {blocked:rows.length>0,byMe:rows.some(x=>sid(x.blocker_id)===me),byThem:rows.some(x=>sid(x.blocker_id)===other)};
+  }
+
+  async function refreshBlockedCount(){
+    const ids=await getMyBlockedIds();
+    document.querySelectorAll('.agrilink-block-count').forEach(x=>x.textContent=String(ids.size));
+  }
+
+  window.openBlockedAccounts=async function(){
+    if(!window.currentProfile){alert('Please login first.');return;}
+    const modal=$('blockedAccountsModal'),content=$('blockedAccountsContent');
+    if(!modal||!content){alert('Blocked Accounts panel is missing from this page.');return;}
+    modal.classList.remove('hidden');
+    if(typeof window.setModalScrollLock==='function')window.setModalScrollLock(true);
+    content.innerHTML='<div class="agrilink-block-empty">Loading your blocked accounts...</div>';
+    const {data:blocks,error}=await window.supabaseClient.from('user_blocks')
+      .select('id,blocked_id,created_at').eq('blocker_id',meId()).order('created_at',{ascending:false});
+    if(error){content.innerHTML=`<div class="message error">${esc(error.message)}</div>`;return;}
+    if(!blocks?.length){
+      content.innerHTML='<div class="agrilink-block-empty"><div style="font-size:38px">🛡️</div><br><strong>No blocked accounts</strong><div style="font-size:12px;margin-top:6px">Anyone you block will appear here. You can unblock them anytime.</div></div>';
+      await refreshBlockedCount(); return;
+    }
+    const ids=blocks.map(b=>sid(b.blocked_id));
+    const {data:users,error:userError}=await window.supabaseClient.from('users').select('id,full_name,role').in('id',ids);
+    if(userError){content.innerHTML=`<div class="message error">${esc(userError.message)}</div>`;return;}
+    const map=new Map((users||[]).map(u=>[sid(u.id),u]));
+    content.innerHTML=`<div style="display:grid;gap:10px">${blocks.map(b=>{
+      const u=map.get(sid(b.blocked_id))||{}; const id=sid(b.blocked_id); const name=u.full_name||'User';
+      const icon=String(u.role||'').toUpperCase()==='FARMER'?'👨‍🌾':'🛒';
+      return `<div class="agrilink-block-row"><div class="agrilink-block-person"><div class="agrilink-block-avatar">${icon}</div><div style="min-width:0"><button type="button" class="user-profile-link" onclick="openUserProfile('${esc(id)}')">${esc(name)}</button><div class="agrilink-block-role">${esc(String(u.role||'USER').toUpperCase())}</div></div></div><button type="button" class="agrilink-unblock" data-unblock-id="${esc(id)}">↩ Unblock</button></div>`;
+    }).join('')}</div>`;
+    content.querySelectorAll('[data-unblock-id]').forEach(btn=>btn.addEventListener('click',()=>window.toggleBlockUser(btn.dataset.unblockId,'this account')));
+    await refreshBlockedCount();
+  };
+
+  window.toggleBlockUser=async function(otherId,otherName){
+    if(!window.currentProfile||!otherId||sid(otherId)===meId())return;
+    const relation=await getRelation(otherId);
+    const name=otherName&&otherName!=='this account'?otherName:'this account';
+    if(relation.byMe){
+      if(!confirm(`Unblock ${name}? Their products will become visible again if you are a buyer.`))return;
+      const {error}=await window.supabaseClient.from('user_blocks').delete().eq('blocker_id',meId()).eq('blocked_id',sid(otherId));
+      if(error){alert('Unable to unblock: '+error.message);return;}
+      alert(`${name} has been unblocked.`);
+    }else{
+      if(!confirm(`Block ${name}?${role()==='BUYER'?' Their products will disappear from your marketplace.':''} You will also be unable to start new messages or transactions with this account while blocked.`))return;
+      const {error}=await window.supabaseClient.from('user_blocks').insert({blocker_id:meId(),blocked_id:sid(otherId)});
+      if(error){alert('Unable to block: '+error.message);return;}
+      alert(`${name} has been blocked.`);
+    }
+    await refreshBlockedCount();
+    await applyBlockedProductFilter();
+    if($('blockedAccountsModal')&&!$('blockedAccountsModal').classList.contains('hidden'))await window.openBlockedAccounts();
+    if($('profileModal')&&!$('profileModal').classList.contains('hidden')&&typeof window.openUserProfile==='function')await window.openUserProfile(otherId);
+  };
+
+  async function applyBlockedProductFilter(){
+    if(!window.currentProfile||!window.supabaseClient)return;
+    const blocked=await getMyBlockedIds();
+    // A buyer never sees listings from farmers they blocked.
+    if(role()==='BUYER' && Array.isArray(window.allProducts)){
+      window.allProducts=window.allProducts.filter(p=>!blocked.has(sid(p.seller_id)));
+      if(typeof window.renderProducts==='function')window.renderProducts(window.allProducts);
+    }
+    // Remove any stale DOM cards even when another old wrapper rendered them.
+    if(role()==='BUYER'){
+      document.querySelectorAll('#products .product-card').forEach(card=>{
+        const seller=card.dataset.sellerId||card.getAttribute('data-seller-id');
+        if(seller && blocked.has(sid(seller)))card.remove();
+      });
+    }
+  }
+
+  // Wrap the FINAL loadProducts implementation. This is deliberately installed last
+  // so older duplicate block patches cannot undo the buyer filter.
+  const previousLoad=window.loadProducts;
+  if(typeof previousLoad==='function'&&!previousLoad.__finalBlockFilter){
+    const wrapped=async function(){
+      const result=await previousLoad.apply(this,arguments);
+      await applyBlockedProductFilter();
+      await refreshBlockedCount();
+      return result;
+    };
+    wrapped.__finalBlockFilter=true;
+    window.loadProducts=wrapped;
+  }
+
+  // Add a guaranteed visible Blocked Accounts button for BOTH roles.
+  function ensureBlockButtons(){
+    document.querySelectorAll('.blocked-open-btn').forEach(btn=>{
+      btn.classList.remove('hidden');
+      btn.style.display='inline-flex';
+      if(!btn.querySelector('.agrilink-block-count'))btn.insertAdjacentHTML('beforeend',' <span class="agrilink-block-count">0</span>');
+    });
+    const navActions=document.querySelector('.nav-actions');
+    if(navActions&&!navActions.querySelector('[data-agrilink-block-manager]')){
+      const b=document.createElement('button');b.type='button';b.className='secondary-btn agrilink-block-manager-btn';b.dataset.agrilinkBlockManager='1';b.innerHTML='🚫 Blocked <span class="agrilink-block-count">0</span>';b.onclick=window.openBlockedAccounts;navActions.insertBefore(b,navActions.querySelector('.nav-bot-btn')||null);
+    }
+    const actions=$('roleHomeActions');
+    if(actions&&!actions.querySelector('[data-role-block-manager]')){
+      const b=document.createElement('button');b.type='button';b.className='ghost';b.dataset.roleBlockManager='1';b.innerHTML='🛡️ Blocked Accounts';b.onclick=window.openBlockedAccounts;actions.appendChild(b);
+    }
+  }
+
+  // Make profile pages expose a clear Block/Unblock control for either role.
+  const oldOpenProfile=window.openUserProfile;
+  if(typeof oldOpenProfile==='function'&&!oldOpenProfile.__finalBlockProfile){
+    const wrappedProfile=async function(userId){
+      const result=await oldOpenProfile.apply(this,arguments);
+      if(!window.currentProfile||!userId||sid(userId)===meId())return result;
+      const box=$('profileContent');if(!box)return result;
+      const existing=box.querySelector('.agrilink-profile-block');if(existing)existing.remove();
+      const rel=await getRelation(userId);
+      const title=box.querySelector('.profile-name')?.textContent||'User';
+      const row=document.createElement('div');row.className='agrilink-profile-block';
+      const block=document.createElement('button');block.type='button';block.textContent=rel.byMe?'↩ Unblock':'⛔ Block';block.style.background=rel.byMe?'#16833b':'#252525';block.style.color='#fff';block.onclick=()=>window.toggleBlockUser(userId,title);
+      row.appendChild(block);box.appendChild(row);
+      return result;
+    };
+    wrappedProfile.__finalBlockProfile=true;window.openUserProfile=wrappedProfile;window.openFarmerProfile=wrappedProfile;
+  }
+
+  // Guard BUY and direct message actions against either-direction blocks.
+  const oldBuy=window.openBuyModal;
+  if(typeof oldBuy==='function'&&!oldBuy.__finalBlockBuy){
+    const wrappedBuy=async function(productId){
+      let p=Array.isArray(window.allProducts)?window.allProducts.find(x=>sid(x.id)===sid(productId)):null;
+      if(!p){const r=await window.supabaseClient.from('products').select('seller_id,name').eq('id',sid(productId)).maybeSingle();p=r.data;}
+      if(p?.seller_id){const rel=await getRelation(p.seller_id);if(rel.blocked){alert(rel.byMe?'Unblock this farmer before buying from them.':'You cannot buy from this farmer because they blocked your account.');return;}}
+      return oldBuy.apply(this,arguments);
+    };wrappedBuy.__finalBlockBuy=true;window.openBuyModal=wrappedBuy;
+  }
+
+  const oldMessage=window.messageUserFromProfile;
+  if(typeof oldMessage==='function'&&!oldMessage.__finalBlockMessage){
+    const wrappedMessage=async function(otherId){
+      const rel=await getRelation(otherId);
+      if(rel.blocked){alert(rel.byMe?'Unblock this account before messaging.':'Messaging is unavailable because this account has blocked you.');return;}
+      return oldMessage.apply(this,arguments);
+    };wrappedMessage.__finalBlockMessage=true;window.messageUserFromProfile=wrappedMessage;
+  }
+
+  // Final role-aware AgriBot. Farmer = selling/management. Buyer = buying/discovery.
+  function setBotSuggestions(){
+    const box=document.querySelector('.bot-suggestions');if(!box)return;
+    if(isFarmer()){
+      box.innerHTML=`<button onclick="askAgriBot('How do I sell a product?')">🌾 Sell a product</button><button onclick="askAgriBot('How do I manage my listings?')">📋 My listings</button><button onclick="askAgriBot('How do I manage orders?')">📦 Manage orders</button><button onclick="askAgriBot('How do I message a buyer?')">💬 Message buyer</button><button onclick="askAgriBot('How do I block a buyer?')">🛡️ Block buyer</button><button onclick="askAgriBot('How do I get ratings?')">⭐ Ratings</button>`;
+    }else{
+      box.innerHTML=`<button onclick="askAgriBot('How do I buy a product?')">🛒 How to buy</button><button onclick="askAgriBot('How do I find products?')">🔎 Find products</button><button onclick="askAgriBot('How do I message a farmer?')">💬 Message farmer</button><button onclick="askAgriBot('How do I track my order?')">📦 Track order</button><button onclick="askAgriBot('How do I block a farmer?')">🛡️ Block farmer</button><button onclick="askAgriBot('How do I rate a farmer?')">⭐ Rate farmer</button>`;
+    }
+  }
+  window.openAgriBotWelcome=function(){
+    const w=$('botWindow');if(!w)return;w.classList.remove('hidden');setBotSuggestions();
+    const box=$('botMessages');if(!box)return;
+    if(!box.children.length){const name=window.currentProfile?.full_name||'there';botSay(isFarmer()?`Hi ${name}! 🌾 I’m AgriBot. I’m here to help you SELL products, manage listings, handle buyer orders, message customers, and build your farmer profile.`:`Hi ${name}! 🛒 I’m AgriBot. I’m here to help you BUY products, find farmers, message sellers, track your orders, and manage your buyer profile.`);}
+  };
+  window.botReply=function(text){
+    const q=String(text||'').toLowerCase();let reply;
+    if(isFarmer()){
+      if(q.includes('sell')||q.includes('listing')||q.includes('product'))reply='To sell: open Add Product, enter the product name, category, description, price, quantity, unit, location and photo, then publish the listing.';
+      else if(q.includes('order')||q.includes('track'))reply='For selling, open Transactions/Orders to review incoming buyer purchases and update their status as you process them.';
+      else if(q.includes('message')||q.includes('chat'))reply='Open Chat to talk with buyers. You can open a buyer profile from a conversation and manage the account relationship there.';
+      else if(q.includes('block'))reply='Open the buyer profile and press Block. That buyer will no longer be able to start new messages or transactions with you. Use Blocked Accounts to see and unblock them later.';
+      else if(q.includes('rating')||q.includes('review'))reply='Completed purchases can receive ratings and reviews. Your farmer profile displays your rating history.';
+      else if(q.includes('profile'))reply='Open Profile to update your farmer name, location, contact number and bio.';
+      else reply='I can help you with SELLING, product listings, buyer orders, customer messages, blocking buyers, ratings and your farmer profile. 🌾';
+    }else{
+      if(q.includes('buy')||q.includes('product')||q.includes('find'))reply='To buy: browse the Marketplace, search for a product, check the farmer and available quantity, then press Buy. Products from farmers you blocked stay hidden until you unblock them.';
+      else if(q.includes('message')||q.includes('chat'))reply='Tap the farmer name or Chat button on a product to contact the seller. You can also open the farmer profile from Messages.';
+      else if(q.includes('order')||q.includes('track'))reply='Open My Orders to see your purchases and their current status. Completed purchases can be rated.';
+      else if(q.includes('block'))reply='Open a farmer profile and press Block. That farmer’s products will immediately disappear from your Marketplace. Use Blocked Accounts to see the farmer and press Unblock to make the products visible again.';
+      else if(q.includes('rating')||q.includes('review'))reply='After your purchase is marked COMPLETED, you can rate the farmer and leave an optional review.';
+      else if(q.includes('profile'))reply='Open Profile to update your buyer name, location, contact number and bio.';
+      else reply='I can help you with BUYING, finding products, messaging farmers, tracking orders, blocking farmers, ratings and your buyer profile. 🛒';
+    }
+    botSay(reply);
+  };
+
+  // Re-run after login/profile initialization and whenever the role-home changes.
+  const boot=async()=>{ensureBlockButtons();if(window.currentProfile){setBotSuggestions();await refreshBlockedCount();await applyBlockedProductFilter();}};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,500));else setTimeout(boot,500);
+  const observer=new MutationObserver(()=>{if(window.currentProfile){ensureBlockButtons();setBotSuggestions();}});
+  observer.observe(document.body,{childList:true,subtree:true});
+  setInterval(()=>{if(window.currentProfile){ensureBlockButtons();refreshBlockedCount();}},2500);
 })();
 </script>
 
