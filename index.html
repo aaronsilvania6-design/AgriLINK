@@ -8729,5 +8729,422 @@ AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
 })();
 </script>
 
+
+<!-- =========================================================
+     AGRILINK MOBILE UX + TWO-WAY BLOCKING + ROLE-AWARE AGRIBOT
+     Final mobile usability layer
+     ========================================================= -->
+<style id="agrilink-final-mobile-ux">
+  /* Desktop stays intact. These rules only become active on phones. */
+  .mobile-bottom-nav{display:none}
+
+  @media (max-width:600px){
+    html,body{width:100%;max-width:100%;overflow-x:hidden!important}
+    body{padding-bottom:76px!important}
+
+    /* Clean phone header: logo + LIVE only. The confusing icon row moves below. */
+    #app>.navbar{
+      height:58px!important;min-height:58px!important;padding:0 12px!important;
+      display:flex!important;align-items:center!important;gap:8px!important;
+      position:sticky!important;top:0!important;z-index:100!important;
+      overflow:visible!important;
+    }
+    #app>.navbar .nav-brand{
+      flex:0 0 auto!important;width:auto!important;min-width:0!important;
+      justify-content:flex-start!important;font-size:16px!important;gap:7px!important;
+    }
+    #app>.navbar .nav-logo{width:34px!important;height:34px!important;min-width:34px!important;font-size:18px!important}
+    #app>.navbar .live-pill{margin-left:auto!important;margin-right:0!important;font-size:9px!important;padding:6px 9px!important}
+    #app>.navbar .nav-actions{display:none!important}
+
+    /* Bottom navigation */
+    .mobile-bottom-nav{
+      position:fixed!important;display:grid!important;grid-template-columns:repeat(5,1fr)!important;
+      left:0;right:0;bottom:0;height:70px;padding:7px 7px calc(7px + env(safe-area-inset-bottom));
+      background:rgba(255,255,255,.97);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+      border-top:1px solid #e4ebe6;box-shadow:0 -8px 24px rgba(19,53,34,.10);z-index:1000;
+    }
+    .mobile-nav-item{
+      border:0;background:transparent;color:#68756e;border-radius:14px;
+      min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:2px;font-size:9px;font-weight:850;cursor:pointer;padding:4px 2px;
+    }
+    .mobile-nav-item .mobile-nav-icon{font-size:21px;line-height:22px}
+    .mobile-nav-item.active{color:var(--role-primary,var(--green,#176b45));background:#f0f7f2}
+    .mobile-nav-item .mobile-nav-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+    .mobile-nav-badge{position:absolute;margin:-30px 0 0 22px;min-width:17px;height:17px;padding:0 4px;border-radius:999px;background:#dc2626;color:#fff;font-size:9px;display:grid;place-items:center;font-weight:900}
+
+    /* Make the main dashboard readable on narrow screens. */
+    .container{padding:10px 10px 88px!important;width:100%!important;max-width:100%!important}
+    .welcome{padding:18px 15px!important;border-radius:20px!important;margin-bottom:12px!important}
+    .welcome h1{font-size:22px!important;line-height:1.2!important}
+    .welcome p{font-size:12px!important}
+    .role-home{border-radius:20px!important;padding:17px!important}
+    .role-home h2{font-size:19px!important}
+    .role-home-actions{grid-template-columns:1fr!important;gap:8px!important}
+    .quick-grid{grid-template-columns:1fr!important;gap:8px!important}
+    .quick-card{min-height:76px!important}
+
+    .search-box{padding:14px!important;border-radius:18px!important}
+    .search-grid{grid-template-columns:1fr!important;gap:8px!important}
+    .search-grid input,.search-grid select,.search-grid button{min-height:46px!important}
+    .products{grid-template-columns:1fr!important;gap:12px!important}
+    .product-card{width:100%!important;border-radius:18px!important;overflow:hidden!important}
+    .product-image{height:210px!important}
+    .product-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important}
+    .product-actions button{min-height:44px!important}
+    .product-seller{padding:9px 0!important;min-height:42px!important}
+
+    /* Chat should be a full-screen mobile app, not a squeezed desktop modal. */
+    #chatModal{padding:0!important}
+    #chatModal .modal-card{width:100%!important;height:100dvh!important;max-height:none!important;border-radius:0!important;margin:0!important}
+    #chatModal .chat-layout{height:100%!important;display:flex!important;flex-direction:column!important}
+    #chatModal .conversation-list{display:none!important}
+    #chatModal .chat-window{min-height:0!important;flex:1!important}
+    #chatModal .chat-header{min-height:64px!important;padding:10px 12px!important}
+    #chatModal .chat-messages{min-height:0!important;flex:1!important;padding:12px!important}
+    #chatModal .chat-input{padding:8px!important;padding-bottom:calc(8px + env(safe-area-inset-bottom))!important}
+    #chatModal .chat-input input{min-height:44px!important}
+    #chatModal .chat-input button{min-height:44px!important}
+
+    /* Profile / blocked account modals */
+    #profileModal,#myProfileModal,#blockedAccountsModal{padding:0!important}
+    #profileModal .modal-card,#myProfileModal .modal-card,#blockedAccountsModal .modal-card{
+      width:100%!important;max-width:none!important;height:100dvh!important;max-height:none!important;
+      margin:0!important;border-radius:0!important;
+    }
+    .profile-modal-card{height:100dvh!important;max-height:none!important;border-radius:0!important}
+    #profileContent{padding-bottom:30px!important}
+    .profile-action-row{display:grid!important;grid-template-columns:1fr!important;gap:8px!important}
+    .profile-action-row button{width:100%!important;min-height:46px!important}
+    .profile-stats-grid{grid-template-columns:1fr 1fr!important}
+    .profile-meta{flex-direction:column!important;align-items:flex-start!important}
+    .profile-product-grid{grid-template-columns:1fr!important}
+
+    .blocked-user{padding:12px!important;gap:8px!important}
+    .blocked-user-info{min-width:0!important}
+    .blocked-user-name{max-width:170px!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .unblock-btn{min-height:42px!important;padding:9px 12px!important}
+
+    /* AgriBot is above the bottom nav and has mobile-friendly sizing. */
+    .bot-launcher{right:14px!important;bottom:82px!important;width:52px!important;height:52px!important;z-index:1001!important}
+    .bot-window{right:10px!important;left:10px!important;bottom:142px!important;width:auto!important;height:min(600px,72dvh)!important;max-height:72dvh!important;border-radius:20px!important;z-index:1002!important}
+    .bot-suggestions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:6px!important;padding:8px!important}
+    .bot-suggestions button{min-height:38px!important;font-size:10px!important}
+
+    /* Hide secondary desktop-only clutter inside mobile */
+    .desktop-only-mobile-hide{display:none!important}
+  }
+</style>
+
+<script id="agrilink-final-mobile-js">
+(function(){
+  if(window.__agrilinkFinalMobileLoaded)return;
+  window.__agrilinkFinalMobileLoaded=true;
+  const $=id=>document.getElementById(id);
+  const esc=v=>typeof escapeHtml==='function'?escapeHtml(v):String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const sid=v=>String(v??'');
+  const same=(a,b)=>sid(a)===sid(b);
+  const isFarmer=()=>String(window.currentProfile?.role||'').toUpperCase()==='FARMER';
+
+  /* ---------------- Mobile navigation ---------------- */
+  function ensureMobileNav(){
+    if($('mobileBottomNav'))return;
+    const nav=document.createElement('nav');
+    nav.id='mobileBottomNav';
+    nav.className='mobile-bottom-nav';
+    nav.setAttribute('aria-label','Mobile navigation');
+    nav.innerHTML=`
+      <button class="mobile-nav-item active" data-mobile-nav="home" type="button"><span class="mobile-nav-icon">⌂</span><span class="mobile-nav-label">Home</span></button>
+      <button class="mobile-nav-item" data-mobile-nav="market" type="button"><span class="mobile-nav-icon">🛒</span><span class="mobile-nav-label">Marketplace</span></button>
+      <button class="mobile-nav-item" data-mobile-nav="chat" type="button"><span class="mobile-nav-icon">💬</span><span class="mobile-nav-label">Messages</span><span id="mobileChatBadge" class="mobile-nav-badge hidden">0</span></button>
+      <button class="mobile-nav-item" data-mobile-nav="notifications" type="button"><span class="mobile-nav-icon">🔔</span><span class="mobile-nav-label">Alerts</span><span id="mobileNotifBadge" class="mobile-nav-badge hidden">0</span></button>
+      <button class="mobile-nav-item" data-mobile-nav="profile" type="button"><span class="mobile-nav-icon">👤</span><span class="mobile-nav-label">Profile</span></button>`;
+    document.body.appendChild(nav);
+
+    nav.addEventListener('click',async e=>{
+      const b=e.target.closest('[data-mobile-nav]'); if(!b)return;
+      nav.querySelectorAll('.mobile-nav-item').forEach(x=>x.classList.remove('active'));b.classList.add('active');
+      const action=b.dataset.mobileNav;
+      if(action==='home'){window.scrollTo({top:0,behavior:'smooth'});return;}
+      if(action==='market'){
+        const target=isFarmer()?($('products')||$('farmerDashboard')):($('buyerSearchSection')||$('products'));
+        target?.scrollIntoView({behavior:'smooth',block:'start'});return;
+      }
+      if(action==='chat'){if(typeof openChat==='function')await openChat();return;}
+      if(action==='notifications'){if(typeof toggleNotifications==='function')toggleNotifications();return;}
+      if(action==='profile'){if(typeof openMyProfile==='function')await openMyProfile();return;}
+    });
+  }
+
+  function setMobileBadge(id,n){
+    const b=$(id);if(!b)return;const count=Number(n)||0;
+    b.textContent=count>99?'99+':String(count);b.classList.toggle('hidden',count<=0);
+  }
+
+  /* ---------------- Two-way block relationship ---------------- */
+  async function getBlockRelationship(otherId){
+    if(!window.currentProfile||!otherId)return {blocked:false,byMe:false,byThem:false};
+    const me=sid(currentProfile.id),other=sid(otherId);
+    const {data,error}=await supabaseClient.from('user_blocks').select('blocker_id,blocked_id')
+      .or(`and(blocker_id.eq.${me},blocked_id.eq.${other}),and(blocker_id.eq.${other},blocked_id.eq.${me})`);
+    if(error){console.warn('Block relationship:',error.message);return {blocked:false,byMe:false,byThem:false};}
+    const rows=data||[];
+    return {blocked:rows.length>0,byMe:rows.some(x=>same(x.blocker_id,me)),byThem:rows.some(x=>same(x.blocker_id,other))};
+  }
+  async function getBlockedUserIds(){
+    if(!window.currentProfile)return new Set();
+    const me=sid(currentProfile.id);
+    const {data,error}=await supabaseClient.from('user_blocks').select('blocker_id,blocked_id')
+      .or(`blocker_id.eq.${me},blocked_id.eq.${me}`);
+    if(error){console.warn('Blocked users:',error.message);return new Set();}
+    const set=new Set();(data||[]).forEach(x=>{if(same(x.blocker_id,me))set.add(sid(x.blocked_id));else set.add(sid(x.blocker_id));});
+    return set;
+  }
+
+  window.toggleBlockUser=async function(otherId,otherName){
+    if(!currentProfile||!otherId||same(otherId,currentProfile.id))return;
+    const rel=await getBlockRelationship(otherId);
+    if(rel.byMe){
+      if(!confirm(`Unblock ${otherName||'this user'}?`))return;
+      const {error}=await supabaseClient.from('user_blocks').delete().eq('blocker_id',sid(currentProfile.id)).eq('blocked_id',sid(otherId));
+      if(error){alert(error.message);return;}
+      alert(`${otherName||'User'} has been unblocked.`);
+    }else{
+      if(!confirm(`Block ${otherName||'this user'}? Their products will disappear from your marketplace and you will not be able to send new messages or start new transactions with each other.`))return;
+      const {error}=await supabaseClient.from('user_blocks').insert({blocker_id:sid(currentProfile.id),blocked_id:sid(otherId)});
+      if(error){alert(error.message);return;}
+      alert(`${otherName||'User'} has been blocked.`);
+    }
+    if($('profileModal')&&!$('profileModal').classList.contains('hidden'))await window.openUserProfile(otherId);
+    if($('blockedAccountsModal')&&!$('blockedAccountsModal').classList.contains('hidden'))await window.openBlockedAccounts();
+    if(typeof loadProducts==='function')await loadProducts();
+  };
+
+  window.reportUser=async function(otherId,otherName){
+    if(!currentProfile||!otherId||same(otherId,currentProfile.id))return;
+    const reason=prompt(`Why are you reporting ${otherName||'this user'}?\n\nExamples: spam, fake profile, suspicious activity, harassment, inappropriate content, or other.`);
+    if(reason===null)return;
+    const clean=reason.trim()||'Other';
+    const details=prompt('Optional: Add more details about this report.')||null;
+    const {error}=await supabaseClient.from('user_reports').insert({
+      reporter_id:sid(currentProfile.id),reported_user_id:sid(otherId),reason:clean,
+      description:details?.trim()||null,status:'PENDING'
+    });
+    if(error){
+      if(String(error.code)==='23505'||String(error.message).toLowerCase().includes('duplicate'))alert('You already reported this account.');
+      else alert(error.message);return;
+    }
+    alert('Report submitted successfully.');
+  };
+
+  /* ---------------- Products: disappear immediately for either-direction blocks ---------------- */
+  async function hideBlockedProducts(){
+    if(!currentProfile)return;
+    const blocked=await getBlockedUserIds();
+    const source=(typeof allProducts!=='undefined'&&Array.isArray(allProducts))?allProducts:(Array.isArray(window.allProducts)?window.allProducts:[]);
+    const visible=source.filter(p=>!blocked.has(sid(p.seller_id)));
+    if(typeof renderProducts==='function')renderProducts(visible);
+    document.querySelectorAll('[data-seller-id]').forEach(el=>{
+      if(blocked.has(sid(el.dataset.sellerId)))el.closest('.product-card')?.remove();
+    });
+  }
+  const baseLoadProducts=window.loadProducts;
+  if(typeof baseLoadProducts==='function'){
+    window.loadProducts=async function(){
+      await baseLoadProducts.apply(this,arguments);
+      await hideBlockedProducts();
+    };
+  }
+
+  /* Also protect Buy and Chat from the frontend side. SQL trigger remains the final protection. */
+  const baseBuy=window.openBuyModal;
+  if(typeof baseBuy==='function')window.openBuyModal=async function(productId){
+    let p=((typeof allProducts!=='undefined'&&Array.isArray(allProducts))?allProducts:(Array.isArray(window.allProducts)?window.allProducts:[])).find(x=>same(x.id,productId));
+    if(!p){const r=await supabaseClient.from('products').select('seller_id,name').eq('id',sid(productId)).maybeSingle();p=r.data;}
+    if(p?.seller_id){
+      const rel=await getBlockRelationship(p.seller_id);
+      if(rel.blocked){alert('You cannot start a transaction with this user because one account has blocked the other.');return;}
+    }
+    return baseBuy.apply(this,arguments);
+  };
+
+  const baseStartChat=window.startChat;
+  if(typeof baseStartChat==='function')window.startChat=async function(sellerId,productId){
+    const rel=await getBlockRelationship(sellerId);
+    if(rel.blocked){alert('Messaging is unavailable because one account has blocked the other.');return;}
+    return baseStartChat.apply(this,arguments);
+  };
+
+  /* ---------------- Generic profile for buyer OR farmer ---------------- */
+  window.openUserProfile=async function(userId){
+    if(!currentProfile||!userId)return;
+    const modal=$('profileModal'),box=$('profileContent');if(!modal||!box)return;
+    modal.classList.remove('hidden');if(typeof setModalScrollLock==='function')setModalScrollLock(true);
+    box.innerHTML='<div class="empty">Loading profile...</div>';
+    const {data:u,error}=await supabaseClient.from('users').select('*').eq('id',sid(userId)).maybeSingle();
+    if(error||!u){box.innerHTML=`<div class="empty">${esc(error?.message||'Profile not found.')}</div>`;return;}
+    const self=same(u.id,currentProfile.id),farmer=String(u.role||'').toUpperCase()==='FARMER';
+    const rel=self?{blocked:false,byMe:false,byThem:false}:await getBlockRelationship(u.id);
+    let products=[],completed=0,avg=0,reviews=0;
+    if(farmer){
+      const [pr,rv,co]=await Promise.all([
+        supabaseClient.from('products').select('id,name,price,quantity,unit,image_url,status').eq('seller_id',sid(u.id)).eq('status','ACTIVE').gt('quantity',0).order('created_at',{ascending:false}),
+        supabaseClient.from('reviews').select('rating').eq('seller_id',sid(u.id)),
+        supabaseClient.from('orders').select('id',{count:'exact',head:true}).eq('seller_id',sid(u.id)).eq('status','COMPLETED')
+      ]);
+      products=pr.data||[];const rr=rv.data||[];reviews=rr.length;avg=reviews?rr.reduce((a,x)=>a+Number(x.rating||0),0)/reviews:0;completed=Number(co.count||0);
+    }else{
+      const co=await supabaseClient.from('orders').select('id',{count:'exact',head:true}).eq('buyer_id',sid(u.id)).eq('status','COMPLETED');completed=Number(co.count||0);
+    }
+    const joined=u.created_at?new Date(u.created_at).toLocaleDateString():'';
+    const name=u.full_name||(farmer?'Farmer':'Buyer');
+    const safeName=esc(name).replaceAll('`','&#96;').replaceAll("'",'&#39;');
+    const avatar=farmer?'👨‍🌾':'🛒';
+    const roleText=farmer?'FARMER':'BUYER';
+    box.innerHTML=`
+      <div class="profile-cover"></div>
+      <div class="profile-main">
+        <div class="profile-avatar">${avatar}</div>
+        <div class="profile-name">${esc(name)}</div>
+        <div class="profile-role">${roleText} ACCOUNT</div>
+        ${farmer?`<div class="profile-rating"><span class="stars">${typeof starString==='function'?starString(avg):'☆☆☆☆☆'}</span><span class="rating-number">${reviews?avg.toFixed(1):'New'}</span><span class="rating-label">${reviews} review${reviews===1?'':'s'}</span></div>`:''}
+        <div class="profile-meta">
+          <span>📍 ${esc(u.location||'Location not provided')}</span>
+          ${joined?`<span>🗓️ Joined ${esc(joined)}</span>`:''}
+          ${u.phone&&!rel.blocked?`<span>☎️ ${esc(u.phone)}</span>`:''}
+        </div>
+        <div class="profile-bio">${esc(u.bio||'No bio added yet.')}</div>
+        <div class="profile-stats-grid">
+          <div class="profile-stat-mini"><b>${completed}</b><span>COMPLETED TRANSACTIONS</span></div>
+          ${farmer?`<div class="profile-stat-mini"><b>${products.length}</b><span>ACTIVE PRODUCTS</span></div><div class="profile-stat-mini"><b>${reviews?avg.toFixed(1):'—'}</b><span>RATING</span></div>`:`<div class="profile-stat-mini"><b>${roleText}</b><span>ACCOUNT TYPE</span></div><div class="profile-stat-mini"><b>${rel.blocked?'Restricted':'Active'}</b><span>CONNECTION</span></div>`}
+        </div>
+        ${!self?`
+          <div class="profile-action-row">
+            <button class="message-user-btn" onclick="messageUserFromProfile('${esc(sid(u.id))}')" ${rel.blocked?'disabled':''}>💬 Message</button>
+            <button class="block-user-btn" onclick="toggleBlockUser('${esc(sid(u.id))}','${safeName}')">${rel.byMe?'↩ Unblock':'⛔ Block'}</button>
+            <button class="report-user-btn" onclick="reportUser('${esc(sid(u.id))}','${safeName}')">⚑ Report</button>
+          </div>
+          ${rel.byThem?'<div class="message error">This user has blocked you. Messaging and new transactions are unavailable.</div>':''}
+        `:`
+          <div class="profile-action-row"><button class="message-user-btn" onclick="document.getElementById('profileModal').classList.add('hidden');openMyProfile()">✏️ Edit My Profile</button></div>
+        `}
+        ${farmer?`
+          <h3 style="margin-top:22px">Available Products</h3>
+          <div class="profile-product-grid">${products.length?products.map(p=>`<div class="mini-product"><div class="mini-product-img">${p.image_url?`<img src="${esc(p.image_url)}" alt="${esc(p.name)}">`:'🌱'}</div><div class="mini-product-body"><div class="mini-product-name">${esc(p.name)}</div><div class="mini-product-price">₱${typeof formatMoney==='function'?formatMoney(p.price):Number(p.price||0).toFixed(2)} / ${esc(p.unit||'unit')}</div></div></div>`).join(''):'<div class="empty">No active products.</div>'}</div>
+        `:''}
+      </div>`;
+  };
+  window.openFarmerProfile=window.openUserProfile;
+
+  window.messageUserFromProfile=async function(otherId){
+    if(!currentProfile||!otherId)return;
+    const rel=await getBlockRelationship(otherId);
+    if(rel.blocked){alert(rel.byMe?'Unblock this user before messaging them.':'This conversation is unavailable because one account has blocked the other.');return;}
+    const {data:u,error}=await supabaseClient.from('users').select('id,role,full_name').eq('id',sid(otherId)).maybeSingle();
+    if(error||!u){alert(error?.message||'User not found.');return;}
+    const meRole=String(currentProfile.role).toUpperCase(),theirRole=String(u.role).toUpperCase();
+    if(meRole===theirRole){alert('AgriLink chat connects buyers and farmers.');return;}
+    const buyerId=meRole==='BUYER'?currentProfile.id:u.id,sellerId=meRole==='FARMER'?currentProfile.id:u.id;
+    let {data:c,error:e}=await supabaseClient.from('conversations').select('*').eq('buyer_id',sid(buyerId)).eq('seller_id',sid(sellerId)).order('updated_at',{ascending:false}).limit(1).maybeSingle();
+    if(e){alert(e.message);return;}
+    if(!c){const made=await supabaseClient.from('conversations').insert({buyer_id:sid(buyerId),seller_id:sid(sellerId),product_id:null,product_name:'Direct conversation',buyer_hidden:false,seller_hidden:false}).select('*').single();if(made.error){alert(made.error.message);return;}c=made.data;}
+    $('profileModal')?.classList.add('hidden');
+    if(typeof openChat==='function')await openChat();
+    if(typeof selectConversation==='function')await selectConversation(c);
+  };
+
+  /* ---------------- Blocked Accounts: both roles ---------------- */
+  window.openBlockedAccounts=async function(){
+    if(!currentProfile)return;
+    const modal=$('blockedAccountsModal'),content=$('blockedAccountsContent');if(!modal||!content)return;
+    modal.classList.remove('hidden');if(typeof setModalScrollLock==='function')setModalScrollLock(true);
+    const p=modal.querySelector('.modal-header p');if(p)p.textContent='Manage accounts you have blocked.';
+    content.innerHTML='<div class="blocked-empty">Loading blocked accounts...</div>';
+    const {data:blocks,error}=await supabaseClient.from('user_blocks').select('id,blocked_id,created_at').eq('blocker_id',sid(currentProfile.id)).order('created_at',{ascending:false});
+    if(error){content.innerHTML=`<div class="message error">${esc(error.message)}</div>`;return;}
+    if(!blocks?.length){content.innerHTML='<div class="blocked-empty"><div style="font-size:36px">🛡️</div><br><strong>No blocked accounts</strong><div style="font-size:12px;margin-top:6px">Accounts you block will appear here.</div></div>';return;}
+    const ids=blocks.map(x=>sid(x.blocked_id));const {data:users}=await supabaseClient.from('users').select('id,full_name,role').in('id',ids);const map=new Map((users||[]).map(x=>[sid(x.id),x]));
+    content.innerHTML=`<div class="blocked-list">${blocks.map(b=>{const u=map.get(sid(b.blocked_id))||{};const n=u.full_name||'User';return `<div class="blocked-user"><div class="blocked-user-info"><div class="blocked-avatar">${u.role==='FARMER'?'👨‍🌾':'🛒'}</div><div><button class="user-profile-link" onclick="openUserProfile('${esc(sid(b.blocked_id))}')">${esc(n)}</button><div class="blocked-user-role">${esc(u.role||'USER')}</div></div></div><button class="unblock-btn" onclick="toggleBlockUser('${esc(sid(b.blocked_id))}','${esc(n).replaceAll("'",'&#39;')}')">↩ Unblock</button></div>`}).join('')}</div>`;
+  };
+
+  /* Give mobile users a clear place to manage their blocked accounts. */
+  const baseOpenMyProfile=window.openMyProfile;
+  if(typeof baseOpenMyProfile==='function')window.openMyProfile=async function(){
+    await baseOpenMyProfile.apply(this,arguments);
+    const box=$('myProfileContent');if(!box||box.querySelector('.mobile-blocked-management'))return;
+    const wrap=document.createElement('div');wrap.className='mobile-blocked-management';
+    wrap.style.cssText='margin-top:12px;padding-top:12px;border-top:1px solid var(--border,#e5ebe7)';
+    wrap.innerHTML='<button type="button" class="secondary-btn" style="width:100%;min-height:44px" onclick="openBlockedAccounts()">🛡️ Manage Blocked Accounts</button>';
+    box.appendChild(wrap);
+  };
+
+  /* ---------------- Role-aware AgriBot ---------------- */
+  function botSuggestions(){
+    const box=document.querySelector('.bot-suggestions');if(!box)return;
+    if(isFarmer()){
+      box.innerHTML=`<button onclick="askAgriBot('How do I sell a product?')">🌾 Sell a product</button><button onclick="askAgriBot('How do I manage orders?')">📦 Manage orders</button><button onclick="askAgriBot('How do I edit my profile?')">👤 Edit profile</button><button onclick="askAgriBot('How do I block a buyer?')">🛡️ Block buyer</button>`;
+    }else{
+      box.innerHTML=`<button onclick="askAgriBot('How do I buy a product?')">🛒 How to buy</button><button onclick="askAgriBot('How do I message a farmer?')">💬 Message farmer</button><button onclick="askAgriBot('How do I track my order?')">📦 Track order</button><button onclick="askAgriBot('How do I block a farmer?')">🛡️ Block farmer</button>`;
+    }
+  }
+  window.openAgriBotWelcome=function(){
+    const w=$('botWindow');if(!w)return;w.classList.remove('hidden');const box=$('botMessages');botSuggestions();
+    if(!box.children.length){
+      const name=currentProfile?.full_name||'there';
+      botSay(isFarmer()?`Hi ${name}! 🌾 I’m AgriBot. I’m ready to help you sell, manage products, handle orders, edit your farmer profile, and connect with buyers.`:`Hi ${name}! 🛒 I’m AgriBot. I’m ready to help you find products, buy from farmers, message sellers, track orders, and manage your buyer profile.`);
+    }
+  };
+  window.botReply=function(text){
+    const q=String(text||'').toLowerCase();const farmer=isFarmer();let reply;
+    if(farmer){
+      if(q.includes('sell')||q.includes('product'))reply='To sell, open Add Product and enter the product name, price, quantity, unit, location, description and photo. Publish it when everything is correct.';
+      else if(q.includes('order')||q.includes('track'))reply='Open your Farmer Orders section to review incoming purchases. Update each order through the available status steps until it is completed.';
+      else if(q.includes('profile')||q.includes('bio'))reply='Open Profile to edit your name, location, phone number and bio. Your saved changes update your AgriLink profile.';
+      else if(q.includes('block'))reply='Open a buyer profile from Messages or a transaction, then tap Block. Their new messages and transactions with you will be restricted. You can later use Blocked Accounts to Unblock them.';
+      else if(q.includes('rating')||q.includes('review'))reply='Completed transactions can generate buyer ratings. Your farmer profile shows your rating and reviews.';
+      else if(q.includes('chat')||q.includes('message'))reply='Buyers start conversations from products or your profile. Open Messages to reply and tap the buyer name to view their profile.';
+      else reply='I can help you sell products, manage orders, edit your farmer profile, message buyers, block accounts, and understand ratings. 🌾';
+    }else{
+      if(q.includes('buy')||q.includes('product'))reply='Open Marketplace, choose a product, check the quantity and price, then use Buy to start your purchase. Products from accounts you blocked are automatically hidden.';
+      else if(q.includes('message')||q.includes('chat'))reply='Tap a farmer name or Chat on a product to message them. In Messages, tap the farmer name to open their profile.';
+      else if(q.includes('order')||q.includes('track'))reply='Open My Orders to see your purchases and their current status. Completed purchases can be rated.';
+      else if(q.includes('profile')||q.includes('bio'))reply='Open Profile to edit your name, location, phone number and bio.';
+      else if(q.includes('block'))reply='Open a farmer profile and tap Block. Their products will disappear from your marketplace and new messaging/transactions between you will be restricted. Use Blocked Accounts to Unblock them later.';
+      else if(q.includes('rating')||q.includes('review'))reply='After a purchase is completed, you can rate the farmer and optionally leave a review.';
+      else reply='I can help you buy products, message farmers, track orders, edit your buyer profile, block accounts, and leave ratings. 🛒';
+    }
+    botSay(reply);
+  };
+
+  /* ---------------- Clickable names in chat ---------------- */
+  document.addEventListener('click',e=>{
+    const el=e.target.closest('#chatUserName.chat-user-clickable');
+    if(el?.dataset.userId){e.preventDefault();e.stopImmediatePropagation();window.openUserProfile(el.dataset.userId);}
+  },true);
+
+  /* Prevent message submit when blocked, even if another handler is already attached. */
+  $('chatForm')?.addEventListener('submit',async e=>{
+    if(!window.currentConversation||!currentProfile)return;
+    const other=same(currentConversation.buyer_id,currentProfile.id)?currentConversation.seller_id:currentConversation.buyer_id;
+    const rel=await getBlockRelationship(other);
+    if(rel.blocked){e.preventDefault();e.stopImmediatePropagation();alert('You cannot send a message because one account has blocked the other.');}
+  },true);
+
+  /* Initialize only after the original app has loaded its profile. */
+  const boot=()=>{
+    ensureMobileNav();
+    if(currentProfile){botSuggestions();document.querySelector('.blocked-open-btn')?.classList.remove('hidden');}
+  };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,350));else setTimeout(boot,350);
+
+  /* Keep mobile badge counts synchronized with existing notification/message badges. */
+  setInterval(()=>{
+    const n=$('notificationBadge');setMobileBadge('mobileNotifBadge',n&&!n.classList.contains('hidden')?Number(n.textContent)||0:0);
+    const c=document.querySelector('.chat-unread-badge');setMobileBadge('mobileChatBadge',c&&!c.classList.contains('hidden')?Number(String(c.textContent).replace('+',''))||0:0);
+  },1500);
+})();
+</script>
+
 </body>
 </html>
