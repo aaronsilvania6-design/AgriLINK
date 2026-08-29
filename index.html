@@ -9146,52 +9146,5 @@ AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
 })();
 </script>
 
-
-<!-- =========================================================
-     FINAL MOBILE FIRST-SCREEN FIX
-     Bottom navigation must ONLY exist after login/app is visible.
-========================================================= -->
-<style id="agrilink-first-screen-mobile-fix">
-/* Hidden by default: login / landing / signup must NEVER show app navigation. */
-#mobileBottomNav{display:none!important}
-/* Only show the bottom navigation when the authenticated app is visible. */
-#app:not(.hidden) ~ #mobileBottomNav{display:grid!important}
-@media(max-width:700px){
-  #mobileBottomNav{position:fixed!important;left:0!important;right:0!important;bottom:0!important;z-index:9999!important;}
-}
-</style>
-<script id="agrilink-first-screen-mobile-fix-js">
-(function(){
-  'use strict';
-  function syncMobileNav(){
-    const nav=document.getElementById('mobileBottomNav');
-    const app=document.getElementById('app');
-    if(!nav||!app)return;
-    const loggedIn=!app.classList.contains('hidden');
-    nav.style.setProperty('display',loggedIn?'grid':'none','important');
-    if(!loggedIn){
-      nav.querySelectorAll('.mobile-nav-item').forEach(x=>x.classList.remove('active'));
-    }
-  }
-  function bind(){
-    syncMobileNav();
-    const app=document.getElementById('app');
-    if(app&&!app.dataset.mobileVisibilityObserver){
-      app.dataset.mobileVisibilityObserver='1';
-      new MutationObserver(syncMobileNav).observe(app,{attributes:true,attributeFilter:['class']});
-    }
-    const nav=document.getElementById('mobileBottomNav');
-    if(nav&&!nav.dataset.firstScreenBound){
-      nav.dataset.firstScreenBound='1';
-      nav.addEventListener('click',function(e){
-        const app=document.getElementById('app');
-        if(!app||app.classList.contains('hidden')){e.preventDefault();e.stopImmediatePropagation();}
-      },true);
-    }
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind);else bind();
-  setInterval(syncMobileNav,500);
-})();
-</script>
-</body>
+\n<!-- FINAL MOBILE FIRST-SCREEN + PROFILE LOGOUT FIX -->\n<style id="agrilink-final-login-nav-logout">\n#mobileBottomNav{display:none!important}\n#app:not(.hidden) ~ #mobileBottomNav{display:grid!important}\n#agrilinkLogoutBtn{display:block;width:100%;margin-top:16px;padding:13px 16px;border:1px solid #e2b8b8;border-radius:12px;background:#fff5f5;color:#c62828;font-weight:800;font-size:15px;cursor:pointer}\n@media(max-width:700px){#mobileBottomNav{position:fixed!important;left:0!important;right:0!important;bottom:0!important;z-index:9999!important}}\n</style>\n<script id="agrilink-final-login-nav-logout-js">\n(function(){\n'use strict';\nfunction syncNav(){const nav=document.getElementById('mobileBottomNav'),app=document.getElementById('app');if(!nav||!app)return;nav.style.setProperty('display',app.classList.contains('hidden')?'none':'grid','important');}\nasync function addLogout(){\n const box=document.getElementById('myProfileContent');\n if(!box||document.getElementById('agrilinkLogoutBtn'))return;\n const btn=document.createElement('button');btn.id='agrilinkLogoutBtn';btn.type='button';btn.textContent='🚪 Logout';\n btn.onclick=async()=>{\n  if(!confirm('Are you sure you want to log out?'))return;\n  try{if(window.supabaseClient?.auth)await window.supabaseClient.auth.signOut();}catch(e){console.error(e)}\n  document.getElementById('mobileBottomNav')?.style.setProperty('display','none','important');\n  document.getElementById('myProfileModal')?.classList.add('hidden');\n  document.getElementById('app')?.classList.add('hidden');\n  document.getElementById('auth')?.classList.remove('hidden');\n  document.querySelectorAll('.modal,.panel').forEach(x=>x.classList.add('hidden'));\n  window.scrollTo(0,0);\n };box.appendChild(btn);\n}\nconst oldOpen=window.openMyProfile;\nif(typeof oldOpen==='function'&&!window.__finalLogoutWrapped){window.__finalLogoutWrapped=true;window.openMyProfile=async function(){await oldOpen.apply(this,arguments);await addLogout();};}\nfunction boot(){syncNav();addLogout();const app=document.getElementById('app');if(app&&!app.dataset.logoutNavObserver){app.dataset.logoutNavObserver='1';new MutationObserver(syncNav).observe(app,{attributes:true,attributeFilter:['class']});}}\nif(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,500));else setTimeout(boot,500);\nsetInterval(()=>{syncNav();addLogout()},1000);\n})();\n</script>\n</body>
 </html>
