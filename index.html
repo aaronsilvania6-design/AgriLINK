@@ -8893,7 +8893,14 @@ AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
       if(error){alert(error.message);return;}
       alert(`${otherName||'User'} has been blocked.`);
     }
-    if($('profileModal')&&!$('profileModal').classList.contains('hidden'))await window.openUserProfile(otherId);
+    /* FREEZE FIX: do not reopen and fully rebuild the profile while the button click is still running. */
+    const profileModal=$('profileModal');
+    if(profileModal&&!profileModal.classList.contains('hidden')){
+      const blockBtn=profileModal.querySelector('.block-user-btn');
+      const messageBtn=profileModal.querySelector('.message-user-btn');
+      if(blockBtn)blockBtn.textContent=rel.byMe?'⛔ Block':'↩ Unblock';
+      if(messageBtn)messageBtn.disabled=!rel.byMe;
+    }
     if($('blockedAccountsModal')&&!$('blockedAccountsModal').classList.contains('hidden'))await window.openBlockedAccounts();
     if(typeof loadProducts==='function')await loadProducts();
   };
@@ -9123,57 +9130,5 @@ AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
 })();
 </script>
 
-
-<!-- CLEAN PROFILE BUTTON FIX: single lightweight handler -->
-<style id="clean-profile-buttons-css">
-#profileModal .profile-action-row button{pointer-events:auto!important;position:relative;z-index:10;cursor:pointer}
-</style>
-<script id="clean-profile-buttons-js">
-(function(){
-'use strict';
-let busy=false;
-const S=v=>String(v??'');
-function me(){return window.currentProfile||null;}
-function info(btn,fn){
- const raw=btn.getAttribute('onclick')||'';
- const re=fn==='block'?/toggleBlockUser\('([^']+)'\s*,\s*'([^']*)'\)/:/reportUser\('([^']+)'\s*,\s*'([^']*)'\)/;
- const m=raw.match(re); return m?{id:m[1],name:m[2]||'User'}:{id:btn.dataset.userId||'',name:btn.dataset.userName||'User'};
-}
-async function block(id,name){
- if(busy||!id)return; const u=me(); if(!u)return alert('Please login first.'); busy=true;
- try{
-  const {data,error}=await supabaseClient.from('user_blocks').select('id').eq('blocker_id',S(u.id)).eq('blocked_id',S(id)).maybeSingle();
-  if(error)throw error;
-  if(data){
-   if(!confirm(`Unblock ${name}?`))return;
-   const r=await supabaseClient.from('user_blocks').delete().eq('id',data.id); if(r.error)throw r.error;
-   alert(`${name} has been unblocked.`);
-  }else{
-   if(!confirm(`Block ${name}?`))return;
-   const r=await supabaseClient.from('user_blocks').insert({blocker_id:S(u.id),blocked_id:S(id)}); if(r.error)throw r.error;
-   alert(`${name} has been blocked.`);
-  }
-  const b=document.querySelector('#profileModal .block-user-btn'); if(b) b.textContent=data?'⛔ Block':'↩ Unblock';
- }catch(e){console.error(e);alert('Block action failed: '+(e.message||'Unknown error'));}finally{busy=false;}
-}
-async function report(id,name){
- if(busy||!id)return; const u=me(); if(!u)return alert('Please login first.');
- const reason=prompt(`Why are you reporting ${name}?`); if(reason===null)return; busy=true;
- try{
-  const {error}=await supabaseClient.from('user_reports').insert({reporter_id:S(u.id),reported_user_id:S(id),reason:reason.trim()||'Other'});
-  if(error)throw error; alert('Report submitted successfully.');
- }catch(e){console.error(e);alert('Report failed: '+(e.message||'Unknown error'));}finally{busy=false;}
-}
-// Capture phase replaces inline action without polling or observers.
-document.addEventListener('click',function(e){
- const b=e.target.closest('#profileModal .block-user-btn');
- const r=e.target.closest('#profileModal .report-user-btn');
- if(!b&&!r)return;
- e.preventDefault();e.stopImmediatePropagation();
- const x=info(b||r,b?'block':'report');
- if(b) block(x.id,x.name); else report(x.id,x.name);
-},true);
-})();
-</script>
 </body>
 </html>
