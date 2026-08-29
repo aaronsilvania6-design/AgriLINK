@@ -2919,7 +2919,7 @@ BLOCKED ACCOUNTS MODAL
       <div>
         <h2>Blocked Accounts</h2>
         <p style="color:var(--muted);font-size:13px;margin-top:4px">
-          Manage farmers you have blocked.
+          Manage accounts you have blocked.
         </p>
       </div>
       <button class="close" type="button" onclick="closeBlockedAccounts()">×</button>
@@ -3468,7 +3468,7 @@ async function initializeApp(user){
     document.querySelector(".blocked-open-btn");
 
   if(blockedButton){
-    blockedButton.classList.toggle("hidden", farmer);
+    blockedButton.classList.remove("hidden");
   }
 
   document
@@ -8099,9 +8099,6 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
    ========================================================= */
 
 /* Desktop + all sizes: role is the source of truth. */
-body.role-farmer .blocked-open-btn{
-  display:none !important;
-}
 
 body.role-buyer #addProductButton,
 body.role-buyer #farmerDashboard,
@@ -8681,9 +8678,12 @@ AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
     content.innerHTML=`<div class="blocked-list">${blocks.map(b=>{const u=m.get(String(b.blocked_id))||{};return `<div class="blocked-user"><div class="blocked-user-info"><div class="blocked-avatar">${u.role==='FARMER'?'👨‍🌾':'🛒'}</div><div><button class="user-profile-link" onclick="openUserProfile('${esc(String(b.blocked_id))}')">${esc(u.full_name||'User')}</button><div class="blocked-user-role">${esc(u.role||'USER')}</div></div></div><button class="unblock-btn" onclick="toggleBlockUser('${esc(String(b.blocked_id))}','${esc(String(u.full_name||'User')).replaceAll("'","&#39;")}')">↩ Unblock</button></div>`}).join('')}</div>`;
   };
 
-  // Make both roles see Blocked Accounts.
+  // Both BUYER and FARMER can manage the accounts they personally blocked.
   const priorInit=window.initializeApp;
-  if(typeof priorInit==='function')window.initializeApp=async function(user){await priorInit(user);document.querySelector('.blocked-open-btn')?.classList.remove('hidden');};
+  if(typeof priorInit==='function')window.initializeApp=async function(user){
+    await priorInit(user);
+    document.querySelector('.blocked-open-btn')?.classList.remove('hidden');
+  };
 
   // Make the other person's name in every transaction clickable.
   const priorRenderOrder=window.renderOrder;
