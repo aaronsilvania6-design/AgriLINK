@@ -9148,7 +9148,7 @@ setInterval(run,700);
 <!-- FINAL: KEEP LOGOUT + KEEP ONE MANAGE BLOCKED + REMOVE TOP BLOCK DESKTOP/TABLET -->
 <style id="agrilink-final-profile-actions">
 @media(min-width:701px){
-  .profile-action-row .block-user-btn{display:none!important}
+  .profile-action-row .block-user-btn{display:block!important}
 }
 #agrilinkKeepLogout{display:block!important;width:100%!important;min-height:44px!important;margin-top:12px!important}
 </style>
@@ -9189,7 +9189,7 @@ function fixProfile(){
  }
  /* Desktop/tablet: remove the Block button from another user's profile, but NEVER remove Logout/Manage Blocked. */
  if(window.matchMedia('(min-width:701px)').matches){
-   document.querySelectorAll('.profile-action-row .block-user-btn').forEach(b=>b.remove());
+   document.querySelectorAll('.profile-action-row .block-user-btn').forEach(b=>{b.style.setProperty('display','block','important');});
  }
 }
 function run(){fixProfile()}
@@ -10624,6 +10624,178 @@ setInterval(run,600);
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,300));
   else setTimeout(boot,300);
   setInterval(boot,1000);
+})();
+</script>
+
+
+<style id="AGRI_BLOCK_BEHAVIOR_FINAL">
+#profileModal .profile-action-row .block-user-btn{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+  cursor:pointer!important;
+}
+#profileModal .profile-action-row .message-user-btn.blocked-final,
+#profileModal .profile-action-row .message-user-btn:disabled{
+  opacity:.45!important;
+  pointer-events:none!important;
+  cursor:not-allowed!important;
+  filter:grayscale(1)!important;
+}
+</style>
+<script id="AGRI_BLOCK_BEHAVIOR_FINAL_JS">
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+const sid=v=>String(v??'');
+const esc=v=>typeof escapeHtml==='function'?escapeHtml(v):String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+async function relationship(otherId){
+  const p=window.currentProfile||window.currentUser;
+  if(!p||!otherId)return {byMe:false,byThem:false,blocked:false};
+  const me=sid(p.id), other=sid(otherId);
+  const {data,error}=await supabaseClient.from('user_blocks')
+    .select('blocker_id,blocked_id')
+    .or(`and(blocker_id.eq.${me},blocked_id.eq.${other}),and(blocker_id.eq.${other},blocked_id.eq.${me})`);
+  if(error){console.warn('final block check',error);return {byMe:false,byThem:false,blocked:false};}
+  const rows=data||[];
+  return {
+    byMe:rows.some(r=>sid(r.blocker_id)===me&&sid(r.blocked_id)===other),
+    byThem:rows.some(r=>sid(r.blocker_id)===other&&sid(r.blocked_id)===me),
+    blocked:rows.length>0
+  };
+}
+
+function setProfileButtons(otherId, rel){
+  const modal=$('profileModal'); if(!modal)return;
+  const block=modal.querySelector('.profile-action-row .block-user-btn');
+  const msg=modal.querySelector('.profile-action-row .message-user-btn');
+  if(block){
+    block.style.setProperty('display','block','important');
+    block.style.setProperty('visibility','visible','important');
+    block.textContent=rel.byMe?'↩ Unblock':'⛔ Block';
+    block.disabled=false;
+    block.dataset.blockedUserId=sid(otherId);
+  }
+  if(msg){
+    const unavailable=!!rel.blocked;
+    msg.disabled=unavailable;
+    msg.classList.toggle('blocked-final',unavailable);
+    msg.setAttribute('aria-disabled',unavailable?'true':'false');
+    msg.style.pointerEvents=unavailable?'none':'auto';
+    msg.style.cursor=unavailable?'not-allowed':'pointer';
+  }
+}
+
+async function refreshCurrentProfileActions(){
+  const modal=$('profileModal');
+  if(!modal||modal.classList.contains('hidden'))return;
+  const block=modal.querySelector('.profile-action-row .block-user-btn');
+  if(!block)return;
+  const id=block.dataset.blockedUserId || block.getAttribute('data-user-id');
+  if(!id)return;
+  const rel=await relationship(id);
+  setProfileButtons(id,rel);
+}
+
+window.toggleBlockUser=async function(otherId,otherName){
+  const p=window.currentProfile||window.currentUser;
+  if(!p||!otherId||sid(otherId)===sid(p.id))return;
+  const me=sid(p.id), other=sid(otherId), name=otherName||'User';
+  const rel=await relationship(other);
+
+  if(rel.byMe){
+    if(!confirm(`Unblock ${name}?`))return;
+    const {error}=await supabaseClient.from('user_blocks').delete()
+      .eq('blocker_id',me).eq('blocked_id',other);
+    if(error){alert('Could not unblock this user. '+error.message);return;}
+
+    /* Immediate UI change: Block text returns, Message becomes clickable. */
+    setProfileButtons(other,{byMe:false,byThem:rel.byThem,blocked:rel.byThem});
+
+    /* Manage Blocked Accounts: remove the row immediately. */
+    const list=$('blockedAccountsContent');
+    if(list){
+      list.querySelectorAll('.blocked-user').forEach(row=>{
+        const btn=row.querySelector('.unblock-btn');
+        if(btn && String(btn.getAttribute('onclick')||'').includes(other))row.remove();
+      });
+      if(!list.querySelector('.blocked-user')){
+        list.innerHTML='<div class="blocked-empty"><div style="font-size:36px">🛡️</div><br><strong>No blocked accounts</strong><div style="font-size:12px;margin-top:6px">Accounts you block will appear here.</div></div>';
+      }
+    }
+  }else{
+    if(!confirm(`Block ${name}? Their products will disappear from your marketplace and you will not be able to message them.`))return;
+    const {error}=await supabaseClient.from('user_blocks').upsert(
+      {blocker_id:me,blocked_id:other},
+      {onConflict:'blocker_id,blocked_id',ignoreDuplicates:true}
+    );
+    if(error){
+      /* If another request created the row first, verify it before failing. */
+      const check=await supabaseClient.from('user_blocks').select('id').eq('blocker_id',me).eq('blocked_id',other).maybeSingle();
+      if(!check.data){alert('Could not block this user. '+error.message);return;}
+    }
+
+    /* Immediate UI change: Block -> Unblock and Message is dead. */
+    setProfileButtons(other,{byMe:true,byThem:rel.byThem,blocked:true});
+  }
+
+  /* Re-render profile if possible, but never let a render failure undo the UI state. */
+  try{
+    if($('profileModal')&&!$('profileModal').classList.contains('hidden')&&typeof window.openUserProfile==='function'){
+      await window.openUserProfile(other);
+      const fresh=await relationship(other);
+      setProfileButtons(other,fresh);
+    }
+  }catch(e){console.warn('profile refresh after block',e)}
+
+  /* Remove/restore marketplace products immediately for BUYERS. */
+  try{
+    if(typeof window.loadProducts==='function')await window.loadProducts();
+  }catch(e){console.warn('product refresh after block',e)}
+
+  /* If Manage Blocked is open, reload it so an unblocked user disappears NOW. */
+  try{
+    const bm=$('blockedAccountsModal');
+    if(bm&&!bm.classList.contains('hidden')&&typeof window.openBlockedAccounts==='function'){
+      await window.openBlockedAccounts();
+    }
+  }catch(e){console.warn('blocked manager refresh',e)}
+};
+
+/* Hard-stop Message even if an old onclick handler is still attached. */
+document.addEventListener('click',async function(e){
+  const btn=e.target.closest('#profileModal .message-user-btn');
+  if(!btn)return;
+  const row=btn.closest('.profile-action-row');
+  const block=row?.querySelector('.block-user-btn');
+  const otherId=block?.dataset.blockedUserId || block?.getAttribute('data-user-id');
+  if(!otherId)return;
+  const rel=await relationship(otherId);
+  if(rel.blocked){
+    e.preventDefault(); e.stopImmediatePropagation();
+    btn.disabled=true; btn.classList.add('blocked-final');
+    return;
+  }
+},true);
+
+/* Observe profile rerenders and keep the correct label/state. */
+const obs=new MutationObserver(()=>{
+  const modal=$('profileModal');
+  if(!modal||modal.classList.contains('hidden'))return;
+  const b=modal.querySelector('.profile-action-row .block-user-btn');
+  if(!b)return;
+  const id=b.dataset.blockedUserId;
+  if(id)refreshCurrentProfileActions();
+});
+function boot(){
+  const modal=$('profileModal');
+  if(modal)obs.observe(modal,{childList:true,subtree:true,attributes:true,attributeFilter:['disabled','class']});
+  refreshCurrentProfileActions();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,300));
+else setTimeout(boot,300);
 })();
 </script>
 
