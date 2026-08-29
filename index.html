@@ -7920,5 +7920,112 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
 })();
 </script>
 
+
+<style id="agrilink-message-badge-final-fix">
+/* FINAL MESSAGE +1 BADGE FIX */
+.nav-actions,
+.nav-actions button,
+.nav-icon-btn,
+.chat-nav-wrap{overflow:visible!important}
+.nav-actions{position:relative!important}
+.nav-actions button{position:relative!important}
+.chat-unread-badge{
+  position:absolute!important;
+  top:-7px!important;
+  right:-7px!important;
+  min-width:22px!important;
+  height:22px!important;
+  padding:0 6px!important;
+  border-radius:999px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  background:#d93025!important;
+  color:#fff!important;
+  border:2px solid #fff!important;
+  font-size:10px!important;
+  line-height:1!important;
+  font-weight:950!important;
+  z-index:9999!important;
+  pointer-events:none!important;
+  box-sizing:border-box!important;
+}
+.chat-unread-badge.hidden{display:none!important}
+.conversation-unread{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-width:24px!important;
+  height:22px!important;
+  padding:0 7px!important;
+  flex:0 0 auto!important;
+  background:#d93025!important;
+  color:#fff!important;
+  border-radius:999px!important;
+  font-size:10px!important;
+  font-weight:950!important;
+}
+@media(max-width:700px){
+  .chat-unread-badge{top:-5px!important;right:-5px!important;min-width:21px!important;height:21px!important}
+  #chatModal .conversation-top{min-width:0!important}
+  #chatModal .conversation-person{min-width:0!important;flex:1 1 auto!important}
+  #chatModal .conversation-name{max-width:calc(100vw - 135px)!important}
+  #chatModal .conversation-unread{margin-left:auto!important}
+}
+</style>
+<script id="agrilink-message-badge-final-script">
+(function(){
+  'use strict';
+  if(window.__agrilinkMessageBadgeFinalFix)return;
+  window.__agrilinkMessageBadgeFinalFix=true;
+  const $=id=>document.getElementById(id);
+  function currentSide(c){
+    return String(c.buyer_id)===String(window.currentProfile?.id||currentProfile?.id)?'buyer':'seller';
+  }
+  function unread(c){
+    const side=currentSide(c);
+    return Number(side==='buyer'?c.buyer_unread:c.seller_unread)||0;
+  }
+  async function refresh(){
+    if(!window.currentProfile && typeof currentProfile==='undefined')return;
+    const profile=window.currentProfile||currentProfile;
+    if(!profile)return;
+    const {data,error}=await supabaseClient
+      .from('conversations')
+      .select('buyer_id,seller_id,buyer_unread,seller_unread')
+      .or(`buyer_id.eq.${profile.id},seller_id.eq.${profile.id}`);
+    if(error)return;
+    const count=(data||[]).reduce((sum,c)=>sum+unread(c),0);
+    const buttons=[...document.querySelectorAll('.nav-actions button')];
+    const btn=buttons.find(b=>String(b.textContent||'').includes('Chat'));
+    if(!btn)return;
+    btn.style.position='relative';
+    let badge=btn.querySelector('.chat-unread-badge');
+    if(count<=0){if(badge)badge.classList.add('hidden');return;}
+    if(!badge){badge=document.createElement('span');badge.className='chat-unread-badge';btn.appendChild(badge);}
+    badge.textContent=count>99?'99+':`+${count}`;
+    badge.classList.remove('hidden');
+  }
+  window.refreshAgriLinkMessageBadge=refresh;
+  function start(){
+    if(typeof currentProfile==='undefined'||!currentProfile)return;
+    refresh();
+    if(window.__agrilinkBadgeChannel){try{supabaseClient.removeChannel(window.__agrilinkBadgeChannel)}catch(_){} }
+    const id=String(currentProfile.id);
+    window.__agrilinkBadgeChannel=supabaseClient.channel('message-badge-final-'+id+'-'+Date.now())
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},async payload=>{
+        if(String(payload.new.sender_id)===id)return;
+        await refresh();
+      })
+      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'conversations'},refresh)
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'conversations'},refresh)
+      .subscribe();
+  }
+  const boot=()=>setTimeout(start,700);
+  boot();
+  setInterval(()=>{if(typeof currentProfile!=='undefined'&&currentProfile)refresh()},5000);
+})();
+</script>
+
 </body>
 </html>
