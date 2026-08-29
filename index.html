@@ -9210,97 +9210,9 @@ setInterval(run,600);
 </script>
 
 <!-- FINAL PROFILE + MESSENGER RESPONSIVE FIX -->
-<style id="final-profile-messenger-fix">
-@media(min-width:701px){.profile-action-row .block-user-btn{display:block!important}}
-.final-chat-close{margin-left:auto;border:0;background:transparent;font-size:20px;cursor:pointer;padding:8px}
-</style>
-<script id="final-profile-messenger-fix-js">
-(function(){
-'use strict';
-const $=id=>document.getElementById(id);
-function resetChatView(){
- const m=$('chatModal'); if(!m)return;
- m.classList.remove('chat-has-selection');
- const w=$('chatWindow'); if(w)w.classList.remove('active');
- const h=m.querySelector('.chat-header');
- const close=h?.querySelector('.close');
- if(close){
-   close.textContent='—';
-   close.title='Back to contacts';
-   close.onclick=resetChatView;
- }
-}
-function addClose(){
- const m=$('chatModal'); if(!m)return;
- const h=m.querySelector('.chat-header'); if(!h)return;
 
- // Remove the injected duplicate close button from older versions.
- h.querySelectorAll('.final-chat-close').forEach(b=>b.remove());
 
- // Reuse the original single header button.
- const b=h.querySelector('.close');
- if(!b)return;
- b.textContent='—';
- b.title='Back to contacts';
- b.setAttribute('aria-label','Back to contacts');
- b.onclick=resetChatView;
-}
-function bindMessageNav(){
- document.querySelectorAll('[data-mobile-nav="chat"]').forEach(b=>{
-  if(b.dataset.finalMsgFix)return; b.dataset.finalMsgFix='1';
-  b.addEventListener('click',()=>setTimeout(resetChatView,80),true);
- });
-}
-function boot(){bindMessageNav();addClose()}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,300));else setTimeout(boot,300);
-setInterval(boot,700);
-})();
-</script>
 
-<style id="agrilink-contacts-first-chat-fix">
-@media(max-width:700px){
-  #chatModal:not(.chat-has-selection) .chat-window{
-    display:none!important;
-  }
-  #chatModal.chat-has-selection .conversation-list{
-    display:none!important;
-  }
-  #chatModal:not(.chat-has-selection) .conversation-list{
-    display:block!important;
-    flex:1 1 auto!important;
-    max-height:none!important;
-    height:100%!important;
-    border-bottom:0!important;
-  }
-  #chatModal:not(.chat-has-selection) .chat-list-header{
-    position:sticky!important;
-    top:0!important;
-  }
-  #chatModal.chat-has-selection .chat-window{
-    display:flex!important;
-    flex:1 1 auto!important;
-  }
-  #chatModal .chat-input input{
-    display:block!important;
-    flex:1 1 auto!important;
-    min-width:0!important;
-    width:auto!important;
-    opacity:1!important;
-    visibility:visible!important;
-  }
-  #chatModal .chat-input button[type="submit"]{
-    display:block!important;
-    visibility:visible!important;
-    min-width:62px!important;
-  }
-}
-@media(min-width:701px){
-  .profile-action-row .block-user-btn{
-    display:block!important;
-    visibility:visible!important;
-  }
-}
-</style>
 
 
 <script id="agrilink-block-unblock-final-guard">
@@ -9320,6 +9232,430 @@ setInterval(boot,700);
     setTimeout(syncProfileBlockButton,200);
   }
   setInterval(syncProfileBlockButton,700);
+})();
+</script>
+
+
+<style id="AGRI_FINAL_CHAT_UI_FIX">
+/* =========================================================
+   FINAL CHAT UI FIX
+   - exactly ONE header control
+   - contacts first on phone
+   - selected contact opens chat
+   - message input is always visible in selected chat
+   ========================================================= */
+
+/* Never create/use a second header X. */
+#chatModal .chat-header .final-chat-close{display:none!important}
+
+/* Keep the original header button as the ONLY control. */
+#chatModal .chat-header > .close{
+  display:block!important;
+  flex:0 0 auto!important;
+  margin-left:auto!important;
+  cursor:pointer!important;
+}
+
+/* Phone: contacts first, chat after selecting a contact. */
+@media(max-width:700px){
+  #chatModal:not(.chat-has-selection) .conversation-list{
+    display:block!important;
+    width:100%!important;
+    height:100%!important;
+    max-height:none!important;
+    flex:1 1 auto!important;
+    border:0!important;
+    overflow-y:auto!important;
+  }
+
+  #chatModal:not(.chat-has-selection) .chat-window{
+    display:none!important;
+  }
+
+  #chatModal.chat-has-selection .conversation-list{
+    display:none!important;
+  }
+
+  #chatModal.chat-has-selection .chat-window{
+    display:flex!important;
+    width:100%!important;
+    height:100%!important;
+    min-height:0!important;
+    flex:1 1 auto!important;
+  }
+
+  #chatModal.chat-has-selection .chat-input{
+    display:flex!important;
+    visibility:visible!important;
+    flex:0 0 auto!important;
+    width:100%!important;
+    min-height:60px!important;
+    box-sizing:border-box!important;
+    z-index:20!important;
+  }
+
+  #chatModal.chat-has-selection .chat-input input,
+  #chatModal.chat-has-selection #chatInput{
+    display:block!important;
+    visibility:visible!important;
+    opacity:1!important;
+    width:auto!important;
+    min-width:0!important;
+    flex:1 1 auto!important;
+    height:44px!important;
+    min-height:44px!important;
+    box-sizing:border-box!important;
+    font-size:16px!important;
+  }
+
+  #chatModal.chat-has-selection .chat-input button,
+  #chatModal.chat-has-selection #chatForm button[type="submit"]{
+    display:block!important;
+    visibility:visible!important;
+    opacity:1!important;
+    flex:0 0 auto!important;
+    min-width:62px!important;
+    height:44px!important;
+  }
+
+  #chatModal.chat-has-selection .chat-messages{
+    display:flex!important;
+    flex-direction:column!important;
+    min-height:0!important;
+    flex:1 1 auto!important;
+    overflow-y:auto!important;
+  }
+}
+
+/* Desktop: keep the contacts list and chat side-by-side. */
+@media(min-width:701px){
+  #chatModal .conversation-list{
+    display:block!important;
+  }
+  #chatModal .chat-window{
+    display:flex!important;
+  }
+}
+</style>
+
+<script id="AGRI_FINAL_CHAT_UI_FIX_JS">
+(function(){
+  'use strict';
+
+  const $ = id => document.getElementById(id);
+
+  function getModal(){
+    return $('chatModal');
+  }
+
+  /* Guarantee that the chat header has exactly ONE button.
+     Reuse the original .close button and remove any injected duplicate. */
+  function normalizeChatHeader(){
+    const modal=getModal();
+    const header=modal?.querySelector('.chat-header');
+    if(!header)return;
+
+    const buttons=[...header.querySelectorAll('button')];
+    let keep=header.querySelector('button.close');
+
+    if(!keep){
+      keep=document.createElement('button');
+      keep.className='close';
+      keep.type='button';
+      header.appendChild(keep);
+    }
+
+    buttons.forEach(b=>{
+      if(b!==keep)b.remove();
+    });
+
+    keep.textContent='—';
+    keep.title='Back to contacts';
+    keep.setAttribute('aria-label','Back to contacts');
+
+    keep.onclick=function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      showContactsOnly();
+    };
+  }
+
+  function showContactsOnly(){
+    const modal=getModal();
+    if(!modal)return;
+
+    modal.classList.remove('chat-has-selection');
+
+    if($('chatWindow'))$('chatWindow').classList.remove('active');
+
+    /* Do not destroy the contact list or messages. */
+    const name=$('chatUserName');
+    if(name)name.textContent='Select a conversation';
+
+    const messages=$('chatMessages');
+    if(messages){
+      messages.innerHTML='<div class="chat-empty">Select a conversation to start chatting.</div>';
+    }
+
+    normalizeChatHeader();
+  }
+
+  /* Messages button always opens the contacts screen, never an old chat. */
+  function bindMessagesButton(){
+    document.querySelectorAll('[data-mobile-nav="chat"]').forEach(btn=>{
+      if(btn.dataset.finalContactsFix==='1')return;
+      btn.dataset.finalContactsFix='1';
+
+      btn.addEventListener('click',function(){
+        setTimeout(function(){
+          const modal=getModal();
+          if(modal && !modal.classList.contains('hidden')){
+            showContactsOnly();
+          }
+        },120);
+      },true);
+    });
+  }
+
+  /* If an old script injects another X later, remove it immediately. */
+  function cleanupDuplicateButtons(){
+    const modal=getModal();
+    const header=modal?.querySelector('.chat-header');
+    if(!header)return;
+
+    const buttons=[...header.querySelectorAll('button')];
+    const close=header.querySelector('button.close');
+
+    if(close){
+      buttons.forEach(b=>{if(b!==close)b.remove();});
+    }
+
+    normalizeChatHeader();
+  }
+
+  /* Make sure the input/send controls exist and are usable on phones. */
+  function ensureChatForm(){
+    const windowEl=$('chatWindow');
+    if(!windowEl)return;
+
+    let form=$('chatForm');
+    if(!form){
+      form=document.createElement('form');
+      form.id='chatForm';
+      form.className='chat-input';
+      form.innerHTML='<input id="chatInput" placeholder="Type a message..." autocomplete="off"><button type="submit">Send</button>';
+      windowEl.appendChild(form);
+    }
+
+    let input=$('chatInput');
+    let send=form.querySelector('button[type="submit"]');
+
+    if(!input){
+      input=document.createElement('input');
+      input.id='chatInput';
+      input.placeholder='Type a message...';
+      input.autocomplete='off';
+      form.insertBefore(input,form.firstChild);
+    }
+
+    if(!send){
+      send=document.createElement('button');
+      send.type='submit';
+      send.textContent='Send';
+      form.appendChild(send);
+    }
+
+    input.style.removeProperty('display');
+    input.style.removeProperty('visibility');
+    input.style.setProperty('display','block','important');
+    input.style.setProperty('visibility','visible','important');
+
+    send.style.setProperty('display','block','important');
+    send.style.setProperty('visibility','visible','important');
+  }
+
+  function boot(){
+    normalizeChatHeader();
+    cleanupDuplicateButtons();
+    ensureChatForm();
+    bindMessagesButton();
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,300));
+  }else{
+    setTimeout(boot,300);
+  }
+
+  setInterval(boot,500);
+})();
+</script>
+
+
+<style id="AGRI_EXCLUSIVE_PANEL_FIX">
+/* =========================================================
+   ONE PANEL AT A TIME
+   No stacked / sandwich / overlapping panels.
+   ========================================================= */
+.modal.hidden,
+#notificationPanel.hidden,
+#botWindow.hidden{display:none!important}
+
+.modal:not(.hidden){
+  z-index:2000!important;
+}
+
+#notificationPanel:not(.hidden),
+#botWindow:not(.hidden){
+  z-index:1900!important;
+}
+
+/* If a panel is open, its own content remains the only visible panel. */
+</style>
+
+<script id="AGRI_EXCLUSIVE_PANEL_FIX_JS">
+(function(){
+  'use strict';
+
+  const PANEL_IDS=[
+    'notificationPanel',
+    'botWindow',
+    'chatModal',
+    'profileModal',
+    'myProfileModal',
+    'blockedAccountsModal',
+    'buyModal',
+    'orderDetailsModal'
+  ];
+
+  let changing=false;
+
+  function panels(){
+    return PANEL_IDS
+      .map(id=>document.getElementById(id))
+      .filter(Boolean);
+  }
+
+  function isOpen(el){
+    return !el.classList.contains('hidden');
+  }
+
+  function closePanel(el){
+    if(!el || el.classList.contains('hidden'))return;
+    el.classList.add('hidden');
+    el.setAttribute('aria-hidden','true');
+  }
+
+  function unlockIfNothingOpen(){
+    const anyOpen=panels().some(isOpen);
+    if(!anyOpen && typeof window.setModalScrollLock==='function'){
+      try{window.setModalScrollLock(false)}catch(_){}
+    }
+  }
+
+  function showOnly(target){
+    if(!target)return;
+
+    changing=true;
+    panels().forEach(p=>{
+      if(p!==target)closePanel(p);
+    });
+    target.classList.remove('hidden');
+    target.setAttribute('aria-hidden','false');
+    changing=false;
+  }
+
+  /* Called whenever a known panel is opened by an existing function. */
+  function enforceOneOpen(){
+    if(changing)return;
+
+    const open=panels().filter(isOpen);
+    if(open.length<=1)return;
+
+    /* Keep the most recently opened/changed panel. */
+    const target=open[open.length-1];
+
+    changing=true;
+    open.forEach(p=>{
+      if(p!==target)closePanel(p);
+    });
+    changing=false;
+  }
+
+  /* Navigation buttons: close everything before the existing onclick runs. */
+  document.addEventListener('click',function(e){
+    const btn=e.target.closest('button,[role="button"]');
+    if(!btn)return;
+
+    const action=String(btn.getAttribute('onclick')||'').replace(/\s/g,'');
+
+    let target=null;
+
+    if(action.includes('toggleNotifications(')){
+      target=document.getElementById('notificationPanel');
+    }else if(action.includes('toggleAgriBot(')){
+      target=document.getElementById('botWindow');
+    }else if(action.includes('openChat(')){
+      target=document.getElementById('chatModal');
+    }else if(action.includes('openMyProfile(')){
+      target=document.getElementById('myProfileModal');
+    }else if(action.includes('openBlockedAccounts(')){
+      target=document.getElementById('blockedAccountsModal');
+    }else if(action.includes('openAddProduct(')){
+      /* Add Product may be created by the existing app dynamically. */
+      target=document.getElementById('addProductModal');
+    }
+
+    if(target){
+      changing=true;
+      panels().forEach(p=>{if(p!==target)closePanel(p)});
+      changing=false;
+    }
+  },true);
+
+  /* Watch class changes so dynamically-created modals cannot stack. */
+  const observer=new MutationObserver(function(records){
+    if(changing)return;
+
+    let relevant=false;
+    for(const r of records){
+      if(r.type==='attributes' && r.attributeName==='class'){
+        const el=r.target;
+        if(PANEL_IDS.includes(el.id)){
+          relevant=true;
+          break;
+        }
+      }
+    }
+
+    if(relevant)enforceOneOpen();
+  });
+
+  function boot(){
+    panels().forEach(p=>{
+      observer.observe(p,{attributes:true,attributeFilter:['class']});
+    });
+    enforceOneOpen();
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,250));
+  }else{
+    setTimeout(boot,250);
+  }
+
+  /* New modals can be created later (ex. order details). */
+  const bodyObserver=new MutationObserver(function(){
+    panels().forEach(p=>{
+      if(!p.__exclusiveObserved){
+        p.__exclusiveObserved=true;
+        observer.observe(p,{attributes:true,attributeFilter:['class']});
+      }
+    });
+    enforceOneOpen();
+  });
+
+  bodyObserver.observe(document.body,{childList:true,subtree:true});
 })();
 </script>
 
