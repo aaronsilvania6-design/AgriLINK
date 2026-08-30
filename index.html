@@ -9908,282 +9908,104 @@ setTimeout(run,600);
 </script>
 
 
-<style id="LUNDUYAN_LOGOUT_BLOCK_X_FIX">
+<style id="LUNDUYAN_PROFILE_LOGOUT_AND_MESSAGE_X_FINAL">
 /* =========================================================
-   FINAL PHONE FIX
-   1) Profile: keep Logout visible on mobile.
-   2) Messages contacts: X is a solid/block button.
+   FINAL MOBILE PROFILE + MESSAGES POLISH
+   1) Keep Logout visible in My Profile on phones.
+   2) Make the Messages-list X a solid/block button.
    ========================================================= */
 
-@media (max-width:700px){
-  /* Do not let the profile content clip the logout control. */
-  #profile,
-  .profile-section,
-  .profile-card,
-  .profile-content,
-  .profile-actions{
-    overflow:visible !important;
-  }
-
-  /* Common logout selectors used by the existing app. */
-  #logoutBtn,
-  #logoutButton,
-  #profileLogout,
-  .logout-btn,
-  .logout-button,
-  button[data-action="logout"],
-  button[data-logout],
-  [onclick*="logout" i]{
-    display:flex !important;
-    visibility:visible !important;
-    opacity:1 !important;
-    position:relative !important;
-    z-index:1000 !important;
-    width:100% !important;
-    min-height:48px !important;
-    align-items:center !important;
-    justify-content:center !important;
-    margin-top:14px !important;
-  }
-
-  /* If logout is inside a hidden desktop-only action row, expose it. */
-  .profile-actions,
-  .profile-buttons,
-  .profile-footer,
-  .profile-settings-actions{
-    display:flex !important;
-    flex-direction:column !important;
-    width:100% !important;
-    gap:10px !important;
-  }
+/* Logout must remain reachable even on short phone screens. */
+#myProfileModal #myProfileContent{
+  overflow:visible!important;
+  padding-bottom:92px!important;
+}
+#myProfileModal #agrilinkKeepLogout{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  position:sticky!important;
+  bottom:8px!important;
+  z-index:50!important;
+  width:100%!important;
+  min-height:50px!important;
+  margin:18px 0 4px!important;
+  border:0!important;
+  border-radius:13px!important;
+  background:#111!important;
+  color:#fff!important;
+  font-weight:900!important;
+  box-shadow:0 8px 22px rgba(0,0,0,.16)!important;
 }
 
-/* Messages CONTACT LIST = solid/block X.
-   Open conversation still uses the — back button. */
-#chatModal:not(.chat-has-selection) .chat-header > button.close{
-  display:flex !important;
-  width:52px !important;
-  height:52px !important;
-  min-width:52px !important;
-  min-height:52px !important;
-  align-items:center !important;
-  justify-content:center !important;
-  flex:0 0 52px !important;
-  margin-left:auto !important;
-  padding:0 !important;
-  border:0 !important;
-  border-radius:12px !important;
-  background:#111 !important;
-  color:#fff !important;
-  box-shadow:0 4px 12px rgba(0,0,0,.18) !important;
-  font-size:32px !important;
-  font-weight:700 !important;
-  line-height:1 !important;
-  cursor:pointer !important;
-  pointer-events:auto !important;
+/* If the profile renderer places its own logout button, style it too. */
+#myProfileModal .logout-btn,
+#myProfileModal button.danger-btn{
+  min-height:50px!important;
 }
 
-#chatModal.chat-has-selection .chat-header > button.close{
-  display:flex !important;
-  width:48px !important;
-  height:48px !important;
-  min-width:48px !important;
-  min-height:48px !important;
-  align-items:center !important;
-  justify-content:center !important;
-  margin-left:auto !important;
-  border:0 !important;
-  border-radius:12px !important;
-  background:#111 !important;
-  color:#fff !important;
-  font-size:28px !important;
-  font-weight:700 !important;
+/* Messages contacts-list X = BLOCK/SQUARE control, not circular. */
+#chatModal:not(.chat-has-selection) .chat-contacts-close{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  flex:0 0 44px!important;
+  width:44px!important;
+  min-width:44px!important;
+  height:44px!important;
+  min-height:44px!important;
+  margin-left:auto!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:8px!important;
+  background:#111!important;
+  color:#fff!important;
+  font-size:30px!important;
+  font-weight:700!important;
+  line-height:1!important;
+  box-shadow:none!important;
+  opacity:1!important;
+  cursor:pointer!important;
+  pointer-events:auto!important;
+  z-index:100000!important;
+}
+#chatModal:not(.chat-has-selection) .chat-contacts-close:hover{
+  background:#222!important;
+}
+#chatModal:not(.chat-has-selection) .chat-contacts-close:active{
+  transform:scale(.96)!important;
+}
+
+/* On conversation view, keep the header control as the back/minus button. */
+#chatModal.chat-has-selection .chat-header > .close{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:44px!important;
+  min-width:44px!important;
+  height:44px!important;
+  border-radius:8px!important;
+  background:#111!important;
+  color:#fff!important;
+  border:0!important;
 }
 </style>
 
-<script id="LUNDUYAN_LOGOUT_BLOCK_X_FIX_JS">
+<script id="LUNDUYAN_PROFILE_LOGOUT_AND_MESSAGE_X_FINAL_JS">
 (function(){
   'use strict';
 
-  function forceLogoutVisible(){
-    const candidates = [
-      '#logoutBtn','#logoutButton','#profileLogout',
-      '.logout-btn','.logout-button',
-      'button[data-action="logout"]',
-      'button[data-logout]'
-    ];
-
-    let found = [];
-    candidates.forEach(sel=>{
-      try { found.push(...document.querySelectorAll(sel)); } catch(_){}
-    });
-
-    /* Also detect a visible button/link whose text is exactly Logout. */
-    document.querySelectorAll('button,a,[role="button"]').forEach(el=>{
-      const text=(el.textContent||'').trim().toLowerCase();
-      if(text === 'logout' || text === 'log out') found.push(el);
-    });
-
-    [...new Set(found)].forEach(el=>{
-      el.style.setProperty('display','flex','important');
-      el.style.setProperty('visibility','visible','important');
-      el.style.setProperty('opacity','1','important');
-      el.style.setProperty('position','relative','important');
-      el.style.setProperty('z-index','1000','important');
-
-      const parent=el.parentElement;
-      if(parent && window.matchMedia('(max-width:700px)').matches){
-        parent.style.setProperty('display','flex','important');
-        parent.style.setProperty('flex-direction','column','important');
-        parent.style.setProperty('width','100%','important');
-        parent.style.setProperty('overflow','visible','important');
-      }
-    });
-  }
-
-  function forceBlockX(){
-    const modal=document.getElementById('chatModal');
-    if(!modal)return;
-
-    const btn=modal.querySelector('.chat-header > button.close');
-    if(!btn)return;
-
-    const isChat=modal.classList.contains('chat-has-selection');
-    btn.textContent=isChat ? '—' : '×';
-    btn.title=isChat ? 'Back to contacts' : 'Close Messages';
-    btn.setAttribute('aria-label',isChat ? 'Back to contacts' : 'Close Messages');
-
-    /* Solid/block look, no transparent circle. */
-    btn.style.setProperty('background','#111','important');
-    btn.style.setProperty('color','#fff','important');
-    btn.style.setProperty('border','0','important');
-    btn.style.setProperty('border-radius','12px','important');
-    btn.style.setProperty('box-shadow','0 4px 12px rgba(0,0,0,.18)','important');
-    btn.style.setProperty('font-weight','700','important');
-    btn.style.setProperty('pointer-events','auto','important');
-  }
-
-  function boot(){
-    forceLogoutVisible();
-    forceBlockX();
-  }
-
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',boot,{once:true});
-  }else{
-    boot();
-  }
-
-  setTimeout(boot,250);
-  setTimeout(boot,800);
-  setInterval(boot,1200);
-})();
-</script>
-
-
-<style id="LUNDUYAN_PROFILE_ONLY_LOGOUT_ROLE_FIX">
-/* =========================================================
-   FINAL NAVIGATION RULE
-   - NO Role Switcher anywhere.
-   - NO Logout button in the top navbar.
-   - Logout exists ONLY after opening Profile.
-   - Mobile Profile button stays in the bottom navigation.
-   ========================================================= */
-
-/* Completely remove the role switcher. */
-#roleSwitcherWrap,
-#roleSwitcherBtn,
-#roleSwitcherMenu{
-  display:none !important;
-  visibility:hidden !important;
-  pointer-events:none !important;
-}
-
-/* Remove the old top-navbar logout. */
-#app > .navbar .nav-logout-btn,
-#app > .navbar .logout-btn,
-#app > .navbar .logout-button,
-#app > .navbar button[data-action="logout"],
-#app > .navbar button[data-logout]{
-  display:none !important;
-}
-
-/* The previous mobile patch tried to expose generic Logout buttons.
-   Cancel that behavior specifically inside the top navbar. */
-@media(max-width:700px){
-  #app > .navbar [onclick*="logout" i]{
-    display:none !important;
-  }
-
-  /* Bottom navigation remains the phone navigation. */
-  body.lunduyan-logged-in .mobile-bottom-nav{
-    display:grid !important;
-  }
-
-  /* Profile button must remain tappable on phone. */
-  .mobile-bottom-nav [data-mobile-nav="profile"]{
-    display:flex !important;
-    visibility:visible !important;
-    opacity:1 !important;
-    pointer-events:auto !important;
-  }
-}
-
-/* Logout is ONLY the one generated inside My Profile. */
-#agrilinkKeepLogout{
-  display:flex !important;
-  width:100% !important;
-  min-height:48px !important;
-  align-items:center !important;
-  justify-content:center !important;
-  margin-top:14px !important;
-  border-radius:12px !important;
-}
-
-/* Never show the profile-only logout outside My Profile. */
-body > #agrilinkKeepLogout,
-#app > #agrilinkKeepLogout,
-.navbar #agrilinkKeepLogout{
-  display:none !important;
-}
-</style>
-
-<script id="LUNDUYAN_PROFILE_ONLY_LOGOUT_ROLE_FIX_JS">
-(function(){
-  'use strict';
-
-  function removeTopControls(){
-    /* Role switcher: gone everywhere. */
-    ['roleSwitcherWrap','roleSwitcherBtn','roleSwitcherMenu'].forEach(id=>{
-      const el=document.getElementById(id);
-      if(el){
-        el.classList.add('hidden');
-        el.style.setProperty('display','none','important');
-        el.style.setProperty('pointer-events','none','important');
-      }
-    });
-
-    /* Navbar logout: gone. */
-    document.querySelectorAll(
-      '#app > .navbar .nav-logout-btn,'+
-      '#app > .navbar .logout-btn,'+
-      '#app > .navbar .logout-button,'+
-      '#app > .navbar button[data-action="logout"],'+
-      '#app > .navbar button[data-logout]'
-    ).forEach(el=>{
-      el.style.setProperty('display','none','important');
-    });
-  }
-
-  function keepLogoutInsideProfile(){
+  function profileLogoutFix(){
     const box=document.getElementById('myProfileContent');
     const modal=document.getElementById('myProfileModal');
     if(!box || !modal || modal.classList.contains('hidden')) return;
 
-    /* If the existing profile script already created it, leave it there. */
+    /* Remove duplicate injected logout buttons, then guarantee one exists. */
+    const logs=[...box.querySelectorAll('#agrilinkKeepLogout')];
+    logs.slice(1).forEach(x=>x.remove());
+
     let logoutBtn=box.querySelector('#agrilinkKeepLogout');
 
-    /* Safety fallback: create it ONLY inside My Profile. */
     if(!logoutBtn){
       logoutBtn=document.createElement('button');
       logoutBtn.id='agrilinkKeepLogout';
@@ -10197,30 +10019,78 @@ body > #agrilinkKeepLogout,
           else if(window.supabaseClient?.auth) await window.supabaseClient.auth.signOut();
         }finally{
           modal.classList.add('hidden');
+          document.getElementById('app')?.classList.add('hidden');
+          document.getElementById('landingScreen')?.classList.remove('hidden');
+          document.getElementById('authScreen')?.classList.remove('hidden');
+          document.getElementById('mobileBottomNav')?.style.setProperty('display','none','important');
           window.scrollTo(0,0);
         }
       });
       box.appendChild(logoutBtn);
     }
 
+    /* Always put Logout last so it cannot be buried behind other controls. */
+    box.appendChild(logoutBtn);
     logoutBtn.style.setProperty('display','flex','important');
-    logoutBtn.style.setProperty('width','100%','important');
   }
 
-  function boot(){
-    removeTopControls();
-    keepLogoutInsideProfile();
+  function messageButtonFix(){
+    const modal=document.getElementById('chatModal');
+    if(!modal) return;
+
+    const listX=modal.querySelector('.chat-contacts-close');
+    if(listX){
+      listX.textContent='×';
+      listX.title='Close Messages';
+      listX.setAttribute('aria-label','Close Messages');
+
+      if(modal.classList.contains('chat-has-selection')){
+        listX.style.setProperty('display','none','important');
+      }else{
+        listX.style.setProperty('display','flex','important');
+        listX.style.setProperty('border-radius','8px','important');
+        listX.style.setProperty('background','#111','important');
+      }
+    }
+
+    const chatBack=modal.querySelector('.chat-header > .close');
+    if(chatBack){
+      if(modal.classList.contains('chat-has-selection')){
+        chatBack.textContent='—';
+        chatBack.title='Back to contacts';
+        chatBack.setAttribute('aria-label','Back to contacts');
+        chatBack.style.setProperty('display','flex','important');
+        chatBack.style.setProperty('border-radius','8px','important');
+        chatBack.style.setProperty('background','#111','important');
+      }else{
+        chatBack.style.setProperty('display','none','important');
+      }
+    }
+  }
+
+  function run(){
+    profileLogoutFix();
+    messageButtonFix();
   }
 
   if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',boot,{once:true});
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(run,200),{once:true});
   }else{
-    boot();
+    setTimeout(run,200);
   }
 
-  setTimeout(boot,200);
-  setTimeout(boot,700);
-  setInterval(boot,1000);
+  setTimeout(run,500);
+  setTimeout(run,1000);
+
+  /* Only observe the two relevant modals, avoiding heavy body-wide polling. */
+  const profile=document.getElementById('myProfileModal');
+  if(profile){
+    new MutationObserver(run).observe(profile,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+  }
+  const chat=document.getElementById('chatModal');
+  if(chat){
+    new MutationObserver(run).observe(chat,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+  }
 })();
 </script>
 
@@ -10883,5 +10753,6 @@ body > #agrilinkKeepLogout,
 
 
 <!-- FINAL MOBILE NAV VISIBILITY OVERRIDE -->
+
 
 
