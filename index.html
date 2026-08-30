@@ -9750,7 +9750,164 @@ setTimeout(run,600);
   window.addEventListener('resize',sync,{passive:true});
   window.addEventListener('orientationchange',function(){setTimeout(sync,100);},{passive:true});
 })();
-</script></body>
+</script>
+<style id="LUNDUYAN_NAVIGATION_FINAL_FIX">
+/* =========================================================
+   FINAL MOBILE NAVIGATION FIX
+   Marketplace/My Products = jump immediately to products.
+   Messages contacts list = visible X button.
+   ========================================================= */
+
+/* The contacts/list header owns the X when no conversation is selected. */
+#chatModal:not(.chat-has-selection) .chat-contacts-close{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:42px!important;
+  height:42px!important;
+  min-width:42px!important;
+  min-height:42px!important;
+  margin-left:auto!important;
+  padding:0!important;
+  border:1px solid rgba(255,255,255,.22)!important;
+  border-radius:50%!important;
+  background:rgba(255,255,255,.15)!important;
+  color:#fff!important;
+  font-size:26px!important;
+  line-height:1!important;
+  cursor:pointer!important;
+  pointer-events:auto!important;
+  z-index:100000!important;
+}
+
+/* Hide the chat-header control while the contacts list is shown;
+   the contacts-header X is the only close control in that state. */
+#chatModal:not(.chat-has-selection) .chat-window .chat-header{
+  display:none!important;
+}
+
+/* When a conversation is open, use the chat header's — / back control. */
+#chatModal.chat-has-selection .chat-window .chat-header{
+  display:flex!important;
+}
+#chatModal.chat-has-selection .chat-contacts-close{
+  display:none!important;
+}
+
+@media(max-width:700px){
+  #chatModal:not(.chat-has-selection) .conversation-list{
+    display:block!important;
+  }
+  #chatModal.chat-has-selection .conversation-list{
+    display:none!important;
+  }
+}
+</style>
+
+<script id="LUNDUYAN_NAVIGATION_FINAL_FIX_JS">
+(function(){
+  'use strict';
+
+  function byId(id){ return document.getElementById(id); }
+
+  function goToProductsNow(){
+    const target=byId('products');
+    if(!target)return;
+
+    /* Scroll FIRST. Do not wait for Supabase/product loading. */
+    requestAnimationFrame(function(){
+      target.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+
+    /* Correct the position again after dynamic product rendering. */
+    setTimeout(function(){
+      byId('products')?.scrollIntoView({behavior:'smooth', block:'start'});
+    },180);
+  }
+
+  function wireMobileMarket(){
+    const nav=byId('mobileBottomNav');
+    if(!nav || nav.dataset.navigationFinalFix==='1')return;
+
+    nav.dataset.navigationFinalFix='1';
+
+    nav.addEventListener('click',function(e){
+      const button=e.target.closest('[data-mobile-nav="market"]');
+      if(!button)return;
+
+      /* Let the existing handler update the data/label, but force
+         the visual jump immediately instead of waiting for loadProducts(). */
+      goToProductsNow();
+
+      /* Refresh in the background; never block navigation on it. */
+      if(typeof window.loadProducts==='function'){
+        Promise.resolve().then(function(){
+          return window.loadProducts();
+        }).then(function(){
+          setTimeout(goToProductsNow,60);
+        }).catch(function(){});
+      }
+    },true);
+  }
+
+  function keepMessagesXCorrect(){
+    const modal=byId('chatModal');
+    if(!modal)return;
+
+    const listX=modal.querySelector('.chat-contacts-close');
+    if(listX){
+      if(modal.classList.contains('chat-has-selection')){
+        listX.style.setProperty('display','none','important');
+      }else{
+        listX.style.setProperty('display','flex','important');
+        listX.textContent='×';
+        listX.title='Close Messages';
+        listX.setAttribute('aria-label','Close Messages');
+      }
+    }
+
+    const chatX=modal.querySelector('.chat-header > .close');
+    if(chatX){
+      if(modal.classList.contains('chat-has-selection')){
+        chatX.style.setProperty('display','flex','important');
+        chatX.textContent='—';
+        chatX.title='Back to contacts';
+        chatX.setAttribute('aria-label','Back to contacts');
+      }else{
+        chatX.style.setProperty('display','none','important');
+      }
+    }
+  }
+
+  function boot(){
+    wireMobileMarket();
+    keepMessagesXCorrect();
+
+    const modal=byId('chatModal');
+    if(modal && !modal.dataset.navigationFinalObserver){
+      modal.dataset.navigationFinalObserver='1';
+      new MutationObserver(keepMessagesXCorrect).observe(modal,{
+        attributes:true,
+        attributeFilter:['class']
+      });
+    }
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',function(){
+      setTimeout(boot,100);
+    },{once:true});
+  }else{
+    setTimeout(boot,100);
+  }
+
+  /* The mobile nav can be created after login. */
+  setTimeout(boot,500);
+  setTimeout(boot,1200);
+})();
+</script>
+
+</body>
 </html>
 <style id="AGRI_MESSAGE_BACK_FINAL_FIX">
 /* FINAL: Messages list = X / opened chat = — */
@@ -10409,3 +10566,5 @@ setTimeout(run,600);
 
 
 <!-- FINAL MOBILE NAV VISIBILITY OVERRIDE -->
+
+
