@@ -2502,6 +2502,19 @@ Refresh
 </div>
 <div class="products" id="products"></div>
 </section>
+<section id="aggregationSection" class="section aggregation-section">
+  <div class="aggregation-head">
+    <div>
+      <div class="eyebrow">COMMUNITY</div>
+      <h2>Community Aggregations</h2>
+      <p>Buyers can request a large quantity while smaller farmers pool their contributions to fulfill it together.</p>
+    </div>
+    <button id="createAggregationBtn" class="hero-primary" type="button" onclick="openAggregationRequest()">+ Create Buying Request</button>
+  </div>
+  <div id="aggregationGrid" class="aggregation-grid">
+    <div class="aggregation-empty">Loading community requests...</div>
+  </div>
+</section>
 <section class="section hidden" id="farmerTransactions">
 <div class="section-title">
 <h2>Transactions</h2>
@@ -2520,19 +2533,7 @@ Refresh
 </div>
 <div class="orders" id="orders"></div>
 </section>
-<section id="aggregationSection" class="section aggregation-section">
-  <div class="aggregation-head">
-    <div>
-      <div class="eyebrow">COMMUNITY</div>
-      <h2>Community Aggregations</h2>
-      <p>Buyers can request a large quantity while smaller farmers pool their contributions to fulfill it together.</p>
-    </div>
-    <button id="createAggregationBtn" class="hero-primary" type="button" onclick="openAggregationRequest()">+ Create Buying Request</button>
-  </div>
-  <div id="aggregationGrid" class="aggregation-grid">
-    <div class="aggregation-empty">Loading community requests...</div>
-  </div>
-</section>
+
 </main>
 </div>
 <!-- =======================================================
@@ -6234,6 +6235,11 @@ function setupRoleHome(){
       <strong>Chat</strong>
       <span>Message farmers directly.</span>
     </div>
+    <div class="quick-card" onclick="document.getElementById('aggregationSection')?.scrollIntoView({behavior:'smooth',block:'start'})">
+      <div class="quick-icon">🤝</div>
+      <strong>Community Buying</strong>
+      <span>Request a large quantity and let farmers pool their supply.</span>
+    </div>
   `;
 }
 
@@ -9125,7 +9131,8 @@ function run(){
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(run,300));else setTimeout(run,300);
 setTimeout(run,700);
 })();
-</script>\n
+</script>
+
 <!-- FINAL: KEEP LOGOUT + KEEP ONE MANAGE BLOCKED + REMOVE TOP BLOCK DESKTOP/TABLET -->
 <style id="agrilink-final-profile-actions">
 @media(min-width:701px){
@@ -10659,6 +10666,226 @@ document.addEventListener('DOMContentLoaded',()=>{
     wrapped.__aggregationPatched=true; window.loadProducts=wrapped;
   }
   setTimeout(()=>{ if(window.currentProfile) loadAggregations(); },900);
+})();
+</script>
+
+<style id="LUNDUYAN_FINAL_CLEANUP_FIX">
+/* =========================================================
+   LUNDUYAN FINAL CLEANUP
+   - Community Aggregations is part of the dashboard flow
+   - Mobile navigation is always visible while logged in
+   - No stray literal \\n text
+   - Profile always has Logout on mobile + desktop
+   - Messages always has a visible X on the contacts screen
+   ========================================================= */
+
+/* Community section should not look like an orphaned footer. */
+#aggregationSection{
+  margin-top:28px!important;
+  margin-bottom:28px!important;
+  scroll-margin-top:82px!important;
+}
+.aggregation-section .aggregation-head{
+  display:flex!important;
+  align-items:flex-end!important;
+  justify-content:space-between!important;
+  gap:18px!important;
+  margin-bottom:18px!important;
+}
+.aggregation-section .aggregation-head > div{min-width:0!important}
+.aggregation-section .aggregation-head p{max-width:760px!important}
+@media(max-width:700px){
+  #aggregationSection{margin-top:18px!important;scroll-margin-top:68px!important}
+  .aggregation-section .aggregation-head{display:block!important}
+  .aggregation-section .aggregation-head .hero-primary{width:100%!important;margin-top:12px!important;min-height:46px!important}
+  .aggregation-grid{grid-template-columns:1fr!important}
+  .aggregation-card{width:100%!important}
+}
+
+/* One reliable fixed mobile navigation. */
+@media(max-width:700px){
+  body.logged-in,
+  #app:not(.hidden) ~ *{padding-bottom:0!important}
+  body{padding-bottom:calc(78px + env(safe-area-inset-bottom))!important;overflow-x:hidden!important}
+  #mobileBottomNav.mobile-bottom-nav{
+    position:fixed!important;
+    left:0!important;right:0!important;bottom:0!important;
+    width:100%!important;
+    height:calc(72px + env(safe-area-inset-bottom))!important;
+    display:grid!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    align-items:stretch!important;
+    padding:6px 6px env(safe-area-inset-bottom)!important;
+    margin:0!important;
+    background:#fff!important;
+    border-top:1px solid #e1e9e3!important;
+    box-shadow:0 -8px 25px rgba(18,53,31,.12)!important;
+    z-index:2147483647!important;
+    transform:translateZ(0)!important;
+  }
+  #mobileBottomNav .mobile-nav-item{
+    width:100%!important;min-width:0!important;height:60px!important;
+    display:flex!important;visibility:visible!important;opacity:1!important;
+    align-items:center!important;justify-content:center!important;
+    flex-direction:column!important;gap:2px!important;
+    border:0!important;background:transparent!important;
+    color:#68756e!important;border-radius:12px!important;
+    padding:3px 1px!important;margin:0!important;
+    font-size:10px!important;font-weight:800!important;
+  }
+  #mobileBottomNav .mobile-nav-item.active{color:#16833b!important;background:#eef8f1!important}
+  #mobileBottomNav .mobile-nav-icon{font-size:21px!important;line-height:23px!important;height:23px!important}
+  #mobileBottomNav .mobile-nav-label{display:block!important;line-height:13px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;max-width:100%!important}
+  #mobileBottomNav .mobile-nav-badge{z-index:3!important}
+}
+@media(min-width:701px){#mobileBottomNav.mobile-bottom-nav{display:none!important}}
+
+/* Profile modal: make the action area scroll with the content and keep Logout visible. */
+#myProfileModal .modal-card{display:flex!important;flex-direction:column!important;overflow:hidden!important}
+#myProfileModal #myProfileContent{overflow-y:auto!important;min-height:0!important;padding:18px!important;padding-bottom:32px!important;-webkit-overflow-scrolling:touch!important}
+#myProfileContent .lunduyan-profile-actions{
+  display:grid!important;grid-template-columns:1fr!important;gap:10px!important;
+  margin-top:16px!important;padding-top:14px!important;border-top:1px solid var(--border,#e1e9e3)!important;
+}
+#myProfileContent .lunduyan-profile-actions button{width:100%!important;min-height:46px!important;border-radius:12px!important}
+#myProfileContent .lunduyan-logout-btn{background:#fff1f0!important;color:#c62828!important;border:1px solid #ffd0cc!important;font-weight:900!important}
+
+/* Messages: always show exactly one header X on the contact screen. */
+#chatModal .chat-header > .close{
+  display:flex!important;visibility:visible!important;opacity:1!important;
+  width:42px!important;height:42px!important;min-width:42px!important;
+  align-items:center!important;justify-content:center!important;
+  margin-left:auto!important;border-radius:50%!important;
+  color:#fff!important;background:rgba(255,255,255,.18)!important;
+  border:1px solid rgba(255,255,255,.24)!important;font-size:26px!important;
+}
+@media(max-width:700px){
+  #chatModal .chat-header{display:flex!important;align-items:center!important;justify-content:space-between!important}
+  #chatModal:not(.chat-has-selection) .chat-header > .close{display:flex!important}
+  #chatModal.chat-has-selection .chat-header > .close{display:flex!important}
+}
+</style>
+
+<script id="LUNDUYAN_FINAL_CLEANUP_FIX_JS">
+(function(){
+  'use strict';
+  const $=id=>document.getElementById(id);
+
+  /* ---------------- Community placement ---------------- */
+  function placeCommunity(){
+    const section=$('aggregationSection');
+    const tx=$('farmerTransactions');
+    if(section && tx && tx.parentNode) tx.parentNode.insertBefore(section,tx);
+  }
+
+  /* ---------------- Mobile nav ---------------- */
+  function ensureNav(){
+    let nav=$('mobileBottomNav');
+    if(!nav && typeof ensureMobileNav==='function'){
+      try{ensureMobileNav();nav=$('mobileBottomNav');}catch(_){nav=null;}
+    }
+    if(!nav)return;
+    if(!nav.querySelector('[data-mobile-nav="home"]')){
+      nav.innerHTML=`
+        <button class="mobile-nav-item active" data-mobile-nav="home" type="button"><span class="mobile-nav-icon">⌂</span><span class="mobile-nav-label">Home</span></button>
+        <button class="mobile-nav-item" data-mobile-nav="market" type="button"><span class="mobile-nav-icon" id="mobileMarketIcon">🛒</span><span class="mobile-nav-label" id="mobileMarketLabel">Marketplace</span></button>
+        <button class="mobile-nav-item" data-mobile-nav="chat" type="button"><span class="mobile-nav-icon">💬</span><span class="mobile-nav-label">Messages</span><span id="mobileChatBadge" class="mobile-nav-badge hidden">0</span></button>
+        <button class="mobile-nav-item" data-mobile-nav="notifications" type="button"><span class="mobile-nav-icon">🔔</span><span class="mobile-nav-label">Alerts</span><span id="mobileNotifBadge" class="mobile-nav-badge hidden">0</span></button>
+        <button class="mobile-nav-item" data-mobile-nav="profile" type="button"><span class="mobile-nav-icon">👤</span><span class="mobile-nav-label">Profile</span></button>`;
+    }
+    if(window.innerWidth<=700 && $('app') && !$('app').classList.contains('hidden')){
+      nav.style.setProperty('display','grid','important');
+      nav.style.setProperty('visibility','visible','important');
+      nav.style.setProperty('opacity','1','important');
+    }
+  }
+
+  /* ---------------- Profile logout ---------------- */
+  function ensureProfileLogout(){
+    const modal=$('myProfileModal'),box=$('myProfileContent');
+    if(!modal||!box||modal.classList.contains('hidden')||!window.currentProfile)return;
+    let actions=box.querySelector('.lunduyan-profile-actions');
+    if(!actions){
+      actions=document.createElement('div');
+      actions.className='lunduyan-profile-actions';
+      box.appendChild(actions);
+    }
+    if(!actions.querySelector('.lunduyan-logout-btn')){
+      const b=document.createElement('button');
+      b.type='button';b.className='danger-btn lunduyan-logout-btn';b.textContent='🚪 Logout';
+      b.addEventListener('click',async()=>{
+        if(!confirm('Are you sure you want to log out?'))return;
+        try{
+          if(typeof window.logout==='function') await window.logout();
+          else if(window.supabaseClient?.auth) await window.supabaseClient.auth.signOut();
+        }catch(err){alert(err?.message||'Could not log out.');}
+      });
+      actions.appendChild(b);
+    }
+  }
+
+  /* ---------------- Messages X ---------------- */
+  function ensureChatClose(){
+    const modal=$('chatModal');
+    const header=modal?.querySelector('.chat-header');
+    if(!header)return;
+    let close=header.querySelector('button.close');
+    if(!close){
+      close=document.createElement('button');
+      close.type='button';close.className='close';header.appendChild(close);
+    }
+    [...header.querySelectorAll('button')].forEach(b=>{if(b!==close)b.remove();});
+    const selected=modal.classList.contains('chat-has-selection')||!!window.currentConversation;
+    close.textContent='×';
+    close.title='Close Messages';
+    close.setAttribute('aria-label','Close Messages');
+    close.onclick=function(e){e.preventDefault();e.stopPropagation();
+      if(typeof window.closeChat==='function')window.closeChat();else modal.classList.add('hidden');
+    };
+  }
+
+  /* ---------------- Patch openMyProfile after all old overrides have loaded. */
+  function patchProfileOpen(){
+    if(typeof window.openMyProfile!=='function' || window.openMyProfile.__lunduyanFinal)return;
+    const base=window.openMyProfile;
+    const wrapped=async function(){
+      const r=await base.apply(this,arguments);
+      setTimeout(ensureProfileLogout,30);
+      return r;
+    };
+    wrapped.__lunduyanFinal=true;
+    window.openMyProfile=wrapped;
+  }
+
+  /* ---------------- Make sure nav remains after auth/dashboard render. */
+  function sync(){
+    placeCommunity();
+    patchProfileOpen();
+    ensureNav();
+    ensureProfileLogout();
+    ensureChatClose();
+  }
+
+  function boot(){
+    sync();
+    setTimeout(sync,250);
+    setTimeout(sync,700);
+    setTimeout(sync,1400);
+  }
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+
+  /* These are targeted observers, not body-wide loops, so they do not create the phone lag. */
+  const profile=$('myProfileModal');
+  if(profile){new MutationObserver(()=>setTimeout(ensureProfileLogout,0)).observe(profile,{attributes:true,attributeFilter:['class']});}
+  const chat=$('chatModal');
+  if(chat){new MutationObserver(()=>setTimeout(ensureChatClose,0)).observe(chat,{attributes:true,attributeFilter:['class']});}
+
+  window.addEventListener('resize',()=>{
+    const nav=$('mobileBottomNav');
+    if(nav && window.innerWidth<=700 && $('app')&&!$('app').classList.contains('hidden'))nav.style.setProperty('display','grid','important');
+    else if(nav)nav.style.setProperty('display','none','important');
+  });
 })();
 </script>
 </body>
