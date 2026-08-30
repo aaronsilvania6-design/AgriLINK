@@ -10410,5 +10410,115 @@ setTimeout(run,600);
 
 <!-- FINAL MOBILE NAV VISIBILITY OVERRIDE -->
 
+
+<style id="LUNDUYAN_FINAL_PROFILE_LOGOUT_MESSAGES">
+/* ===== MOBILE PROFILE LOGOUT ===== */
+@media (max-width:700px){
+  .nav-logout-btn{display:none!important;}
+
+  #agrilinkKeepLogout{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    width:100%!important;
+    min-height:48px!important;
+    margin:14px 0 4px!important;
+    padding:12px 16px!important;
+    box-sizing:border-box!important;
+    border-radius:14px!important;
+  }
+
+  /* Also support common profile/edit-profile containers used by the app. */
+  #myProfileModal #agrilinkKeepLogout,
+  #editProfileModal #agrilinkKeepLogout,
+  .profile-modal #agrilinkKeepLogout,
+  .edit-profile #agrilinkKeepLogout{
+    display:flex!important;
+  }
+}
+
+/* ===== MESSAGES CONTACT-LIST X ===== */
+#chatModal .chat-contacts-close{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  flex:0 0 40px!important;
+  width:40px!important;
+  height:40px!important;
+  padding:0!important;
+  margin-left:auto!important;
+  border:0!important;
+  border-radius:50%!important;
+  background:rgba(255,255,255,.14)!important;
+  color:#fff!important;
+  font-size:28px!important;
+  line-height:1!important;
+  cursor:pointer!important;
+  z-index:9999!important;
+}
+
+#chatModal .chat-contacts-close:hover{
+  background:rgba(255,255,255,.24)!important;
+}
+
+#chatModal:not(.chat-has-selection) .chat-header .close{
+  display:none!important;
+}
+
+#chatModal.chat-has-selection .chat-contacts-close{
+  display:none!important;
+}
+
+#chatModal.chat-has-selection .chat-header .close{
+  display:flex!important;
+}
+</style>
+
+<script id="LUNDUYAN_FINAL_PROFILE_LOGOUT_MESSAGES_JS">
+(function(){
+  'use strict';
+
+  function ensureProfileLogout(){
+    if(window.innerWidth > 700) return;
+
+    const logout = document.getElementById('agrilinkKeepLogout');
+    if(logout){
+      logout.style.setProperty('display','flex','important');
+    }
+  }
+
+  function ensureMessagesX(){
+    const modal=document.getElementById('chatModal');
+    if(!modal) return;
+
+    const x=modal.querySelector('.chat-contacts-close');
+    if(x){
+      x.textContent='×';
+      x.setAttribute('aria-label','Close Messages');
+      x.setAttribute('title','Close Messages');
+      if(!modal.classList.contains('chat-has-selection')){
+        x.style.setProperty('display','flex','important');
+      }
+    }
+  }
+
+  function boot(){
+    ensureProfileLogout();
+    ensureMessagesX();
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',boot,{once:true});
+  }else{
+    boot();
+  }
+
+  /* Only lightweight checks; no body-wide MutationObserver. */
+  setTimeout(boot,250);
+  setTimeout(boot,700);
+  setTimeout(boot,1500);
+})();
+</script>
+
 </body>
 </html>
