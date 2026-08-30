@@ -2336,23 +2336,33 @@ id="signupName"
 required
 placeholder="Juan Dela Cruz">
 
-<label>Phone Number</label>
+<label>Sign up using</label>
+<div class="auth-method-toggle" role="tablist" aria-label="Choose signup method">
+  <button type="button" id="signupEmailMethod" class="auth-method-btn active" onclick="setSignupMethod('email')">Email</button>
+  <button type="button" id="signupPhoneMethod" class="auth-method-btn" onclick="setSignupMethod('phone')">Phone Number</button>
+</div>
 
-<input
-id="signupPhone"
-type="tel"
-inputmode="tel"
-autocomplete="tel"
-required
-placeholder="09XXXXXXXXX or +63XXXXXXXXXX">
+<div id="signupEmailWrap">
+  <label>Email</label>
+  <input
+    id="signupEmail"
+    type="email"
+    inputmode="email"
+    autocomplete="email"
+    placeholder="you@example.com">
+</div>
 
-<label>Email</label>
+<div id="signupPhoneWrap" class="hidden">
+  <label>Phone Number</label>
+  <input
+    id="signupPhone"
+    type="tel"
+    inputmode="tel"
+    autocomplete="tel"
+    placeholder="09XXXXXXXXX or +63XXXXXXXXXX">
+</div>
 
-<input
-id="signupEmail"
-type="email"
-required
-placeholder="you@example.com">
+<p class="auth-role-note">Use either your email <strong>or</strong> phone number. You only need one.</p>
 
 <label>Password</label>
 
@@ -3102,6 +3112,45 @@ function showAuthMessage(text,type=""){
 LANDING / AUTH
 ========================================================= */
 
+window.signupMethod = "email";
+
+function isValidEmail(value){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
+}
+
+function isPhoneNumber(value){
+  const digits = String(value || "").replace(/\D/g, "");
+  return digits.length >= 7 && digits.length <= 15;
+}
+
+function normalizePhone(value){
+  let v = String(value || "").trim().replace(/[\s()-]/g, "");
+  if(v.startsWith("00")) v = "+" + v.slice(2);
+  if(v.startsWith("09")) v = "+63" + v.slice(1);
+  return v;
+}
+
+function setSignupMethod(method){
+  window.signupMethod = method === "phone" ? "phone" : "email";
+
+  const emailWrap = document.getElementById("signupEmailWrap");
+  const phoneWrap = document.getElementById("signupPhoneWrap");
+  const emailBtn = document.getElementById("signupEmailMethod");
+  const phoneBtn = document.getElementById("signupPhoneMethod");
+  const emailInput = document.getElementById("signupEmail");
+  const phoneInput = document.getElementById("signupPhone");
+
+  emailWrap?.classList.toggle("hidden", window.signupMethod !== "email");
+  phoneWrap?.classList.toggle("hidden", window.signupMethod !== "phone");
+  emailBtn?.classList.toggle("active", window.signupMethod === "email");
+  phoneBtn?.classList.toggle("active", window.signupMethod === "phone");
+
+  if(emailInput) emailInput.required = window.signupMethod === "email";
+  if(phoneInput) phoneInput.required = window.signupMethod === "phone";
+
+  document.getElementById("authMessage").textContent = "";
+}
+
 function showAuth(){
 
   document
@@ -3142,6 +3191,9 @@ function showLogin(){
 
 function showSignup(){
 
+  setSignupMethod(window.signupMethod || "email");
+
+
   document
     .getElementById("loginForm")
     .classList.add("hidden");
@@ -3178,6 +3230,15 @@ document
     document.getElementById("loginEmail")
       .value.trim();
 
+  const normalizedLogin = normalizePhone(loginIdentifier);
+  const isEmailLogin = loginIdentifier.includes("@");
+  const isPhoneLogin = !isEmailLogin && isPhoneNumber(loginIdentifier);
+
+  if(!isEmailLogin && !isPhoneLogin){
+    showAuthMessage("Enter a valid email address or phone number.", "error");
+    return;
+  }
+
   const password =
     document.getElementById("loginPassword")
       .value;
@@ -3189,9 +3250,9 @@ document
     error
   } =
     await supabaseClient.auth.signInWithPassword(
-      /^\+?63|^09/.test(loginIdentifier.replace(/[\s-]/g,""))
-        ? { phone: loginIdentifier.replace(/[\s-]/g,""), password }
-        : { email: loginIdentifier, password }
+      isPhoneLogin
+        ? { phone: normalizedLogin, password }
+        : { email: loginIdentifier.toLowerCase(), password }
     );
 
   if(error){
@@ -3234,6 +3295,22 @@ document
       .getElementById("signupEmail")
       .value.trim();
 
+  const signupMethod =
+    window.signupMethod || "email";
+
+  const normalizedPhone =
+    normalizePhone(phone);
+
+  if(signupMethod === "email" && !isValidEmail(email)){
+    showAuthMessage("Please enter a valid email address.", "error");
+    return;
+  }
+
+  if(signupMethod === "phone" && !isPhoneNumber(phone)){
+    showAuthMessage("Please enter a valid phone number.", "error");
+    return;
+  }
+
   const password =
     document
       .getElementById("signupPassword")
@@ -3264,20 +3341,27 @@ document
     creating the public users profile.
   */
 
+  const signupCredentials =
+    signupMethod === "phone"
+      ? { phone: normalizedPhone, password }
+      : { email: email.toLowerCase(), password };
+
   const {
     data,
     error
   } =
   await supabaseClient.auth.signUp({
 
-    email,
-    password,
+    ...signupCredentials,
 
     options:{
       data:{
         full_name:fullName,
-        phone:phone,
-        role:role
+        phone:signupMethod === "phone" ? normalizedPhone : null,
+        signup_method:signupMethod,
+        role:role,
+        roles:[role],
+        active_role:role
       }
     }
 
@@ -3300,7 +3384,9 @@ document
   }else{
 
     showAuthMessage(
-      "Account created! Check your email for verification, then log in.",
+      signupMethod === "phone"
+        ? "Account created! Check your phone for the verification code, then log in with your phone number."
+        : "Account created! Check your email for verification, then log in with your email.",
       "success"
     );
 
@@ -3394,11 +3480,11 @@ async function getOrCreateProfile(user){
       /*
         THIS WAS MISSING BEFORE.
       */
-      email:user.email,
+      email:user.email || metadata.email || (metadata.signup_method === "phone" ? `phone_${String(metadata.phone || "").replace(/\D/g,"")}@phone.lunduyan.local` : null),
 
       full_name:fullName,
 
-      phone:metadata.phone || null,
+      phone:metadata.phone || (user.phone || null),
 
       role:role
 
@@ -9959,6 +10045,9 @@ setInterval(run,600);
 .role-switcher-menu button:hover{background:#eef8f1}
 .role-switcher-menu button.active{background:#eaf8ef;color:#16833b}
 .role-switcher-menu .role-add{border-top:1px solid #e7eee9;margin-top:5px;padding-top:10px;border-radius:0}
+.auth-method-toggle{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:4px;background:#f1f5f2;border:1px solid #e2e9e4;border-radius:12px;margin:-4px 0 12px;}
+.auth-method-btn{border:0;background:transparent;color:#5d6a61;border-radius:9px;padding:9px 10px;font-weight:900;font-size:12px;cursor:pointer;}
+.auth-method-btn.active{background:#fff;color:#16833b;box-shadow:0 2px 8px rgba(22,131,59,.10);}
 .auth-role-note{font-size:11px;color:#748078;line-height:1.45;margin:-3px 0 12px}
 @media(max-width:900px){.role-switcher-wrap{display:none}}
 </style>
@@ -10076,6 +10165,9 @@ setInterval(run,600);
   },100);
   document.addEventListener('DOMContentLoaded',init);
 })();
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded",()=>setSignupMethod("email"));
 </script>
 </body>
 </html>
