@@ -8894,8 +8894,8 @@ AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
       alert(`${otherName||'User'} has been blocked.`);
     }
     if($('profileModal')&&!$('profileModal').classList.contains('hidden'))await window.openUserProfile(otherId);
-    if($('blockedAccountsModal')&&!$('blockedAccountsModal').classList.contains('hidden'))await window.openBlockedAccounts();
-    if(typeof loadProducts==='function')await loadProducts();
+    /* Do not reload Manage Blocked here; its dedicated handler removes rows instantly. */
+    if(typeof loadProducts==='function')Promise.resolve(loadProducts()).catch(console.warn);
   };
 
   window.reportUser=async function(otherId,otherName){
@@ -9031,6 +9031,42 @@ AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
     if(typeof selectConversation==='function')await selectConversation(c);
   };
 
+  /* Instant unblock from Manage Blocked Accounts: remove only the clicked row after DB success. */
+  window.unblockFromBlockedManager=async function(button,otherId,otherName){
+    if(!currentProfile||!otherId||!button||button.dataset.busy==='1')return;
+    if(!confirm(`Unblock ${otherName||'this user'}?`))return;
+    button.dataset.busy='1';
+    button.disabled=true;
+    button.textContent='Unblocking...';
+    try{
+      const {error}=await supabaseClient.from('user_blocks').delete()
+        .eq('blocker_id',sid(currentProfile.id))
+        .eq('blocked_id',sid(otherId));
+      if(error)throw error;
+
+      /* Remove immediately from the current Manage Blocked list — no modal reload. */
+      const row=button.closest('.blocked-user');
+      if(row)row.remove();
+
+      const content=$('blockedAccountsContent');
+      if(content&&!content.querySelector('.blocked-user')){
+        content.innerHTML='<div class="blocked-empty"><div style="font-size:36px">🛡️</div><br><strong>No blocked accounts</strong><div style="font-size:12px;margin-top:6px">Accounts you block will appear here.</div></div>';
+      }
+
+      /* Refresh other data in the background without blocking the UI. */
+      if(typeof loadProducts==='function')Promise.resolve(loadProducts()).catch(console.warn);
+      if($('profileModal')&&!$('profileModal').classList.contains('hidden')&&typeof window.openUserProfile==='function'){
+        Promise.resolve(window.openUserProfile(otherId)).catch(console.warn);
+      }
+    }catch(error){
+      console.error('Unblock failed:',error);
+      alert(error.message||'Could not unblock this user.');
+      button.disabled=false;
+      button.dataset.busy='0';
+      button.textContent='↩ Unblock';
+    }
+  };
+
   /* ---------------- Blocked Accounts: both roles ---------------- */
   window.openBlockedAccounts=async function(){
     if(!currentProfile)return;
@@ -9042,7 +9078,7 @@ AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
     if(error){content.innerHTML=`<div class="message error">${esc(error.message)}</div>`;return;}
     if(!blocks?.length){content.innerHTML='<div class="blocked-empty"><div style="font-size:36px">🛡️</div><br><strong>No blocked accounts</strong><div style="font-size:12px;margin-top:6px">Accounts you block will appear here.</div></div>';return;}
     const ids=blocks.map(x=>sid(x.blocked_id));const {data:users}=await supabaseClient.from('users').select('id,full_name,role').in('id',ids);const map=new Map((users||[]).map(x=>[sid(x.id),x]));
-    content.innerHTML=`<div class="blocked-list">${blocks.map(b=>{const u=map.get(sid(b.blocked_id))||{};const n=u.full_name||'User';return `<div class="blocked-user"><div class="blocked-user-info"><div class="blocked-avatar">${u.role==='FARMER'?'👨‍🌾':'🛒'}</div><div><button class="user-profile-link" onclick="openUserProfile('${esc(sid(b.blocked_id))}')">${esc(n)}</button><div class="blocked-user-role">${esc(u.role||'USER')}</div></div></div><button class="unblock-btn" onclick="toggleBlockUser('${esc(sid(b.blocked_id))}','${esc(n).replaceAll("'",'&#39;')}')">↩ Unblock</button></div>`}).join('')}</div>`;
+    content.innerHTML=`<div class="blocked-list">${blocks.map(b=>{const u=map.get(sid(b.blocked_id))||{};const n=u.full_name||'User';return `<div class="blocked-user"><div class="blocked-user-info"><div class="blocked-avatar">${u.role==='FARMER'?'👨‍🌾':'🛒'}</div><div><button class="user-profile-link" onclick="openUserProfile('${esc(sid(b.blocked_id))}')">${esc(n)}</button><div class="blocked-user-role">${esc(u.role||'USER')}</div></div></div><button class="unblock-btn" onclick="unblockFromBlockedManager(this,'${esc(sid(b.blocked_id))}','${esc(n).replaceAll("'",'&#39;')}')">↩ Unblock</button></div>`}).join('')}</div>`;
   };
 
   /* Give mobile users a clear place to manage their blocked accounts. */
@@ -9649,842 +9685,158 @@ setInterval(run,600);
 </script>
 
 
-<style id="AGRI_FINAL_V4_CHAT_BLOCK_FIX">
-/* =========================================================
-   V4: CHAT BACK/CLOSE + BLOCKED PROFILE CONTROLS
-   ========================================================= */
-
-/* NO selected chat = contacts only. Selected chat = chat only on phone,
-   and chat window visible on desktop beside contacts. */
-@media(min-width:701px){
-  #chatModal:not(.chat-has-selection) .chat-window{
-    display:none!important;
-  }
-  #chatModal:not(.chat-has-selection) .conversation-list{
-    display:block!important;
-    width:100%!important;
-    max-width:none!important;
-    flex:1 1 100%!important;
-  }
-  #chatModal.chat-has-selection .conversation-list{
-    display:block!important;
-  }
-  #chatModal.chat-has-selection .chat-window{
-    display:flex!important;
-  }
-}
-
-@media(max-width:700px){
-  #chatModal:not(.chat-has-selection) .chat-window{
-    display:none!important;
-  }
-  #chatModal:not(.chat-has-selection) .conversation-list{
-    display:block!important;
-    width:100%!important;
-    max-width:none!important;
-    height:100%!important;
-    max-height:none!important;
-    flex:1 1 100%!important;
-    overflow-y:auto!important;
-  }
-  #chatModal.chat-has-selection .conversation-list{
-    display:none!important;
-  }
-  #chatModal.chat-has-selection .chat-window{
-    display:flex!important;
-    width:100%!important;
-    height:100%!important;
-    flex:1 1 100%!important;
-  }
-
-  #chatModal.chat-has-selection #chatForm,
-  #chatModal.chat-has-selection .chat-input{
-    display:flex!important;
-    visibility:visible!important;
-    opacity:1!important;
-    flex:0 0 auto!important;
-  }
-  #chatModal.chat-has-selection #chatInput{
-    display:block!important;
-    visibility:visible!important;
-    opacity:1!important;
-    flex:1 1 auto!important;
-    min-width:0!important;
-    width:auto!important;
-  }
-  #chatModal.chat-has-selection #chatForm button[type="submit"]{
-    display:block!important;
-    visibility:visible!important;
-    opacity:1!important;
-  }
-}
-
-/* Blocked profiles: Message must visibly look and behave disabled. */
-#profileModal .profile-action-row .message-user-btn[disabled]{
-  opacity:.48!important;
-  cursor:not-allowed!important;
-  pointer-events:none!important;
-  filter:grayscale(.35)!important;
-}
-
-/* Block button always stays visible. */
+<!-- BLOCKING SYSTEM FROM index (1).html -->
+<!-- PROFILE BLOCK CLICKABILITY FINAL FIX -->
+<style id="PROFILE_BLOCK_CLICKABILITY_FINAL">
 #profileModal .profile-action-row .block-user-btn{
-  display:block!important;
-  visibility:visible!important;
-}
-</style>
-
-<script id="AGRI_FINAL_V4_CHAT_BLOCK_FIX_JS">
-(function(){
-  'use strict';
-
-  const $=id=>document.getElementById(id);
-  const modal=()=>$('chatModal');
-
-  function closeWholeChat(){
-    const m=modal();
-    if(!m)return;
-    m.classList.add('hidden');
-    m.classList.remove('chat-has-selection');
-    $('chatWindow')?.classList.remove('active');
-    if(typeof finalMessageChannel!=='undefined' && finalMessageChannel){
-      try{supabaseClient.removeChannel(finalMessageChannel)}catch(_){}
-      finalMessageChannel=null;
-    }
-    currentConversation=null;
-    try{
-      if(typeof chatSelectionKey==='function')localStorage.removeItem(chatSelectionKey());
-    }catch(_){}
-  }
-
-  function backToContacts(){
-    const m=modal();
-    if(!m)return;
-
-    /* This is the button behavior when a chat is currently open:
-       hide only the open chat, keep Contacts visible. */
-    m.classList.remove('chat-has-selection');
-    $('chatWindow')?.classList.remove('active');
-    currentConversation=null;
-
-    try{
-      if(typeof chatSelectionKey==='function')localStorage.removeItem(chatSelectionKey());
-    }catch(_){}
-
-    const name=$('chatUserName');
-    if(name){
-      name.textContent='Select a conversation';
-      name.classList.remove('chat-user-clickable');
-      name.onclick=null;
-      name.removeAttribute('data-user-id');
-    }
-
-    const ctx=$('chatProductContext');
-    if(ctx)ctx.textContent='';
-
-    const messages=$('chatMessages');
-    if(messages)messages.innerHTML='<div class="chat-empty">Select a conversation to start chatting.</div>';
-
-    ensureHeaderButton();
-  }
-
-  function ensureHeaderButton(){
-    const m=modal();
-    const header=m?.querySelector('.chat-header');
-    if(!header)return;
-
-    /* Remove every generated duplicate close button. */
-    header.querySelectorAll('.final-chat-close').forEach(x=>x.remove());
-
-    let btn=header.querySelector('button.close');
-    if(!btn){
-      btn=document.createElement('button');
-      btn.className='close';
-      btn.type='button';
-      header.appendChild(btn);
-    }
-
-    /* There must be exactly one header button. */
-    [...header.querySelectorAll('button')].forEach(x=>{
-      if(x!==btn)x.remove();
-    });
-
-    btn.textContent='—';
-    btn.title='Back to contacts';
-    btn.setAttribute('aria-label','Back to contacts');
-
-    btn.onclick=function(e){
-      e.preventDefault();
-      e.stopPropagation();
-
-      const m=modal();
-      if(m?.classList.contains('chat-has-selection')){
-        backToContacts();
-      }else{
-        closeWholeChat();
-      }
-    };
-  }
-
-  /* Keep the header control working even if another script changes it. */
-  function protectHeader(){
-    ensureHeaderButton();
-  }
-
-  /* Re-apply Message disabled state from the actual block relationship.
-     This covers both: I blocked them and they blocked me. */
-  async function refreshProfileMessageState(){
-    const m=$('profileModal');
-    const btn=m?.querySelector('.message-user-btn');
-    const block=m?.querySelector('.block-user-btn');
-    if(!m || m.classList.contains('hidden') || !currentProfile || !block)return;
-
-    const otherId=block.getAttribute('data-user-id') || block.dataset.userId;
-    if(!otherId)return;
-
-    try{
-      const rel=await getBlockRelationship(otherId);
-
-      btn.disabled=!!rel.blocked;
-      btn.setAttribute('aria-disabled',rel.blocked?'true':'false');
-      if(rel.blocked){
-        btn.title=rel.byMe
-          ? 'Unblock this user before messaging'
-          : 'This user has blocked you';
-      }else{
-        btn.title='';
-      }
-
-      block.textContent=rel.byMe?'↩ Unblock':'⛔ Block';
-      block.dataset.blocked=rel.byMe?'1':'0';
-      block.dataset.userId=String(otherId);
-    }catch(_){}
-  }
-
-  /* Capture profile Message clicks so a blocked user can never start chat,
-     even if an older onclick handler is still present. */
-  document.addEventListener('click',async function(e){
-    const msg=e.target.closest('#profileModal .message-user-btn');
-    if(!msg)return;
-
-    const block=e.target.closest('#profileModal .profile-action-row')?.querySelector('.block-user-btn');
-    const otherId=block?.dataset.userId || block?.getAttribute('data-user-id');
-
-    if(msg.disabled || !otherId || !currentProfile)return;
-
-    try{
-      const rel=await getBlockRelationship(otherId);
-      if(rel.blocked){
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        msg.disabled=true;
-        alert(rel.byMe
-          ? 'Unblock this user before messaging them.'
-          : 'This user has blocked you. Messaging is unavailable.');
-      }
-    }catch(_){}
-  },true);
-
-  /* When the profile is rendered, the block button gets its user id. */
-  const observer=new MutationObserver(()=>{
-    const block=$('profileModal')?.querySelector('.profile-block-btn');
-    if(block){
-      const onclick=block.getAttribute('onclick')||'';
-      const match=onclick.match(/toggleBlockUser\('([^']+)'/);
-      if(match)block.dataset.userId=match[1];
-    }
-    refreshProfileMessageState();
-  });
-
-  function boot(){
-    const m=modal();
-    if(m){
-      const header=m.querySelector('.chat-header');
-      if(header)ensureHeaderButton();
-    }
-
-    const pm=$('profileModal');
-    if(pm && !pm.__v4Observed){
-      pm.__v4Observed=true;
-      observer.observe(pm,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
-    }
-    refreshProfileMessageState();
-  }
-
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,250));
-  }else{
-    setTimeout(boot,250);
-  }
-
-  setInterval(boot,700);
-})();
-</script>
-
-
-<style id="AGRI_FINAL_V5_CHAT_BLOCK_LOGO_FIX">
-/* =========================================================
-   V5 FINAL FIX
-   1. One Messages close/back control only.
-   2. Close works on PC + phone.
-   3. Block is idempotent: no duplicate-key error.
-   4. Blocked user => Message disabled.
-   5. Use provided green LUNDUYAN logo.
-   ========================================================= */
-
-/* Provided LUNDUYAN logo */
-.nav-logo{
-  overflow:hidden!important;
-  padding:0!important;
-  background:transparent!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-}
-.nav-logo img{
-  width:100%!important;
-  height:100%!important;
-  object-fit:cover!important;
-  display:block!important;
-}
-.auth-logo{
-  overflow:hidden!important;
-  padding:0!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-}
-.auth-logo img{
-  width:100%!important;
-  height:100%!important;
-  object-fit:contain!important;
-  display:block!important;
-}
-
-/* Hide every old/injected chat close button. V5 creates exactly one. */
-#chatModal .chat-header > .close,
-#chatModal .final-chat-close{
-  display:none!important;
-}
-
-/* One universal Messages control. */
-#chatModal .v5-chat-control{
-  position:absolute!important;
-  top:12px!important;
-  right:14px!important;
-  z-index:9999!important;
-  width:40px!important;
-  height:40px!important;
-  border:0!important;
-  border-radius:10px!important;
-  background:transparent!important;
-  color:#17201b!important;
-  font-size:27px!important;
-  line-height:40px!important;
-  font-weight:700!important;
+  pointer-events:auto!important;
   cursor:pointer!important;
-  display:grid!important;
-  place-items:center!important;
-  padding:0!important;
+  display:inline-flex!important;
+  visibility:visible!important;
+  position:relative!important;
+  z-index:9999!important;
 }
-#chatModal .v5-chat-control:hover{
-  background:rgba(0,0,0,.06)!important;
+</style>
+<!-- FINAL BLOCK PRODUCT VISIBILITY FIX -->
+<!-- ABSOLUTE FINAL PROFILE BLOCK BUTTON FIX -->
+<style id="AGRILINK_ABSOLUTE_PROFILE_BLOCK_FIX_CSS">
+#profileModal .profile-block-action{
+  background:#252525!important;
+  color:#fff!important;
+  border:0!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  cursor:pointer!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  position:relative!important;
+  z-index:2147483647!important;
+  min-height:44px!important;
+  -webkit-tap-highlight-color:transparent!important;
 }
-
-/* Leave room for the one control in the contacts header. */
-#chatModal .chat-list-header{
-  padding-right:58px!important;
-}
-
-/* Disabled Message means visually + functionally disabled. */
-#profileModal .message-user-btn:disabled,
-#profileContent .message-user-btn:disabled{
-  opacity:.45!important;
-  cursor:not-allowed!important;
-  pointer-events:none!important;
-  filter:grayscale(1)!important;
-}
-
-/* Keep Block/Unblock visible on every screen size. */
-.profile-action-row .block-user-btn{
-  display:block!important;
+</style>
+<!-- ONE FINAL CLICKABLE BLOCK FIX -->
+<style id="AGRILINK_ONE_FINAL_BLOCK_FIX_CSS">
+#profileModal .block-user-btn,#profileModal .profile-block-action{
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  cursor:pointer!important;
+  position:relative!important;
+  z-index:2147483647!important;
+  display:inline-flex!important;
   visibility:visible!important;
 }
 </style>
+<!-- ACTUAL FINAL FIX: PUBLIC FARMER PROFILE BLOCK BUTTON -->
+<style id="AGRILINK_PUBLIC_FARMER_BLOCK_ACTUAL_FIX_CSS">
+#profileModal .agrilink-profile-block-final{
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  position:relative!important;
+  z-index:2147483647!important;
+  cursor:pointer!important;
+  -webkit-tap-highlight-color:transparent!important;
+}
+</style>
 
-<script id="AGRI_FINAL_V5_CHAT_BLOCK_LOGO_FIX_JS">
+<!-- CLEAN BLOCK SYSTEM COPIED FROM index (1)(1).html -->
+<script id="CLEAN_SOURCE_BLOCK_SYSTEM">
 (function(){
   'use strict';
-
+  const sid=v=>String(v??'');
+  const same=(a,b)=>sid(a)===sid(b);
   const $=id=>document.getElementById(id);
+  const getProfile=()=>{ try{ if(typeof currentProfile!=='undefined'&&currentProfile)return currentProfile; }catch(_){} return window.currentProfile||null; };
+  let busy=false;
 
-  /* ---------------- Messages: exactly ONE control ---------------- */
-
-  function ensureChatControl(){
-    const modal=$('chatModal');
-    if(!modal)return null;
-    const card=modal.querySelector('.modal-card');
-    if(!card)return null;
-
-    let control=card.querySelector('.v5-chat-control');
-    if(!control){
-      control=document.createElement('button');
-      control.type='button';
-      control.className='v5-chat-control';
-      card.appendChild(control);
-    }
-
-    /* There is ONE Messages close button only. */
-    modal.querySelectorAll('.chat-header > .close,.final-chat-close').forEach(b=>b.remove());
-    control.textContent='×';
-    control.title='Close Messages';
-    control.setAttribute('aria-label','Close Messages');
-    control.onclick=function(e){
-      e.preventDefault();
-      e.stopPropagation();
-      modal.classList.add('hidden');
-      modal.classList.remove('chat-has-selection');
-      $('chatWindow')?.classList.remove('active');
-      if(typeof currentConversation!=='undefined')currentConversation=null;
-      try{
-        const key=typeof chatSelectionKey==='function'?chatSelectionKey():null;
-        if(key)localStorage.removeItem(key);
-      }catch(_){ }
-      if(typeof finalMessageChannel!=='undefined' && finalMessageChannel){
-        try{supabaseClient.removeChannel(finalMessageChannel)}catch(_){ }
-        finalMessageChannel=null;
-      }
-      if(typeof messageChannel!=='undefined' && messageChannel){
-        try{supabaseClient.removeChannel(messageChannel)}catch(_){ }
-        messageChannel=null;
-      }
-    };
-    return control;
-  }
-
-  function normalizeChatState(){
-    const modal=$('chatModal');
-    if(!modal)return;
-    ensureChatControl();
-
-    const selected=modal.classList.contains('chat-has-selection') ||
-      !!(typeof currentConversation!=='undefined' && currentConversation);
-
-    const control=modal.querySelector('.v5-chat-control');
-    if(control){
-      control.textContent='×';
-      control.title='Close Messages';
-      control.setAttribute('aria-label','Close Messages');
-    }
-
-    /* Contacts first. */
-    if(!selected){
-      modal.classList.remove('chat-has-selection');
-      $('chatWindow')?.classList.remove('active');
-    }else{
-      modal.classList.add('chat-has-selection');
-      $('chatWindow')?.classList.add('active');
-    }
-  }
-
-  /* Wrap the existing openChat so clicking Messages never reopens an old chat. */
-  function wrapOpenChat(){
-    const original=window.openChat;
-    if(typeof original!=='function' || original.__v5Wrapped)return;
-
-    const wrapped=async function(){
-      const result=await original.apply(this,arguments);
-
-      const modal=$('chatModal');
-      if(modal){
-        /* Messages button = contacts first. */
-        modal.classList.remove('chat-has-selection');
-        $('chatWindow')?.classList.remove('active');
-
-        if(typeof currentConversation!=='undefined')currentConversation=null;
-
-        try{
-          const key=typeof chatSelectionKey==='function'?chatSelectionKey():null;
-          if(key)localStorage.removeItem(key);
-        }catch(_){}
-
-        const name=$('chatUserName');
-        if(name)name.textContent='Select a conversation';
-
-        const box=$('chatMessages');
-        if(box)box.innerHTML='<div class="chat-empty">Select a conversation to start chatting.</div>';
-
-        ensureChatControl();
-      }
-      return result;
-    };
-
-    wrapped.__v5Wrapped=true;
-    window.openChat=wrapped;
-  }
-
-  /* Selecting a contact explicitly opens the chat. */
-  function wrapSelectConversation(){
-    const original=window.selectConversation;
-    if(typeof original!=='function' || original.__v5Wrapped)return;
-
-    const wrapped=async function(c){
-      const result=await original.apply(this,arguments);
-      const modal=$('chatModal');
-      if(modal){
-        modal.classList.add('chat-has-selection');
-        $('chatWindow')?.classList.add('active');
-        ensureChatControl();
-        normalizeChatState();
-      }
-      return result;
-    };
-
-    wrapped.__v5Wrapped=true;
-    window.selectConversation=wrapped;
-  }
-
-  /* closeChat now fully resets the Messages UI. */
-  function wrapCloseChat(){
-    const original=window.closeChat;
-    if(typeof original!=='function' || original.__v5Wrapped)return;
-
-    const wrapped=function(){
-      const result=original.apply(this,arguments);
-      const modal=$('chatModal');
-      if(modal){
-        modal.classList.add('hidden');
-        modal.classList.remove('chat-has-selection');
-        $('chatWindow')?.classList.remove('active');
-      }
-      if(typeof currentConversation!=='undefined')currentConversation=null;
-      ensureChatControl();
-      return result;
-    };
-    wrapped.__v5Wrapped=true;
-    window.closeChat=wrapped;
-  }
-
-  /* ---------------- Blocking: idempotent / no duplicate key ---------------- */
-
-  async function getOwnBlock(otherId){
-    if(!window.currentProfile && typeof currentProfile==='undefined')return null;
-    const me=String(window.currentProfile?.id || currentProfile?.id || '');
-    const other=String(otherId||'');
-    if(!me||!other)return null;
-
-    const {data,error}=await supabaseClient
-      .from('user_blocks')
-      .select('id,blocker_id,blocked_id')
-      .eq('blocker_id',me)
-      .eq('blocked_id',other)
-      .maybeSingle();
-
-    if(error){
-      console.warn('Block lookup:',error.message);
-      return null;
-    }
+  async function ownBlock(otherId){
+    const p=getProfile();
+    if(!p||!otherId)return null;
+    const {data,error}=await supabaseClient.from('user_blocks').select('id').eq('blocker_id',sid(p.id)).eq('blocked_id',sid(otherId)).maybeSingle();
+    if(error) throw error;
     return data||null;
   }
 
-  async function getAnyBlock(otherId){
-    if(!window.currentProfile && typeof currentProfile==='undefined')return null;
-    const me=String(window.currentProfile?.id || currentProfile?.id || '');
-    const other=String(otherId||'');
-    if(!me||!other)return null;
-
-    const {data,error}=await supabaseClient
-      .from('user_blocks')
-      .select('id,blocker_id,blocked_id')
-      .or(`and(blocker_id.eq.${me},blocked_id.eq.${other}),and(blocker_id.eq.${other},blocked_id.eq.${me})`)
-      .limit(10);
-
-    if(error){
-      console.warn('Block relationship:',error.message);
-      return null;
-    }
-    return (data||[])[0]||null;
-  }
-
-  /* Replace the old insert-based block function with an idempotent version. */
-  window.toggleBlockUser=async function(otherId,otherName){
-    const profile=window.currentProfile || (typeof currentProfile!=='undefined'?currentProfile:null);
-    if(!profile||!otherId||String(otherId)===String(profile.id))return;
-
-    const me=String(profile.id);
-    const other=String(otherId);
-    const name=otherName||'User';
-
-    /* First check the exact row we own. */
-    const existing=await getOwnBlock(other);
-
-    if(existing){
-      if(!confirm(`Unblock ${name}?`))return;
-
-      const {error}=await supabaseClient
-        .from('user_blocks')
-        .delete()
-        .eq('blocker_id',me)
-        .eq('blocked_id',other);
-
-      if(error){
-        alert('Could not unblock this user. '+error.message);
-        return;
+  function paint(otherId,blocked){
+    document.querySelectorAll('#profileModal .block-user-btn').forEach(btn=>{
+      const raw=(btn.dataset.blockedUserId||btn.dataset.userId||btn.getAttribute('onclick')||'');
+      if(raw.includes(sid(otherId))){
+        btn.textContent=blocked?'↩ Unblock':'⛔ Block';
+        btn.disabled=false;
+        btn.style.pointerEvents='auto';
+        btn.style.cursor='pointer';
       }
-
-      alert(`${name} has been unblocked.`);
-    }else{
-      if(!confirm(`Block ${name}? You will not be able to message or start new transactions with each other while blocked.`))return;
-
-      /*
-       * UPSERT + ignoreDuplicates is deliberate:
-       * if the row already exists because another click/request created it,
-       * PostgreSQL will NOT throw user_blocks_blocker_id_blocked_id_key.
-       */
-      const {error}=await supabaseClient
-        .from('user_blocks')
-        .upsert(
-          {blocker_id:me,blocked_id:other},
-          {onConflict:'blocker_id,blocked_id',ignoreDuplicates:true}
-        );
-
-      if(error){
-        /* Race-safe fallback: if the row now exists, treat it as success. */
-        const nowExists=await getOwnBlock(other);
-        if(!nowExists){
-          alert('Could not block this user. '+error.message);
-          return;
-        }
-      }
-
-      alert(`${name} has been blocked.`);
-    }
-
-    /* Refresh the profile so Block <-> Unblock and Message disabled state update immediately. */
-    const profileModal=$('profileModal');
-    if(profileModal && !profileModal.classList.contains('hidden') &&
-       typeof window.openUserProfile==='function'){
-      await window.openUserProfile(other);
-    }
-
-    if(typeof loadProducts==='function'){
-      try{await loadProducts()}catch(_){}
-    }
-  };
-
-  /* Hard frontend protection: even if an old button is still clickable,
-     messaging a blocked account is refused. */
-  const originalMessage=window.messageUserFromProfile;
-  if(typeof originalMessage==='function' && !originalMessage.__v5Wrapped){
-    const wrappedMessage=async function(otherId){
-      const rel=await getAnyBlock(otherId);
-      if(rel){
-        alert('Messaging is unavailable because one account has blocked the other.');
-        return;
-      }
-      return originalMessage.apply(this,arguments);
-    };
-    wrappedMessage.__v5Wrapped=true;
-    window.messageUserFromProfile=wrappedMessage;
-  }
-
-  function disableBlockedMessageButtons(){
+    });
     const modal=$('profileModal');
-    if(!modal||modal.classList.contains('hidden'))return;
+    if(modal){
+      modal.querySelectorAll('.message-user-btn').forEach(btn=>{
+        btn.disabled=blocked;
+        btn.style.pointerEvents=blocked?'none':'auto';
+        btn.style.opacity=blocked?'.5':'1';
+      });
+    }
+  }
 
-    modal.querySelectorAll('.message-user-btn').forEach(btn=>{
-      if(btn.disabled){
-        btn.disabled=true;
-        btn.style.pointerEvents='none';
-        btn.style.cursor='not-allowed';
-      }
+  function hideProductsNow(otherId){
+    document.querySelectorAll('[data-seller-id]').forEach(el=>{
+      if(same(el.dataset.sellerId,otherId)) el.closest('.product-card')?.remove();
+    });
+    document.querySelectorAll('.product-card').forEach(card=>{
+      const seller=card.dataset.sellerId||card.querySelector('[data-seller-id]')?.dataset.sellerId;
+      if(seller&&same(seller,otherId)) card.remove();
     });
   }
 
-  function boot(){
-    ensureChatControl();
-    normalizeChatState();
-    wrapOpenChat();
-    wrapSelectConversation();
-    wrapCloseChat();
-    disableBlockedMessageButtons();
+  function refreshProductsInBackground(){
+    setTimeout(()=>{ try{ const fn=window.loadProducts||((typeof loadProducts==='function')?loadProducts:null); if(typeof fn==='function') Promise.resolve(fn()).catch(e=>console.warn('product refresh after block',e)); }catch(e){console.warn(e);} },0);
   }
 
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,300));
-  }else{
-    setTimeout(boot,300);
-  }
-
-  /* Existing code has several late renderers; keep the final UI stable. */
-  setInterval(boot,700);
-})();
-</script>
-
-
-<style id="AGRI_V6_LOGO_CHAT_BLOCK_FIX">
-/* LUNDUYAN is the only visible app logo. */
-.nav-brand{display:flex!important;align-items:center!important}
-.nav-brand .nav-logo{background:transparent!important;border:0!important;box-shadow:none!important;overflow:hidden!important}
-.nav-brand .nav-logo img{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;border-radius:0!important}
-.lunduyan-brand img{display:block!important;width:180px!important;height:auto!important;object-fit:contain!important}
-
-/* Messages: one real X, visible on PC + tablet + phone. */
-#chatModal .modal-card{position:relative!important;overflow:hidden!important}
-#chatModal .v5-chat-control{
-  position:absolute!important;
-  top:10px!important;
-  right:12px!important;
-  z-index:2147483647!important;
-  width:42px!important;
-  height:42px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  border:0!important;
-  background:transparent!important;
-  color:#17201b!important;
-  font-size:30px!important;
-  line-height:1!important;
-  font-weight:500!important;
-  padding:0!important;
-  margin:0!important;
-  cursor:pointer!important;
-  pointer-events:auto!important;
-}
-#chatModal .v5-chat-control:hover{background:rgba(0,0,0,.07)!important;border-radius:10px!important}
-#chatModal .chat-list-header{padding-right:65px!important}
-
-/* Make sure the X stays visible even when the contact list is the active pane. */
-#chatModal:not(.hidden) .v5-chat-control{visibility:visible!important;opacity:1!important}
-
-/* Blocked message buttons are truly disabled. */
-#profileModal .message-user-btn:disabled,
-#profileContent .message-user-btn:disabled{
-  opacity:.45!important;
-  pointer-events:none!important;
-  cursor:not-allowed!important;
-  filter:grayscale(1)!important;
-}
-</style>
-<script id="AGRI_V6_LOGO_CHAT_BLOCK_FIX_JS">
-(function(){
-  'use strict';
-  const $=id=>document.getElementById(id);
-
-  /* Rebuild the Messages control as ONE X and make it always close the modal. */
-  function forceMessagesX(){
-    const modal=$('chatModal'); if(!modal)return;
-    const card=modal.querySelector('.modal-card'); if(!card)return;
-
-    /* Remove every previous/injected chat close control. */
-    modal.querySelectorAll('.chat-header > .close,.final-chat-close,.v5-chat-control').forEach(b=>b.remove());
-
-    const x=document.createElement('button');
-    x.type='button';
-    x.className='v5-chat-control';
-    x.textContent='×';
-    x.title='Close Messages';
-    x.setAttribute('aria-label','Close Messages');
-    x.onclick=function(e){
-      e.preventDefault();
-      e.stopPropagation();
-      modal.classList.add('hidden');
-      modal.classList.remove('chat-has-selection');
-      $('chatWindow')?.classList.remove('active');
-      if(typeof currentConversation!=='undefined')currentConversation=null;
-      try{
-        const key=typeof chatSelectionKey==='function'?chatSelectionKey():null;
-        if(key)localStorage.removeItem(key);
-      }catch(_){ }
-      if(typeof finalMessageChannel!=='undefined' && finalMessageChannel){
-        try{supabaseClient.removeChannel(finalMessageChannel)}catch(_){ }
-        finalMessageChannel=null;
+  window.toggleBlockUser=async function(otherId,otherName){
+    if(busy)return;
+    const p=getProfile();
+    if(!p||!otherId||same(otherId,p.id))return;
+    busy=true;
+    try{
+      const existing=await ownBlock(otherId);
+      const name=otherName||'this user';
+      if(existing){
+        if(!confirm(`Unblock ${name}?`))return;
+        const {error}=await supabaseClient.from('user_blocks').delete().eq('blocker_id',sid(p.id)).eq('blocked_id',sid(otherId));
+        if(error) throw error;
+        paint(otherId,false);
+        const bm=$('blockedAccountsModal');
+        if(bm&&!bm.classList.contains('hidden')){
+          bm.querySelectorAll('.blocked-user').forEach(row=>{
+            const b=row.querySelector('.unblock-btn');
+            if((b?.getAttribute('onclick')||'').includes(sid(otherId))) row.remove();
+          });
+          const list=bm.querySelector('.blocked-list');
+          if(list&&!list.querySelector('.blocked-user')) list.outerHTML='<div class="blocked-empty"><div style="font-size:36px">🛡️</div><br><strong>No blocked accounts</strong></div>';
+        }
+        refreshProductsInBackground();
+      }else{
+        if(!confirm(`Block ${name}? Their products will disappear from your marketplace and you will not be able to message them.`))return;
+        const {error}=await supabaseClient.from('user_blocks').upsert({blocker_id:sid(p.id),blocked_id:sid(otherId)},{onConflict:'blocker_id,blocked_id',ignoreDuplicates:true});
+        if(error) throw error;
+        paint(otherId,true);
+        hideProductsNow(otherId);
+        refreshProductsInBackground();
       }
-      if(typeof messageChannel!=='undefined' && messageChannel){
-        try{supabaseClient.removeChannel(messageChannel)}catch(_){ }
-        messageChannel=null;
-      }
-    };
-    card.appendChild(x);
-  }
-
-  /* Race-safe block operation: never create a duplicate row. */
-  async function safeBlock(otherId,otherName){
-    const p=window.currentProfile || (typeof currentProfile!=='undefined'?currentProfile:null);
-    if(!p||!otherId||String(otherId)===String(p.id))return;
-    const me=String(p.id), other=String(otherId), name=otherName||'User';
-    const {data:existing}=await supabaseClient.from('user_blocks').select('id').eq('blocker_id',me).eq('blocked_id',other).maybeSingle();
-
-    if(existing){
-      if(!confirm(`Unblock ${name}?`))return;
-      const {error}=await supabaseClient.from('user_blocks').delete().eq('blocker_id',me).eq('blocked_id',other);
-      if(error){alert('Could not unblock this user. '+error.message);return;}
-    }else{
-      if(!confirm(`Block ${name}? You will not be able to message each other while blocked.`))return;
-      const {error}=await supabaseClient.from('user_blocks').upsert(
-        {blocker_id:me,blocked_id:other},
-        {onConflict:'blocker_id,blocked_id',ignoreDuplicates:true}
-      );
-      if(error){
-        const {data:now}=await supabaseClient.from('user_blocks').select('id').eq('blocker_id',me).eq('blocked_id',other).maybeSingle();
-        if(!now){alert('Could not block this user. '+error.message);return;}
-      }
-    }
-
-    if($('profileModal')&&!$('profileModal').classList.contains('hidden')&&typeof window.openUserProfile==='function'){
-      await window.openUserProfile(other);
-    }
-    if(typeof loadProducts==='function'){try{await loadProducts()}catch(_){}}
-  }
-
-  /* Use the final safe block handler so older insert handlers cannot win. */
-  window.toggleBlockUser=safeBlock;
-
-  function boot(){
-    forceMessagesX();
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,200));
-  else setTimeout(boot,200);
-  setInterval(boot,800);
-})();
-</script>
-
-
-
-
-
-
-<!-- BLOCKING SYSTEM FROM index (1).html -->
-<script id="AGRILINK_BLOCKING_SYSTEM_FROM_SOURCE">
-(function(){
-  'use strict';
-window.toggleBlockUser=async function(otherId,otherName){
-    if(!currentProfile||!otherId||same(otherId,currentProfile.id))return;
-    const rel=await getBlockRelationship(otherId);
-    if(rel.byMe){
-      if(!confirm(`Unblock ${otherName||'this user'}?`))return;
-      const {error}=await supabaseClient.from('user_blocks').delete().eq('blocker_id',sid(currentProfile.id)).eq('blocked_id',sid(otherId));
-      if(error){alert(error.message);return;}
-      alert(`${otherName||'User'} has been unblocked.`);
-    }else{
-      if(!confirm(`Block ${otherName||'this user'}? Their products will disappear from your marketplace and you will not be able to send new messages or start new transactions with each other.`))return;
-      const {error}=await supabaseClient.from('user_blocks').insert({blocker_id:sid(currentProfile.id),blocked_id:sid(otherId)});
-      if(error){alert(error.message);return;}
-      alert(`${otherName||'User'} has been blocked.`);
-    }
-    /* FREEZE FIX: do not reopen and fully rebuild the profile while the button click is still running. */
-    const profileModal=$('profileModal');
-    if(profileModal&&!profileModal.classList.contains('hidden')){
-      const blockBtn=profileModal.querySelector('.block-user-btn');
-      const messageBtn=profileModal.querySelector('.message-user-btn');
-      if(blockBtn)blockBtn.textContent=rel.byMe?'⛔ Block':'↩ Unblock';
-      if(messageBtn)messageBtn.disabled=!rel.byMe;
-    }
-    if($('blockedAccountsModal')&&!$('blockedAccountsModal').classList.contains('hidden'))await window.openBlockedAccounts();
-    if(typeof loadProducts==='function')await loadProducts();
+    }catch(err){
+      console.error('Block error:',err);
+      alert(err?.message||'Could not update block status.');
+    }finally{ busy=false; }
   };
+
+  // Keep the source button genuinely tappable; no MutationObserver or interval loop.
+  const fix=()=>document.querySelectorAll('#profileModal .block-user-btn').forEach(btn=>{
+    btn.disabled=false; btn.style.pointerEvents='auto'; btn.style.cursor='pointer'; btn.style.position='relative'; btn.style.zIndex='2';
+  });
+  document.addEventListener('DOMContentLoaded',fix);
+  document.addEventListener('click',e=>{ if(e.target.closest('#profileModal .block-user-btn')) fix(); },true);
 })();
 </script>
+
 </body>
 </html>
