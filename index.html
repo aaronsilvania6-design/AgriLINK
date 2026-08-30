@@ -2147,6 +2147,20 @@ body.modal-is-open{overscroll-behavior:none}
 .navbar,.modal-header,.profile-modal-header,.chat-header,.notification-header,.landing-nav{background:#199A48!important;border-color:#199A48!important;}
 #app>.navbar .nav-logo,.landing-nav .nav-logo,.landing-nav .brand-icon{background:#199A48!important;}
 </style>
+
+<style id="LUNDUYAN_GET_STARTED_PERFORMANCE_FIX">
+/* Keep the Get Started transition light on phones and desktop. */
+#landingScreen.hidden .market-preview,
+#landingScreen.hidden .floating-card{
+  animation:none !important;
+}
+.auth-container{
+  contain:layout paint style;
+}
+.auth-card .auth-logo img{
+  content-visibility:auto;
+}
+</style>
 </head>
 
 <body>
@@ -3160,16 +3174,20 @@ function setSignupMethod(method){
 }
 
 function showAuth(){
+  const landing = document.getElementById("landingScreen");
+  const auth = document.getElementById("authScreen");
+  if(!landing || !auth) return;
 
-  document
-    .getElementById("landingScreen")
-    .classList.add("hidden");
+  // Remove the animated landing DOM from the rendering path first.
+  landing.classList.add("hidden");
+  document.body.classList.add("auth-view");
+  window.scrollTo(0,0);
 
-  document
-    .getElementById("authScreen")
-    .classList.remove("hidden");
-
-  showLogin();
+  // Paint the lightweight auth screen on the next frame.
+  requestAnimationFrame(()=>{
+    auth.classList.remove("hidden");
+    showLogin();
+  });
 }
 
 
@@ -9338,7 +9356,7 @@ AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,350));else setTimeout(boot,350);
 
   /* Keep mobile badge counts synchronized with existing notification/message badges. */
-  setInterval(()=>{
+  setTimeout(()=>{
     const n=$('notificationBadge');setMobileBadge('mobileNotifBadge',n&&!n.classList.contains('hidden')?Number(n.textContent)||0:0);
     const c=document.querySelector('.chat-unread-badge');setMobileBadge('mobileChatBadge',c&&!c.classList.contains('hidden')?Number(String(c.textContent).replace('+',''))||0:0);
   },1500);
@@ -9364,7 +9382,7 @@ function run(){
  /* Block button must remain visible on desktop. */
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(run,300));else setTimeout(run,300);
-setInterval(run,700);
+setTimeout(run,700);
 })();
 </script>\n
 <!-- FINAL: KEEP LOGOUT + KEEP ONE MANAGE BLOCKED + REMOVE TOP BLOCK DESKTOP/TABLET -->
@@ -9416,7 +9434,7 @@ function fixProfile(){
 }
 function run(){fixProfile()}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(run,400));else setTimeout(run,400);
-setInterval(run,600);
+setTimeout(run,600);
 })();
 </script>
 
@@ -9442,7 +9460,7 @@ setInterval(run,600);
   }else{
     setTimeout(syncProfileBlockButton,200);
   }
-  setInterval(syncProfileBlockButton,700);
+  setTimeout(syncProfileBlockButton,700);
 })();
 </script>
 
@@ -9732,7 +9750,7 @@ setInterval(run,600);
     setTimeout(boot,300);
   }
 
-  setInterval(boot,500);
+  setTimeout(boot,500);
 })();
 </script>
 
@@ -10156,7 +10174,7 @@ setInterval(run,600);
     setTimeout(syncPhoneNav,200);
     setTimeout(syncPhoneNav,700);
   });
-  setInterval(syncPhoneNav,500);
+  setTimeout(syncPhoneNav,500);
   try{
     var app=document.getElementById('app');
     if(app){
@@ -10256,7 +10274,7 @@ setInterval(run,600);
   document.addEventListener('DOMContentLoaded',function(){
     sync();setTimeout(sync,100);setTimeout(sync,500);setTimeout(sync,1200);
   });
-  setInterval(sync,300);
+  setTimeout(sync,300);
   try{
     new MutationObserver(sync).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style']});
   }catch(e){}
@@ -10391,7 +10409,7 @@ setInterval(run,600);
   function boot(){wire();}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,150));
   else setTimeout(boot,150);
-  setInterval(boot,400);
+  setTimeout(boot,400);
 })();
 </script>
 
@@ -10695,7 +10713,7 @@ setInterval(run,600);
   /* If another script changes the class/button, immediately restore the correct state. */
   function boot(){wire();}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot); else boot();
-  setInterval(boot,200);
+  setTimeout(boot,200);
 })();
 </script>
 
@@ -10939,7 +10957,7 @@ setInterval(run,600);
     setTimeout(boot,250);
   }
 
-  setInterval(boot,500);
+  setTimeout(boot,500);
 })();
 </script>
 
@@ -10957,7 +10975,7 @@ setInterval(run,600);
     }));
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire);else wire();
-  setInterval(wire,1000);
+  setTimeout(wire,1000);
 })();
 </script>
 
@@ -10997,7 +11015,7 @@ setInterval(run,600);
     setTimeout(restorePhoneNav,300);
     setTimeout(restorePhoneNav,1000);
   });
-  setInterval(restorePhoneNav,1500);
+  setTimeout(restorePhoneNav,1500);
 })();
 </script>
 
@@ -11067,7 +11085,7 @@ setInterval(run,600);
     setTimeout(syncPhoneNav,200);
     setTimeout(syncPhoneNav,700);
   });
-  setInterval(syncPhoneNav,500);
+  setTimeout(syncPhoneNav,500);
   try{
     var app=document.getElementById('app');
     if(app){
@@ -11167,7 +11185,7 @@ setInterval(run,600);
   document.addEventListener('DOMContentLoaded',function(){
     sync();setTimeout(sync,100);setTimeout(sync,500);setTimeout(sync,1200);
   });
-  setInterval(sync,300);
+  setTimeout(sync,300);
   try{
     new MutationObserver(sync).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style']});
   }catch(e){}
