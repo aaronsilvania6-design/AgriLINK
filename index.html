@@ -2373,11 +2373,23 @@ minlength="8"
 required
 placeholder="Minimum 8 characters">
 
-<label>Account Type</label>
-<p class="auth-role-note">Choose your starting role. You can add the other role later without creating another account.</p>
-<select id="signupRole">
-<option value="BUYER">Buyer</option>
-<option value="FARMER">Farmer</option>
+<label>How will you use LUNDUYAN?</label>
+<p class="auth-role-note">Choose your role to personalize your marketplace experience.</p>
+<div class="signup-role-cards" role="radiogroup" aria-label="Choose your LUNDUYAN role">
+  <button type="button" class="signup-role-card active" data-signup-role="BUYER" aria-pressed="true">
+    <span class="signup-role-icon">🛒</span>
+    <span><strong>Buyer</strong><small>Find and buy fresh local products.</small></span>
+    <span class="signup-role-check">✓</span>
+  </button>
+  <button type="button" class="signup-role-card" data-signup-role="FARMER" aria-pressed="false">
+    <span class="signup-role-icon">🌾</span>
+    <span><strong>Farmer</strong><small>Sell your harvest and reach buyers.</small></span>
+    <span class="signup-role-check">✓</span>
+  </button>
+</div>
+<select id="signupRole" class="signup-role-native" aria-hidden="true" tabindex="-1">
+  <option value="BUYER" selected>Buyer</option>
+  <option value="FARMER">Farmer</option>
 </select>
 
 <button class="primary-btn" type="submit">
@@ -2407,10 +2419,6 @@ class="live-pill" style="margin-left:auto;margin-right:10px;font-size:11px;font-
 ● LIVE
 </div>
 
-<div id="roleSwitcherWrap" class="role-switcher-wrap hidden">
-  <button id="roleSwitcherBtn" type="button" class="role-switcher-btn" aria-haspopup="menu" aria-expanded="false">🌾 Role</button>
-  <div id="roleSwitcherMenu" class="role-switcher-menu hidden" role="menu"></div>
-</div>
 
 <div class="nav-actions">
 
@@ -10051,6 +10059,7 @@ setInterval(run,600);
 .role-switcher-menu button:hover{background:#eef8f1}
 .role-switcher-menu button.active{background:#eaf8ef;color:#16833b}
 .role-switcher-menu .role-add{border-top:1px solid #e7eee9;margin-top:5px;padding-top:10px;border-radius:0}
+ .signup-role-cards{display:grid;gap:9px;margin:-2px 0 14px}.signup-role-card{width:100%;display:grid;grid-template-columns:42px 1fr 24px;align-items:center;gap:11px;text-align:left;border:1.5px solid #e1e9e4;background:#fff;border-radius:15px;padding:11px 12px;cursor:pointer;transition:.18s}.signup-role-card:hover{border-color:#199A48;transform:translateY(-1px)}.signup-role-card.active{border-color:#199A48;background:#f3fbf6;box-shadow:0 5px 16px rgba(25,154,72,.10)}.signup-role-icon{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:#eef8f1;font-size:20px}.signup-role-card strong{display:block;font-size:13px;color:#17351f}.signup-role-card small{display:block;color:#718078;font-size:10px;line-height:1.35;margin-top:2px}.signup-role-check{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;border:1.5px solid #d7e2db;color:transparent;font-size:11px;font-weight:900}.signup-role-card.active .signup-role-check{background:#199A48;border-color:#199A48;color:#fff}.signup-role-native{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;margin:0!important;padding:0!important;border:0!important}
 .auth-method-toggle{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:4px;background:#f1f5f2;border:1px solid #e2e9e4;border-radius:12px;margin:-4px 0 12px;}
 .auth-method-btn{border:0;background:transparent;color:#5d6a61;border-radius:9px;padding:9px 10px;font-weight:900;font-size:12px;cursor:pointer;}
 .auth-method-btn.active{background:#fff;color:#16833b;box-shadow:0 2px 8px rgba(22,131,59,.10);}
@@ -10058,122 +10067,7 @@ setInterval(run,600);
 @media(max-width:900px){.role-switcher-wrap{display:none}}
 </style>
 
-<script id="LUNDUYAN_ONE_ACCOUNT_MULTI_ROLE">
-(function(){
-  'use strict';
-  const VALID=['BUYER','FARMER'];
-  const label=r=>r==='FARMER'?'🌾 Farmer':'🛒 Buyer';
-  const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  function current(){
-    try{return String(window.currentProfile?.role||'BUYER').toUpperCase();}catch(_){return 'BUYER';}
-  }
-  function getRoles(user){
-    const m=user?.user_metadata||{};
-    let roles=Array.isArray(m.roles)?m.roles:[];
-    const active=String(m.active_role||m.role||window.currentProfile?.role||'BUYER').toUpperCase();
-    const profile=String(window.currentProfile?.role||'').toUpperCase();
-    roles=[...roles.map(x=>String(x).toUpperCase()),active,profile].filter(x=>VALID.includes(x));
-    return [...new Set(roles)];
-  }
-  function setButton(roles){
-    const b=document.getElementById('roleSwitcherBtn');
-    const w=document.getElementById('roleSwitcherWrap');
-    if(!b||!w)return;
-    if(roles.length<1){w.classList.add('hidden');return;}
-    w.classList.remove('hidden');
-    b.textContent=label(current())+' ▾';
-  }
-  function renderMenu(roles){
-    const menu=document.getElementById('roleSwitcherMenu'); if(!menu)return;
-    const active=current();
-    let html=roles.map(r=>`<button type="button" class="${r===active?'active':''}" data-role="${r}">${label(r)}${r===active?' ✓':''}</button>`).join('');
-    if(roles.length===1){
-      const add=roles[0]==='BUYER'?'FARMER':'BUYER';
-      html+=`<button type="button" class="role-add" data-add-role="${add}">＋ Add ${label(add).replace(/^\S+\s/,'')} role</button>`;
-    }
-    menu.innerHTML=html;
-    menu.querySelectorAll('[data-role]').forEach(btn=>btn.addEventListener('click',()=>switchRole(btn.dataset.role)));
-    menu.querySelector('[data-add-role]')?.addEventListener('click',()=>addRole(menu.querySelector('[data-add-role]').dataset.addRole));
-  }
-  function openMenu(){
-    const menu=document.getElementById('roleSwitcherMenu'); const b=document.getElementById('roleSwitcherBtn'); if(!menu)return;
-    const roles=getRoles(window.currentUser); renderMenu(roles); menu.classList.toggle('hidden'); b?.setAttribute('aria-expanded',String(!menu.classList.contains('hidden')));
-  }
-  async function persistRoles(roles,active){
-    const clean=[...new Set(roles.filter(r=>VALID.includes(r)))];
-    if(!clean.includes(active))clean.push(active);
-    const user=window.currentUser;
-    if(!user)throw new Error('No signed-in user.');
-    const meta={...(user.user_metadata||{}),roles:clean,active_role:active,role:active};
-    const {data,error}=await supabaseClient.auth.updateUser({data:meta});
-    if(error)throw error;
 
-    /* Auth metadata is the source of truth for the active role.
-       This avoids breaking the role switcher when public.users has
-       restrictive UPDATE RLS policies. */
-    window.currentUser=data.user||user;
-    if(window.currentProfile)window.currentProfile.role=active;
-  }
-  async function switchRole(role){
-    role=String(role).toUpperCase();
-    const roles=getRoles(window.currentUser);
-    if(!VALID.includes(role)||!roles.includes(role))return;
-    if(role===current()){openMenu();return;}
-    showAuthMessage?.('Switching to '+(role==='FARMER'?'Farmer':'Buyer')+' mode...');
-    try{
-      await persistRoles(roles,role);
-      location.reload();
-    }catch(e){
-      console.error('Role switch failed',e);
-      alert('Unable to switch roles right now. Make sure your profile update permission is enabled in Supabase.');
-    }
-  }
-  async function addRole(role){
-    role=String(role).toUpperCase();
-    const roles=getRoles(window.currentUser);
-    if(!VALID.includes(role)||roles.includes(role))return;
-    const pretty=role==='FARMER'?'Farmer':'Buyer';
-    if(!confirm('Add '+pretty+' access to this same LUNDUYAN account?\n\nNo new email, phone number, or account will be created.'))return;
-    try{
-      await persistRoles([...roles,role],current());
-      alert(pretty+' access added. You can now switch between Buyer and Farmer mode from the Role menu.');
-      openMenu();
-    }catch(e){
-      console.error('Add role failed',e);
-      alert('Unable to add the role. Check your Supabase profile update permission.');
-    }
-  }
-  function init(){
-    const b=document.getElementById('roleSwitcherBtn');
-    if(b && b.dataset.multiRoleWired!=='1'){
-      b.dataset.multiRoleWired='1';
-      b.addEventListener('click',e=>{e.stopPropagation();openMenu();});
-      document.addEventListener('click',e=>{
-        const w=document.getElementById('roleSwitcherWrap'),m=document.getElementById('roleSwitcherMenu');
-        if(w&&!w.contains(e.target)){m?.classList.add('hidden');b.setAttribute('aria-expanded','false');}
-      });
-    }
-    const roles=getRoles(window.currentUser);
-    setButton(roles); renderMenu(roles);
-  }
-  // Final wrapper catches all later initializeApp wrappers in the existing app.
-  const wait=setInterval(()=>{
-    if(typeof window.initializeApp==='function' && window.initializeApp.__multiRoleWrapped!==true){
-      const base=window.initializeApp;
-      const wrapped=async function(user){
-        const result=await base(user);
-        init();
-        return result;
-      };
-      wrapped.__multiRoleWrapped=true;
-      window.initializeApp=wrapped;
-      clearInterval(wait);
-      init();
-    }
-  },100);
-  document.addEventListener('DOMContentLoaded',init);
-})();
-</script>
 <script>
   document.addEventListener("DOMContentLoaded",()=>setSignupMethod("email"));
 </script>
@@ -10999,5 +10893,22 @@ body.lunduyan-logged-in .mobile-bottom-nav{
 })();
 </script>
 
+<script id="LUNDUYAN_SIGNUP_ROLE_CARDS">
+(function(){
+  function wire(){
+    const select=document.getElementById('signupRole');
+    const cards=document.querySelectorAll('[data-signup-role]');
+    if(!select||!cards.length||select.dataset.cardsWired==='1')return;
+    select.dataset.cardsWired='1';
+    cards.forEach(card=>card.addEventListener('click',()=>{
+      const role=String(card.dataset.signupRole||'BUYER').toUpperCase();
+      select.value=role;
+      cards.forEach(c=>{const active=c.dataset.signupRole===role;c.classList.toggle('active',active);c.setAttribute('aria-pressed',String(active));});
+    }));
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire);else wire();
+  setInterval(wire,1000);
+})();
+</script>
 </body>
 </html>
