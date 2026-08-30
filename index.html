@@ -3590,6 +3590,19 @@ LOAD PRODUCTS
 
 async function loadProducts(){
 
+  // Always refresh the buyer's own block list BEFORE rendering products.
+  // This prevents products from reappearing after Refresh/Search/Clear Search.
+  if(currentProfile?.role === "BUYER"){
+    try{
+      const {data:blocks,error:blockError}=await supabaseClient
+        .from("user_blocks").select("blocked_id")
+        .eq("blocker_id",String(currentProfile.id));
+      if(!blockError){
+        window.__buyerBlockedSellerIds=new Set((blocks||[]).map(x=>String(x.blocked_id)));
+      }
+    }catch(e){ console.warn("Could not refresh buyer block list:",e); }
+  }
+
   const container =
     document.getElementById("products");
 
@@ -3680,6 +3693,12 @@ RENDER PRODUCTS
 ========================================================= */
 
 function renderProducts(products){
+
+  // Buyer-only visibility: products from farmers YOU blocked are hidden.
+  // A farmer blocking the buyer does not hide that farmer's products.
+  if(currentProfile?.role === "BUYER" && window.__buyerBlockedSellerIds instanceof Set){
+    products = (products || []).filter(p => !window.__buyerBlockedSellerIds.has(String(p.seller_id)));
+  }
 
   const container =
     document.getElementById("products");
@@ -8928,11 +8947,19 @@ AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
     });
   }
   const baseLoadProducts=window.loadProducts;
-  if(typeof baseLoadProducts==='function'){
-    window.loadProducts=async function(){
+  if(typeof baseLoadProducts==='function' && !baseLoadProducts.__buyerBlockVisibilityFixed){
+    const fixedBuyerLoadProducts=async function(){
+      if(currentProfile?.role==='BUYER'){
+        try{
+          const {data:blocks,error}=await supabaseClient.from('user_blocks').select('blocked_id').eq('blocker_id',sid(currentProfile.id));
+          if(!error) window.__buyerBlockedSellerIds=new Set((blocks||[]).map(x=>sid(x.blocked_id)));
+        }catch(e){console.warn('Buyer block list refresh:',e)}
+      }
       await baseLoadProducts.apply(this,arguments);
       await hideBlockedProducts();
     };
+    fixedBuyerLoadProducts.__buyerBlockVisibilityFixed=true;
+    window.loadProducts=fixedBuyerLoadProducts;
   }
 
   /* Also protect Buy and Chat from the frontend side. SQL trigger remains the final protection. */
@@ -9806,6 +9833,9 @@ setInterval(run,600);
         const {error}=await supabaseClient.from('user_blocks').delete().eq('blocker_id',sid(p.id)).eq('blocked_id',sid(otherId));
         if(error) throw error;
         paint(otherId,false);
+        if(currentProfile?.role==='BUYER' && window.__buyerBlockedSellerIds instanceof Set){
+          window.__buyerBlockedSellerIds.delete(sid(otherId));
+        }
         const bm=$('blockedAccountsModal');
         if(bm&&!bm.classList.contains('hidden')){
           bm.querySelectorAll('.blocked-user').forEach(row=>{
@@ -9821,6 +9851,10 @@ setInterval(run,600);
         const {error}=await supabaseClient.from('user_blocks').upsert({blocker_id:sid(p.id),blocked_id:sid(otherId)},{onConflict:'blocker_id,blocked_id',ignoreDuplicates:true});
         if(error) throw error;
         paint(otherId,true);
+        if(currentProfile?.role==='BUYER'){
+          if(!(window.__buyerBlockedSellerIds instanceof Set)) window.__buyerBlockedSellerIds=new Set();
+          window.__buyerBlockedSellerIds.add(sid(otherId));
+        }
         hideProductsNow(otherId);
         refreshProductsInBackground();
       }
