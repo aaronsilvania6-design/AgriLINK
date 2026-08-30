@@ -9751,75 +9751,7 @@ setTimeout(run,600);
   window.addEventListener('orientationchange',function(){setTimeout(sync,100);},{passive:true});
 })();
 </script>
-<style id="LUNDUYAN_MOBILE_PROFILE_LOGOUT_FIX">
-/* Mobile: Logout belongs inside Edit Profile/Profile actions.
-   Keep the desktop/top navigation logout unchanged. */
-@media (max-width:700px){
-  .nav-logout-btn{
-    display:none!important;
-  }
 
-  #agrilinkKeepLogout{
-    display:block!important;
-    width:100%!important;
-    min-height:48px!important;
-    margin-top:12px!important;
-    border-radius:14px!important;
-  }
-
-  /* If the profile action container is rendered dynamically,
-     make sure the recreated logout remains visible. */
-  .profile-action-row #agrilinkKeepLogout,
-  .profile-actions #agrilinkKeepLogout,
-  #myProfileModal #agrilinkKeepLogout{
-    display:block!important;
-  }
-}
-</style>
-
-<script id="LUNDUYAN_MOBILE_PROFILE_LOGOUT_FIX_JS">
-(function(){
-  'use strict';
-
-  function ensureMobileLogout(){
-    if(window.innerWidth > 700) return;
-
-    /* The existing profile repair already creates #agrilinkKeepLogout.
-       If profile content is rendered after login, this function simply
-       re-checks it without changing any other controls. */
-    const profile =
-      document.querySelector('#myProfileModal') ||
-      document.querySelector('.profile-modal') ||
-      document.querySelector('.profile-card');
-
-    if(!profile) return;
-
-    const logout = profile.querySelector('#agrilinkKeepLogout');
-    if(logout){
-      logout.style.setProperty('display','block','important');
-    }
-  }
-
-  function boot(){
-    ensureMobileLogout();
-
-    const observer = new MutationObserver(function(){
-      ensureMobileLogout();
-    });
-
-    observer.observe(document.body,{childList:true,subtree:true});
-  }
-
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',boot,{once:true});
-  }else{
-    boot();
-  }
-})();
-</script>
-
-</body>
-</html>
 <style id="AGRI_MESSAGE_BACK_FINAL_FIX">
 /* FINAL: Messages list = X / opened chat = — */
 #chatModal .chat-header > .close{
@@ -10478,5 +10410,5 @@ setTimeout(run,600);
 
 <!-- FINAL MOBILE NAV VISIBILITY OVERRIDE -->
 
-
-
+</body>
+</html>
