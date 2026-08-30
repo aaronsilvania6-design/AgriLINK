@@ -10813,5 +10813,110 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 else setTimeout(convertProfileBlock,100);
 })();
 </script>
+
+<!-- ONE FINAL CLICKABLE BLOCK FIX -->
+<style id="AGRILINK_ONE_FINAL_BLOCK_FIX_CSS">
+#profileModal .block-user-btn,#profileModal .profile-block-action{
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  cursor:pointer!important;
+  position:relative!important;
+  z-index:2147483647!important;
+  display:inline-flex!important;
+  visibility:visible!important;
+}
+</style>
+<script id="AGRILINK_ONE_FINAL_BLOCK_FIX_JS">
+(function(){
+'use strict';
+const sid=v=>String(v??'');
+let blockBusy=false;
+function getMe(){
+  try{ if(typeof currentProfile!=='undefined' && currentProfile) return currentProfile; }catch(_){ }
+  return window.currentProfile||null;
+}
+function getArgs(btn){
+  const raw=(btn?.dataset?.blockArgs||btn?.getAttribute('onclick')||'').replace(/&#39;/g,"'");
+  const m=raw.match(/toggleBlockUser\(\s*['\"]([^'\"]+)['\"]\s*,\s*['\"]([^'\"]*)/);
+  return m?{id:m[1],name:m[2]}:null;
+}
+function paint(userId,blocked){
+  document.querySelectorAll('#profileModal .block-user-btn,#profileModal .profile-block-action').forEach(b=>{
+    const a=getArgs(b);
+    if(!a||sid(a.id)===sid(userId)){
+      b.textContent=blocked?'↩ Unblock':'⛔ Block';
+      b.disabled=false;
+      b.style.pointerEvents='auto';
+      b.dataset.blocked=blocked?'1':'0';
+    }
+  });
+  const msg=document.querySelector('#profileModal .message-user-btn');
+  if(msg) msg.disabled=blocked;
+}
+function hideProducts(userId){
+  const id=sid(userId);
+  (window.__agrilinkHiddenFarmers||(window.__agrilinkHiddenFarmers=new Set())).add(id);
+  document.querySelectorAll('[data-seller-id],[data-farmer-id]').forEach(el=>{
+    const owner=sid(el.dataset.sellerId||el.dataset.farmerId);
+    if(owner===id)(el.closest('.product-card,.product-item,.market-product,article,li')||el).remove();
+  });
+}
+async function runBlock(otherId,otherName){
+  if(blockBusy)return;
+  const me=getMe();
+  if(!me||!otherId||sid(me.id)===sid(otherId))return;
+  blockBusy=true;
+  const myId=sid(me.id), userId=sid(otherId), name=otherName||'this user';
+  try{
+    const q=await supabaseClient.from('user_blocks').select('id').eq('blocker_id',myId).eq('blocked_id',userId).maybeSingle();
+    if(q.error && q.error.code!=='PGRST116')throw q.error;
+    if(q.data){
+      if(!confirm(`Unblock ${name}?`))return;
+      const {error}=await supabaseClient.from('user_blocks').delete().eq('blocker_id',myId).eq('blocked_id',userId);
+      if(error)throw error;
+      paint(userId,false);
+      if(window.__agrilinkHiddenFarmers)window.__agrilinkHiddenFarmers.delete(userId);
+      if(typeof loadProducts==='function')Promise.resolve(loadProducts()).catch(()=>{});
+    }else{
+      if(!confirm(`Block ${name}?`))return;
+      const {error}=await supabaseClient.from('user_blocks').insert({blocker_id:myId,blocked_id:userId});
+      if(error && !/duplicate|unique/i.test(error.message||''))throw error;
+      paint(userId,true);
+      hideProducts(userId);
+    }
+  }catch(err){console.error('Block failed:',err);alert(err?.message||'Could not update block status.');}
+  finally{blockBusy=false;}
+}
+window.toggleBlockUser=runBlock;
+// Capture every click BEFORE all old conflicting handlers.
+document.addEventListener('click',function(e){
+  const b=e.target.closest('#profileModal .block-user-btn,#profileModal .profile-block-action');
+  if(!b)return;
+  const a=getArgs(b);
+  if(!a)return;
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  runBlock(a.id,a.name);
+},true);
+// Repair buttons that an older patch renamed, while preserving their original arguments.
+function repair(){
+  document.querySelectorAll('#profileModal .profile-block-action').forEach(b=>{
+    if(!b.dataset.blockArgs && b.getAttribute('onclick'))b.dataset.blockArgs=b.getAttribute('onclick');
+    b.classList.add('block-user-btn');
+    b.style.pointerEvents='auto';
+    b.disabled=false;
+  });
+  document.querySelectorAll('#profileModal .block-user-btn').forEach(b=>{
+    b.style.pointerEvents='auto';
+    if(!b.dataset.blockArgs && b.getAttribute('onclick'))b.dataset.blockArgs=b.getAttribute('onclick');
+  });
+}
+document.addEventListener('DOMContentLoaded',repair,{once:true});
+const modal=document.getElementById('profileModal');
+if(modal){new MutationObserver(repair).observe(modal,{childList:true,subtree:true});}
+repair();
+})();
+</script>
+
 </body>
 </html>
