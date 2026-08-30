@@ -10093,6 +10093,210 @@ setTimeout(run,600);
   .auth-card .auth-logo{width:200px !important;height:50px !important;margin:0 auto 12px !important;}
   .auth-card .auth-logo img{width:200px !important;height:50px !important;object-position:center center !important;}
 }
+
+/* =========================================================
+   BEAUTIFIED SIGN-UP CONTROLS
+   - Premium segmented Email / Phone selector
+   - Clean Buyer / Farmer role cards
+   - Mobile-friendly touch targets
+   ========================================================= */
+
+.auth-method-toggle{
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  gap:5px !important;
+  width:100% !important;
+  padding:5px !important;
+  margin:7px 0 4px !important;
+  background:#f1f5f3 !important;
+  border:1px solid #e3ebe5 !important;
+  border-radius:14px !important;
+  box-sizing:border-box !important;
+}
+
+.auth-method-btn{
+  appearance:none !important;
+  -webkit-appearance:none !important;
+  width:100% !important;
+  min-height:44px !important;
+  padding:10px 12px !important;
+  border:0 !important;
+  border-radius:10px !important;
+  background:transparent !important;
+  color:#627068 !important;
+  font:inherit !important;
+  font-size:13px !important;
+  font-weight:800 !important;
+  cursor:pointer !important;
+  transition:all .18s ease !important;
+}
+
+.auth-method-btn:hover{
+  color:#16833b !important;
+  background:#fff !important;
+}
+
+.auth-method-btn.active{
+  color:#16833b !important;
+  background:#fff !important;
+  box-shadow:0 3px 10px rgba(18,53,31,.10) !important;
+}
+
+.auth-method-btn:active{
+  transform:scale(.98) !important;
+}
+
+.auth-role-note{
+  margin:7px 0 10px !important;
+  color:#748078 !important;
+  font-size:12px !important;
+  line-height:1.45 !important;
+}
+
+.signup-role-cards{
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  gap:10px !important;
+  margin:9px 0 14px !important;
+}
+
+.signup-role-card{
+  position:relative !important;
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  min-width:0 !important;
+  min-height:76px !important;
+  padding:12px !important;
+  text-align:left !important;
+  border:1.5px solid #dfe8e2 !important;
+  border-radius:15px !important;
+  background:#fff !important;
+  color:#203027 !important;
+  box-shadow:0 3px 12px rgba(18,53,31,.04) !important;
+  cursor:pointer !important;
+  transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease !important;
+}
+
+.signup-role-card:hover{
+  transform:translateY(-2px) !important;
+  border-color:#a9d5b7 !important;
+  box-shadow:0 9px 22px rgba(18,53,31,.08) !important;
+}
+
+.signup-role-card.active{
+  border-color:#16833b !important;
+  background:linear-gradient(180deg,#f8fffa 0%,#eefaf2 100%) !important;
+  box-shadow:0 8px 22px rgba(22,131,59,.12) !important;
+}
+
+.signup-role-icon{
+  flex:0 0 38px !important;
+  width:38px !important;
+  height:38px !important;
+  display:grid !important;
+  place-items:center !important;
+  border-radius:11px !important;
+  background:#f0f7f2 !important;
+  font-size:20px !important;
+}
+
+.signup-role-card.active .signup-role-icon{
+  background:#dff3e5 !important;
+}
+
+.signup-role-card > span:nth-child(2){
+  min-width:0 !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:2px !important;
+}
+
+.signup-role-card strong{
+  display:block !important;
+  font-size:13px !important;
+  line-height:1.2 !important;
+}
+
+.signup-role-card small{
+  display:block !important;
+  color:#7a857e !important;
+  font-size:10.5px !important;
+  line-height:1.35 !important;
+}
+
+.signup-role-check{
+  flex:0 0 19px !important;
+  width:19px !important;
+  height:19px !important;
+  display:grid !important;
+  place-items:center !important;
+  margin-left:auto !important;
+  border:1.5px solid #cbd8cf !important;
+  border-radius:50% !important;
+  background:#fff !important;
+  color:transparent !important;
+  font-size:11px !important;
+  font-weight:900 !important;
+}
+
+.signup-role-card.active .signup-role-check{
+  border-color:#16833b !important;
+  background:#16833b !important;
+  color:#fff !important;
+}
+
+.signup-role-native{
+  position:absolute !important;
+  width:1px !important;
+  height:1px !important;
+  opacity:0 !important;
+  pointer-events:none !important;
+}
+
+@media (max-width:700px){
+  .auth-method-toggle{
+    border-radius:13px !important;
+    margin-top:6px !important;
+  }
+
+  .auth-method-btn{
+    min-height:46px !important;
+    font-size:13px !important;
+  }
+
+  .signup-role-cards{
+    grid-template-columns:1fr !important;
+    gap:9px !important;
+  }
+
+  .signup-role-card{
+    min-height:70px !important;
+    padding:11px 12px !important;
+    border-radius:14px !important;
+  }
+
+  .signup-role-icon{
+    width:40px !important;
+    height:40px !important;
+    flex-basis:40px !important;
+  }
+
+  .signup-role-card small{
+    font-size:11px !important;
+  }
+}
+
+@media (max-width:380px){
+  .signup-role-card{
+    min-height:66px !important;
+  }
+
+  .signup-role-card small{
+    font-size:10px !important;
+  }
+}
+
 </style>
 <script id="AGRI_MESSAGES_X_FINAL_OVERRULE_JS">
 (function(){
@@ -10205,5 +10409,3 @@ setTimeout(run,600);
 
 
 <!-- FINAL MOBILE NAV VISIBILITY OVERRIDE -->
-
-
