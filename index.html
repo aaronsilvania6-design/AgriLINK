@@ -10165,6 +10165,104 @@ setInterval(run,600);
   }catch(e){}
 })();
 </script>
+
+
+<!-- FINAL MOBILE NAV VISIBILITY OVERRIDE -->
+<style id="LUNDUYAN_FINAL_MOBILE_NAV_OVERRIDE">
+@media (max-width:700px){
+  #mobileBottomNav.mobile-bottom-nav{
+    display:grid!important;
+    position:fixed!important;
+    left:0!important;right:0!important;bottom:0!important;
+    width:100%!important;
+    height:calc(70px + env(safe-area-inset-bottom))!important;
+    min-height:70px!important;
+    padding:7px 7px env(safe-area-inset-bottom)!important;
+    box-sizing:border-box!important;
+    visibility:visible!important;
+    opacity:1!important;
+    pointer-events:auto!important;
+    z-index:2147483647!important;
+  }
+  #mobileBottomNav.mobile-bottom-nav .mobile-nav-item{
+    display:flex!important;
+    visibility:visible!important;
+    opacity:1!important;
+  }
+  body{padding-bottom:calc(78px + env(safe-area-inset-bottom))!important;}
+}
+</style>
+<script id="LUNDUYAN_FINAL_MOBILE_NAV_OVERRIDE_JS">
+(function(){
+  'use strict';
+  function getLoggedIn(){
+    var app=document.getElementById('app');
+    if(!app || app.classList.contains('hidden')) return false;
+    try{
+      if(typeof currentUser !== 'undefined' && currentUser) return true;
+    }catch(e){}
+    try{
+      if(typeof window.currentUser !== 'undefined' && window.currentUser) return true;
+    }catch(e){}
+    try{
+      if(typeof currentProfile !== 'undefined' && currentProfile) return true;
+    }catch(e){}
+    try{
+      if(typeof window.currentProfile !== 'undefined' && window.currentProfile) return true;
+    }catch(e){}
+    return false;
+  }
+  function ensureNav(){
+    var nav=document.getElementById('mobileBottomNav');
+    if(!nav){
+      try{
+        if(typeof ensureMobileNav==='function') ensureMobileNav();
+      }catch(e){}
+      nav=document.getElementById('mobileBottomNav');
+    }
+    return nav;
+  }
+  function sync(){
+    var nav=ensureNav();
+    if(!nav) return;
+    var phone=window.innerWidth<=700;
+    var logged=getLoggedIn();
+    if(phone && logged){
+      nav.classList.add('mobile-bottom-nav');
+      nav.style.setProperty('display','grid','important');
+      nav.style.setProperty('visibility','visible','important');
+      nav.style.setProperty('opacity','1','important');
+      nav.style.setProperty('pointer-events','auto','important');
+      nav.style.setProperty('position','fixed','important');
+      nav.style.setProperty('left','0','important');
+      nav.style.setProperty('right','0','important');
+      nav.style.setProperty('bottom','0','important');
+      nav.style.setProperty('width','100%','important');
+      nav.style.setProperty('z-index','2147483647','important');
+      document.body.style.setProperty('padding-bottom','calc(78px + env(safe-area-inset-bottom))','important');
+      nav.querySelectorAll('.mobile-nav-item').forEach(function(b){
+        b.style.setProperty('display','flex','important');
+        b.style.setProperty('visibility','visible','important');
+        b.style.setProperty('opacity','1','important');
+      });
+    }else if(!phone){
+      nav.style.setProperty('display','none','important');
+    }else{
+      nav.style.setProperty('display','none','important');
+    }
+  }
+  window.addEventListener('resize',sync);
+  window.addEventListener('orientationchange',function(){setTimeout(sync,150);});
+  document.addEventListener('DOMContentLoaded',function(){
+    sync();setTimeout(sync,100);setTimeout(sync,500);setTimeout(sync,1200);
+  });
+  setInterval(sync,300);
+  try{
+    new MutationObserver(sync).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style']});
+  }catch(e){}
+})();
+</script>
+
 </body>
 </html>
 
@@ -10978,5 +11076,103 @@ setInterval(run,600);
   }catch(e){}
 })();
 </script>
+
+
+<!-- FINAL MOBILE NAV VISIBILITY OVERRIDE -->
+<style id="LUNDUYAN_FINAL_MOBILE_NAV_OVERRIDE">
+@media (max-width:700px){
+  #mobileBottomNav.mobile-bottom-nav{
+    display:grid!important;
+    position:fixed!important;
+    left:0!important;right:0!important;bottom:0!important;
+    width:100%!important;
+    height:calc(70px + env(safe-area-inset-bottom))!important;
+    min-height:70px!important;
+    padding:7px 7px env(safe-area-inset-bottom)!important;
+    box-sizing:border-box!important;
+    visibility:visible!important;
+    opacity:1!important;
+    pointer-events:auto!important;
+    z-index:2147483647!important;
+  }
+  #mobileBottomNav.mobile-bottom-nav .mobile-nav-item{
+    display:flex!important;
+    visibility:visible!important;
+    opacity:1!important;
+  }
+  body{padding-bottom:calc(78px + env(safe-area-inset-bottom))!important;}
+}
+</style>
+<script id="LUNDUYAN_FINAL_MOBILE_NAV_OVERRIDE_JS">
+(function(){
+  'use strict';
+  function getLoggedIn(){
+    var app=document.getElementById('app');
+    if(!app || app.classList.contains('hidden')) return false;
+    try{
+      if(typeof currentUser !== 'undefined' && currentUser) return true;
+    }catch(e){}
+    try{
+      if(typeof window.currentUser !== 'undefined' && window.currentUser) return true;
+    }catch(e){}
+    try{
+      if(typeof currentProfile !== 'undefined' && currentProfile) return true;
+    }catch(e){}
+    try{
+      if(typeof window.currentProfile !== 'undefined' && window.currentProfile) return true;
+    }catch(e){}
+    return false;
+  }
+  function ensureNav(){
+    var nav=document.getElementById('mobileBottomNav');
+    if(!nav){
+      try{
+        if(typeof ensureMobileNav==='function') ensureMobileNav();
+      }catch(e){}
+      nav=document.getElementById('mobileBottomNav');
+    }
+    return nav;
+  }
+  function sync(){
+    var nav=ensureNav();
+    if(!nav) return;
+    var phone=window.innerWidth<=700;
+    var logged=getLoggedIn();
+    if(phone && logged){
+      nav.classList.add('mobile-bottom-nav');
+      nav.style.setProperty('display','grid','important');
+      nav.style.setProperty('visibility','visible','important');
+      nav.style.setProperty('opacity','1','important');
+      nav.style.setProperty('pointer-events','auto','important');
+      nav.style.setProperty('position','fixed','important');
+      nav.style.setProperty('left','0','important');
+      nav.style.setProperty('right','0','important');
+      nav.style.setProperty('bottom','0','important');
+      nav.style.setProperty('width','100%','important');
+      nav.style.setProperty('z-index','2147483647','important');
+      document.body.style.setProperty('padding-bottom','calc(78px + env(safe-area-inset-bottom))','important');
+      nav.querySelectorAll('.mobile-nav-item').forEach(function(b){
+        b.style.setProperty('display','flex','important');
+        b.style.setProperty('visibility','visible','important');
+        b.style.setProperty('opacity','1','important');
+      });
+    }else if(!phone){
+      nav.style.setProperty('display','none','important');
+    }else{
+      nav.style.setProperty('display','none','important');
+    }
+  }
+  window.addEventListener('resize',sync);
+  window.addEventListener('orientationchange',function(){setTimeout(sync,150);});
+  document.addEventListener('DOMContentLoaded',function(){
+    sync();setTimeout(sync,100);setTimeout(sync,500);setTimeout(sync,1200);
+  });
+  setInterval(sync,300);
+  try{
+    new MutationObserver(sync).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style']});
+  }catch(e){}
+})();
+</script>
+
 </body>
 </html>
