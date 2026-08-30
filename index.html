@@ -9008,51 +9008,112 @@ setTimeout(run,700);
 @media(min-width:701px){
   .profile-action-row .block-user-btn{display:block!important}
 }
-#agrilinkKeepLogout{display:block!important;width:100%!important;min-height:44px!important;margin-top:12px!important}
+
+/* Logout belongs inside My Profile on mobile. Keep it visible below the profile actions. */
+#agrilinkKeepLogout{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:100%!important;
+  min-height:46px!important;
+  margin:14px 0 24px!important;
+  padding:12px 16px!important;
+  box-sizing:border-box!important;
+  border-radius:12px!important;
+  cursor:pointer!important;
+}
+
+#myProfileContent{
+  padding-bottom:110px!important;
+}
+
+@media(max-width:700px){
+  #myProfileModal .modal-card{
+    overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+}
 </style>
+
 <script id="agrilink-final-profile-actions-js">
 (function(){
-'use strict';
-function fixProfile(){
- const box=document.getElementById('myProfileContent');
- const modal=document.getElementById('myProfileModal');
- if(!box||!modal||modal.classList.contains('hidden'))return;
- /* Remove only duplicate/injected blocked-manager wrappers; keep ONE real manager button. */
- const managers=[...box.querySelectorAll('.mobile-blocked-management')];
- managers.slice(1).forEach(x=>x.remove());
- const buttons=[...box.querySelectorAll('button')].filter(b=>/Manage Blocked Accounts/i.test(b.textContent||''));
- buttons.slice(1).forEach(b=>b.closest('.mobile-blocked-management')?.remove()||b.remove());
- if(!box.querySelector('button'))return;
- /* Keep Logout. If the profile renderer removed it, recreate it here. */
- if(!box.querySelector('#agrilinkKeepLogout')){
-   const b=document.createElement('button');
-   b.id='agrilinkKeepLogout';b.type='button';b.className='danger-btn';b.textContent='🚪 Logout';
-   b.onclick=async function(){
-     if(!confirm('Are you sure you want to log out?'))return;
-     try{ if(typeof logout==='function') await logout(); else if(window.supabaseClient?.auth) await window.supabaseClient.auth.signOut(); }
-     finally{
-       document.getElementById('myProfileModal')?.classList.add('hidden');
-       document.getElementById('profileModal')?.classList.add('hidden');
-       document.getElementById('blockedAccountsModal')?.classList.add('hidden');
-       document.getElementById('chatModal')?.classList.add('hidden');
-       document.getElementById('notificationPanel')?.classList.add('hidden');
-       document.getElementById('mobileBottomNav')?.style.setProperty('display','none','important');
-       document.getElementById('app')?.classList.add('hidden');
-       document.getElementById('landingScreen')?.classList.remove('hidden');
-       document.getElementById('authScreen')?.classList.remove('hidden');
-       window.scrollTo(0,0);
-     }
-   };
-   box.appendChild(b);
- }
- /* Desktop/tablet: remove the Block button from another user's profile, but NEVER remove Logout/Manage Blocked. */
- if(window.matchMedia('(min-width:701px)').matches){
-   document.querySelectorAll('.profile-action-row .block-user-btn').forEach(b=>{b.style.setProperty('display','block','important');});
- }
-}
-function run(){fixProfile()}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(run,400));else setTimeout(run,400);
-setTimeout(run,600);
+  'use strict';
+
+  function addProfileLogout(){
+    const box=document.getElementById('myProfileContent');
+    const modal=document.getElementById('myProfileModal');
+    if(!box || !modal || modal.classList.contains('hidden')) return;
+
+    let logoutBtn=document.getElementById('agrilinkKeepLogout');
+
+    /* If a stale copy exists somewhere else, remove it first. */
+    if(logoutBtn && !box.contains(logoutBtn)){
+      logoutBtn.remove();
+      logoutBtn=null;
+    }
+
+    if(!logoutBtn){
+      logoutBtn=document.createElement('button');
+      logoutBtn.id='agrilinkKeepLogout';
+      logoutBtn.type='button';
+      logoutBtn.className='danger-btn';
+      logoutBtn.textContent='🚪 Logout';
+
+      logoutBtn.addEventListener('click', async function(){
+        if(!confirm('Are you sure you want to log out?')) return;
+
+        try{
+          if(typeof window.logout==='function'){
+            await window.logout();
+          }else if(window.supabaseClient?.auth){
+            await window.supabaseClient.auth.signOut();
+          }
+        }catch(err){
+          console.error('Logout failed:',err);
+          alert('Unable to log out right now. Please try again.');
+          return;
+        }
+
+        document.getElementById('myProfileModal')?.classList.add('hidden');
+        document.getElementById('profileModal')?.classList.add('hidden');
+        document.getElementById('blockedAccountsModal')?.classList.add('hidden');
+        document.getElementById('chatModal')?.classList.add('hidden');
+        document.getElementById('notificationPanel')?.classList.add('hidden');
+        window.scrollTo(0,0);
+      });
+    }
+
+    /*
+      Put Logout AFTER Manage Blocked Accounts.
+      This is the important fix: the button is physically inside the
+      scrollable profile content, so it cannot disappear behind the phone nav.
+    */
+    const manager=box.querySelector('.mobile-blocked-management');
+
+    if(manager){
+      manager.insertAdjacentElement('afterend',logoutBtn);
+    }else{
+      box.appendChild(logoutBtn);
+    }
+
+    logoutBtn.style.setProperty('display','flex','important');
+  }
+
+  function run(){
+    addProfileLogout();
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(run,250),{once:true});
+  }else{
+    setTimeout(run,250);
+  }
+
+  /* Re-run only when the profile is opened/refreshed. */
+  document.addEventListener('click',function(e){
+    const btn=e.target.closest?.('[onclick*="openMyProfile"], #profileButton, .nav-profile-btn');
+    if(btn) setTimeout(run,350);
+  });
 })();
 </script>
 <!-- FINAL PROFILE + MESSENGER RESPONSIVE FIX -->
@@ -10411,114 +10472,7 @@ setTimeout(run,600);
 <!-- FINAL MOBILE NAV VISIBILITY OVERRIDE -->
 
 
-<style id="LUNDUYAN_FINAL_PROFILE_LOGOUT_MESSAGES">
-/* ===== MOBILE PROFILE LOGOUT ===== */
-@media (max-width:700px){
-  .nav-logout-btn{display:none!important;}
 
-  #agrilinkKeepLogout{
-    display:flex!important;
-    align-items:center!important;
-    justify-content:center!important;
-    width:100%!important;
-    min-height:48px!important;
-    margin:14px 0 4px!important;
-    padding:12px 16px!important;
-    box-sizing:border-box!important;
-    border-radius:14px!important;
-  }
-
-  /* Also support common profile/edit-profile containers used by the app. */
-  #myProfileModal #agrilinkKeepLogout,
-  #editProfileModal #agrilinkKeepLogout,
-  .profile-modal #agrilinkKeepLogout,
-  .edit-profile #agrilinkKeepLogout{
-    display:flex!important;
-  }
-}
-
-/* ===== MESSAGES CONTACT-LIST X ===== */
-#chatModal .chat-contacts-close{
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  flex:0 0 40px!important;
-  width:40px!important;
-  height:40px!important;
-  padding:0!important;
-  margin-left:auto!important;
-  border:0!important;
-  border-radius:50%!important;
-  background:rgba(255,255,255,.14)!important;
-  color:#fff!important;
-  font-size:28px!important;
-  line-height:1!important;
-  cursor:pointer!important;
-  z-index:9999!important;
-}
-
-#chatModal .chat-contacts-close:hover{
-  background:rgba(255,255,255,.24)!important;
-}
-
-#chatModal:not(.chat-has-selection) .chat-header .close{
-  display:none!important;
-}
-
-#chatModal.chat-has-selection .chat-contacts-close{
-  display:none!important;
-}
-
-#chatModal.chat-has-selection .chat-header .close{
-  display:flex!important;
-}
-</style>
-
-<script id="LUNDUYAN_FINAL_PROFILE_LOGOUT_MESSAGES_JS">
-(function(){
-  'use strict';
-
-  function ensureProfileLogout(){
-    if(window.innerWidth > 700) return;
-
-    const logout = document.getElementById('agrilinkKeepLogout');
-    if(logout){
-      logout.style.setProperty('display','flex','important');
-    }
-  }
-
-  function ensureMessagesX(){
-    const modal=document.getElementById('chatModal');
-    if(!modal) return;
-
-    const x=modal.querySelector('.chat-contacts-close');
-    if(x){
-      x.textContent='×';
-      x.setAttribute('aria-label','Close Messages');
-      x.setAttribute('title','Close Messages');
-      if(!modal.classList.contains('chat-has-selection')){
-        x.style.setProperty('display','flex','important');
-      }
-    }
-  }
-
-  function boot(){
-    ensureProfileLogout();
-    ensureMessagesX();
-  }
-
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',boot,{once:true});
-  }else{
-    boot();
-  }
-
-  /* Only lightweight checks; no body-wide MutationObserver. */
-  setTimeout(boot,250);
-  setTimeout(boot,700);
-  setTimeout(boot,1500);
-})();
-</script>
 
 </body>
 </html>
