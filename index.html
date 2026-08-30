@@ -2161,6 +2161,19 @@ body.modal-is-open{overscroll-behavior:none}
   content-visibility:auto;
 }
 </style>
+<style id="LUNDUYAN_MOBILE_PERFORMANCE_FINAL">
+@media (max-width:700px){
+  /* Reduce expensive compositing/animation work on mobile browsers. */
+  .market-preview,.floating-card,.pulse-dot{animation:none!important;}
+  .market-preview{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}
+  .navbar,.landing-nav,.modal-card,.bot-window{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}
+  *{scroll-behavior:auto!important;}
+  .feature-card:hover,.product-card:hover,.quick-card:hover,.mini-product:hover{transform:none!important;}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important;}
+}
+</style>
 </head>
 
 <body>
@@ -6921,8 +6934,7 @@ initializeApp=async function(user){await __initEnhancedBase(user);setupRoleHome(
 <script>
 (function(){
   const sync=()=>document.body.classList.toggle('modal-open',!!document.querySelector('.modal:not(.hidden)'));
-  const obs=new MutationObserver(sync);
-  obs.observe(document.body,{subtree:true,attributes:true,attributeFilter:['class']});
+  // Lightweight: check modal state only when explicitly triggered by UI events.
   sync();
 })();
 </script>
@@ -9907,18 +9919,8 @@ setTimeout(run,600);
     setTimeout(boot,250);
   }
 
-  /* New modals can be created later (ex. order details). */
-  const bodyObserver=new MutationObserver(function(){
-    panels().forEach(p=>{
-      if(!p.__exclusiveObserved){
-        p.__exclusiveObserved=true;
-        observer.observe(p,{attributes:true,attributeFilter:['class']});
-      }
-    });
-    enforceOneOpen();
-  });
-
-  bodyObserver.observe(document.body,{childList:true,subtree:true});
+  /* Performance: avoid observing the entire document.
+     Individual panels are already observed above. */
 })();
 </script>
 
@@ -10275,9 +10277,7 @@ setTimeout(run,600);
     sync();setTimeout(sync,100);setTimeout(sync,500);setTimeout(sync,1200);
   });
   setTimeout(sync,300);
-  try{
-    new MutationObserver(sync).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style']});
-  }catch(e){}
+
 })();
 </script>
 
@@ -11186,9 +11186,7 @@ setTimeout(run,600);
     sync();setTimeout(sync,100);setTimeout(sync,500);setTimeout(sync,1200);
   });
   setTimeout(sync,300);
-  try{
-    new MutationObserver(sync).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style']});
-  }catch(e){}
+
 })();
 </script>
 
