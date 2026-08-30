@@ -2168,6 +2168,33 @@ body.modal-is-open{overscroll-behavior:none}
   *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important;}
 }
 </style>
+
+<style id="LUNDUYAN_COMMUNITY_BUY_DEMO_CSS">
+.buyer-community-section{scroll-margin-top:90px}
+.community-heading{align-items:flex-start}
+.community-subtitle{margin:4px 0 0;color:#718078;font-size:14px}
+.community-grid{display:grid;grid-template-columns:1.35fr 1fr 1fr;gap:14px}
+.community-card{background:linear-gradient(145deg,#f8fcf9,#eef8f1);border:1px solid #dcece1;border-radius:20px;padding:18px;box-shadow:0 8px 24px rgba(20,95,48,.06)}
+.community-main-card{display:flex;flex-direction:column;gap:10px}
+.community-icon{width:42px;height:42px;border-radius:13px;background:#fff;display:grid;place-items:center;font-size:22px;border:1px solid #e1eee5}
+.community-card h3{margin:2px 0 6px;color:#173d28}
+.community-card p{margin:0;color:#68776e;line-height:1.55;font-size:14px}
+.community-action{margin-top:auto;width:fit-content}
+.community-pills{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.community-pills span{font-size:12px;padding:7px 10px;border-radius:999px;background:#fff;border:1px solid #dbe9df;color:#287244}
+.market-pulse-list{display:grid;gap:8px;margin-top:12px}
+.market-pulse-item{display:flex;justify-content:space-between;gap:10px;padding:9px 10px;border-radius:12px;background:#fff;border:1px solid #e5eee8;font-size:12px}
+.market-pulse-item strong{color:#193d29}.market-pulse-item span{color:#278044;font-weight:800;white-space:nowrap}
+.pulse-empty{font-size:13px;color:#89968f;padding:4px 0}
+.open-groups-wrap{margin-top:14px;padding:17px;border:1px solid #e0ebe4;border-radius:18px;background:#fff}
+.open-groups-head{display:flex;justify-content:space-between;align-items:center;gap:10px}.open-groups-head h3{margin:0}.open-groups-head span{font-size:12px;color:#6e7c74}
+.demo-group-list{display:grid;gap:9px;margin-top:12px}.demo-group-row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:13px;border-radius:14px;background:#f7fbf8;border:1px solid #e2eee6}.demo-group-row strong{color:#173d28}.demo-group-row small{display:block;color:#77857d;margin-top:3px}.demo-group-progress{min-width:120px;text-align:right;color:#238043;font-weight:900}
+.group-buy-link{width:100%;margin:10px 0 7px;padding:12px 14px;border:1px solid #bfe2ca;background:#f2fbf4;color:#18743a;border-radius:12px;font-weight:800;cursor:pointer}
+.group-buy-hint{font-size:12px;line-height:1.45;color:#6d7c73;background:#f8faf8;border-radius:10px;padding:9px 11px;margin-bottom:12px}
+.group-buy-modal-card{max-width:560px}.group-product-info{background:#f3faf5;border:1px solid #dbece0;border-radius:14px;padding:13px;margin-bottom:14px}.group-math{margin:12px 0;padding:12px;border-radius:12px;background:#eef8f1;color:#16763a;font-weight:900;text-align:center}.demo-note{margin:10px 0 14px;padding:12px;border-radius:12px;background:#fff8e8;border:1px solid #f1dfaa;color:#705b21;font-size:12px;line-height:1.5}
+@media(max-width:900px){.community-grid{grid-template-columns:1fr}.community-main-card{min-height:0}.community-action{width:100%}}
+@media(max-width:600px){.community-card{padding:15px;border-radius:16px}.open-groups-wrap{padding:14px}.demo-group-row{grid-template-columns:1fr}.demo-group-progress{text-align:left;min-width:0}}
+</style>
 </head>
 <body>
 <!-- =======================================================
@@ -2436,6 +2463,45 @@ Refresh
 </div>
 <div class="products" id="products"></div>
 </section>
+<!-- =======================================================
+COMMUNITY BUYING HUB / MARKET PULSE (DEMO)
+======================================================= -->
+<section class="section buyer-community-section" id="communityBuyingHub">
+  <div class="section-title community-heading">
+    <div>
+      <div class="eyebrow">COMMUNITY BUYING</div>
+      <h2>Buy Together</h2>
+      <p class="community-subtitle">Pool smaller farm shares to reach bigger buyer demand.</p>
+    </div>
+    <button class="secondary-btn" type="button" onclick="refreshCommunityHub()">Refresh</button>
+  </div>
+  <div class="community-grid">
+    <div class="community-card community-main-card">
+      <div class="community-icon">🤝</div>
+      <div>
+        <h3>Group Buy Hub</h3>
+        <p>A farmer has 100kg but the buyer needs 500kg? Create a group and let other buyers combine shares from the same agreed-price listing.</p>
+      </div>
+      <button class="primary-btn community-action" type="button" onclick="openGroupBuyFromHub()">Start a Demo Group Buy</button>
+    </div>
+    <div class="community-card">
+      <div class="community-icon">📍</div>
+      <h3>Local Communities</h3>
+      <p>See nearby buyers and farmers who are joining the same buying group.</p>
+      <div class="community-pills"><span>Ilocos Norte</span><span>Ilocos Sur</span><span>La Union</span></div>
+    </div>
+    <div class="community-card market-pulse-card">
+      <div class="community-icon">📈</div>
+      <h3>Market Pulse</h3>
+      <p>Quick updates from products currently listed in the marketplace.</p>
+      <div id="marketPulseList" class="market-pulse-list"><div class="pulse-empty">Loading market updates…</div></div>
+    </div>
+  </div>
+  <div class="open-groups-wrap">
+    <div class="open-groups-head"><h3>Open Demo Groups</h3><span id="demoGroupCount">0 groups</span></div>
+    <div id="demoGroupList" class="demo-group-list"><div class="pulse-empty">No demo groups yet. Start one from a product.</div></div>
+  </div>
+</section>
 <section class="section hidden" id="farmerTransactions">
 <div class="section-title">
 <h2>Transactions</h2>
@@ -2561,6 +2627,8 @@ line-height:1.5;">
 No real money is charged. This creates a real demo order in Supabase,
 updates the available stock atomically, and sends the farmer a live notification.
 </div>
+<button class="group-buy-link" type="button" onclick="openGroupBuyFromProduct()">🤝 Need a bigger volume? Start / Join a Group Buy</button>
+<div id="groupBuyHint" class="group-buy-hint">Example: farmer has 100kg, but the community needs 500kg. Pool 5 shares instead of rejecting the deal.</div>
 <label>Buyer Note</label>
 <textarea id="buyerNote" placeholder="Optional note for the farmer"></textarea>
 <button class="primary-btn" type="submit">
@@ -2570,6 +2638,34 @@ Place Order
 </form>
 </div>
 </div>
+<!-- =======================================================
+GROUP BUY DEMO MODAL
+======================================================= -->
+<div class="modal hidden" id="groupBuyModal">
+  <div class="modal-card group-buy-modal-card">
+    <div class="modal-header">
+      <div>
+        <div class="eyebrow">DEMO FEATURE</div>
+        <h2>🤝 Group Buy</h2>
+      </div>
+      <button class="close" type="button" onclick="closeGroupBuyModal()">×</button>
+    </div>
+    <div id="groupBuyProductInfo" class="group-product-info"></div>
+    <form id="groupBuyForm">
+      <label>Target quantity needed</label>
+      <input id="groupTargetQuantity" type="number" min="1" step="0.01" value="500" required>
+      <label>Your share</label>
+      <input id="groupShareQuantity" type="number" min="0.01" step="0.01" value="100" required>
+      <label>Community / area</label>
+      <input id="groupCommunity" placeholder="e.g. Laoag / Ilocos Norte" value="Ilocos Norte">
+      <div class="group-math" id="groupMathPreview">5 shares × 100kg = 500kg target</div>
+      <div class="demo-note">🧪 <strong>Demo only.</strong> This does not collect payment or create a real group order. It demonstrates how buyers can pool demand around an agreed marketplace listing.</div>
+      <button class="primary-btn" type="submit">Create Demo Group</button>
+      <div id="groupBuyMessage"></div>
+    </form>
+  </div>
+</div>
+
 <!-- =======================================================
 MY PROFILE MODAL
 ======================================================= -->
@@ -2722,6 +2818,12 @@ let productChannel = null;
 let notificationChannel = null;
 
 let allProducts = [];
+// Expose selected app state to the optional community demo without replacing the existing variables.
+Object.defineProperties(window,{
+  currentProfile:{configurable:true,get:()=>currentProfile,set:v=>{currentProfile=v;}},
+  currentProduct:{configurable:true,get:()=>currentProduct,set:v=>{currentProduct=v;}},
+  allProducts:{configurable:true,get:()=>allProducts,set:v=>{allProducts=v;}}
+});
 
 // Competition-safe mode: purchases are simulated and never charge real money.
 const DEMO_PURCHASE_MODE = true;
@@ -3274,6 +3376,11 @@ async function initializeApp(user){
       "hidden",
       farmer
     );
+
+  const communityHub = document.getElementById("communityBuyingHub");
+  if(communityHub){
+    communityHub.classList.toggle("hidden", farmer);
+  }
 
   document
     .getElementById("buyerOrders")
@@ -10522,5 +10629,67 @@ setTimeout(run,700);
 
 
 
+
+<script id="LUNDUYAN_COMMUNITY_BUY_DEMO_JS">
+(function(){
+  const KEY='lunduyaan_demo_group_buys_v1';
+  function groups(){try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){return[]}}
+  function save(a){localStorage.setItem(KEY,JSON.stringify(a))}
+  function currentProductSafe(){return window.currentProduct||null}
+  function renderPulse(){
+    const el=document.getElementById('marketPulseList'); if(!el)return;
+    const products=Array.isArray(window.allProducts)?window.allProducts.slice(0,4):[];
+    if(!products.length){el.innerHTML='<div class="pulse-empty">Marketplace updates will appear here after products load.</div>';return}
+    el.innerHTML=products.map(p=>`<div class="market-pulse-item"><strong>${escapeHtml(String(p.name||'Product'))}</strong><span>₱${formatMoney(p.price||0)} / ${escapeHtml(String(p.unit||'unit'))}</span></div>`).join('');
+  }
+  function renderGroups(){
+    const el=document.getElementById('demoGroupList'), count=document.getElementById('demoGroupCount'); if(!el)return;
+    const arr=groups(); if(count)count.textContent=arr.length+' group'+(arr.length===1?'':'s');
+    if(!arr.length){el.innerHTML='<div class="pulse-empty">No demo groups yet. Start one from a product.</div>';return}
+    el.innerHTML=arr.slice().reverse().slice(0,6).map(g=>{
+      const pct=Math.min(100,(Number(g.committed)/Math.max(1,Number(g.target)))*100);
+      return `<div class="demo-group-row"><div><strong>${escapeHtml(g.productName)}</strong><small>${escapeHtml(g.community)} · Agreed ₱${formatMoney(g.price)} / ${escapeHtml(g.unit)} · Created by ${escapeHtml(g.buyerName||'Buyer')}</small></div><div class="demo-group-progress">${formatMoney(g.committed)} / ${formatMoney(g.target)} ${escapeHtml(g.unit)}<br><small>${Math.round(pct)}% filled</small></div></div>`;
+    }).join('');
+  }
+  window.refreshCommunityHub=function(){renderPulse();renderGroups()};
+  window.openGroupBuyFromHub=function(){
+    const p=(Array.isArray(window.allProducts)?window.allProducts.find(x=>Number(x.quantity)>0):null);
+    if(p){window.currentProduct=p;openGroupBuyModalFor(p);return}
+    alert('Load a product first, then start a Group Buy from its Buy button.');
+  };
+  window.openGroupBuyFromProduct=function(){
+    const p=currentProductSafe(); if(!p){alert('Please select a product first.');return} openGroupBuyModalFor(p);
+  };
+  function openGroupBuyModalFor(p){
+    const modal=document.getElementById('groupBuyModal'); if(!modal)return;
+    document.getElementById('groupBuyProductInfo').innerHTML=`<strong>${escapeHtml(String(p.name||'Product'))}</strong><br><span style="color:#16833b;font-weight:900">₱${formatMoney(p.price||0)}</span> / ${escapeHtml(String(p.unit||'unit'))}<br>Available from this listing: ${escapeHtml(String(p.quantity||0))} ${escapeHtml(String(p.unit||'unit'))}`;
+    const target=document.getElementById('groupTargetQuantity'), share=document.getElementById('groupShareQuantity');
+    target.value=Number(p.quantity)<500?500:Math.max(500,Number(p.quantity)); share.value=Math.min(Number(p.quantity)||100,100);
+    modal.dataset.productId=p.id; modal.classList.remove('hidden'); updateGroupMath();
+  }
+  window.closeGroupBuyModal=function(){const m=document.getElementById('groupBuyModal');if(m)m.classList.add('hidden')};
+  function updateGroupMath(){
+    const t=Number(document.getElementById('groupTargetQuantity')?.value||0), s=Number(document.getElementById('groupShareQuantity')?.value||0), el=document.getElementById('groupMathPreview');
+    if(!el)return; const shares=s>0?Math.ceil(t/s):0; el.textContent=shares?`${shares} shares × ${s} = ${t} ${currentProductSafe()?.unit||'kg'} target`:'Enter target and share quantities';
+  }
+  document.addEventListener('input',e=>{if(e.target.id==='groupTargetQuantity'||e.target.id==='groupShareQuantity')updateGroupMath()});
+  document.addEventListener('submit',e=>{
+    if(e.target.id!=='groupBuyForm')return; e.preventDefault();
+    const m=document.getElementById('groupBuyModal'), p=currentProductSafe(); if(!p||!m)return;
+    const target=Number(document.getElementById('groupTargetQuantity').value), share=Number(document.getElementById('groupShareQuantity').value), community=document.getElementById('groupCommunity').value.trim()||'Local community';
+    if(!Number.isFinite(target)||!Number.isFinite(share)||target<=0||share<=0){alert('Enter valid quantities.');return}
+    const arr=groups(); arr.push({id:'demo-'+Date.now(),productId:p.id,productName:p.name,price:Number(p.price||0),unit:p.unit||'kg',target,committed:share,community,buyerName:window.currentProfile?.full_name||'Buyer',createdAt:new Date().toISOString()}); save(arr);
+    document.getElementById('groupBuyMessage').innerHTML='<div class="message success">Demo group created! Other buyers can contribute shares toward the target. No payment was made.</div>';
+    renderGroups(); setTimeout(()=>{window.closeGroupBuyModal();document.getElementById('communityBuyingHub')?.scrollIntoView({behavior:'smooth',block:'start'});},700);
+  });
+  function boot(){renderPulse();renderGroups()}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+  setTimeout(boot,1200);
+  // Refresh market pulse whenever the app renders products.
+  const oldRender=window.renderProducts; if(typeof oldRender==='function' && !oldRender.__communityWrapped){
+    window.renderProducts=function(products){const r=oldRender.apply(this,arguments);setTimeout(renderPulse,0);return r}; window.renderProducts.__communityWrapped=true;
+  }
+})();
+</script>
 </body>
 </html>
