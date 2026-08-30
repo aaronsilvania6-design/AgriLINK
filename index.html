@@ -10602,5 +10602,95 @@ window.toggleBlockUser=async function(otherId,otherName){
 })();
 </script>
 
+
+<!-- FINAL BLOCK PRODUCT VISIBILITY FIX -->
+<script id="agrilink-final-block-product-visibility">
+(function(){
+'use strict';
+const sid=v=>String(v??'');
+const same=(a,b)=>sid(a)===sid(b);
+const hiddenFarmers=window.__agrilinkHiddenFarmers||new Set();
+window.__agrilinkHiddenFarmers=hiddenFarmers;
+
+function removeFarmerProducts(farmerId){
+  const id=sid(farmerId);
+  hiddenFarmers.add(id);
+  // Immediately remove rendered cards without waiting for a reload.
+  document.querySelectorAll('[data-seller-id]').forEach(el=>{
+    if(sid(el.dataset.sellerId)===id){
+      const card=el.closest('.product-card,.product-item,.market-product,article,li')||el;
+      card.remove();
+    }
+  });
+  // Also cover cards that carry seller/farmer IDs under other attribute names.
+  document.querySelectorAll('.product-card,[data-product-id]').forEach(card=>{
+    const v=card.dataset?.sellerId||card.dataset?.farmerId||card.getAttribute('data-seller-id')||card.getAttribute('data-farmer-id');
+    if(v && sid(v)===id) card.remove();
+  });
+  // Filter local product cache so future renders in this session stay hidden.
+  try{
+    if(Array.isArray(window.allProducts)) window.allProducts=window.allProducts.filter(x=>sid(x.seller_id)!==id);
+  }catch(e){}
+}
+
+async function restoreProductsAfterUnblock(farmerId){
+  hiddenFarmers.delete(sid(farmerId));
+  // Reload only after an unblock, so products return from the real source.
+  if(typeof window.loadProducts==='function'){
+    try{ await window.loadProducts(); }catch(e){ console.warn('Product reload after unblock:',e); }
+  }
+}
+
+// Final single block implementation. It deliberately does NOT reopen the profile.
+window.toggleBlockUser=async function(otherId,otherName){
+  const me=window.currentProfile;
+  if(!me||!otherId||same(otherId,me.id)) return;
+  const myId=sid(me.id), userId=sid(otherId), name=otherName||'this user';
+  const modal=document.getElementById('profileModal');
+  const btn=modal?.querySelector('.block-user-btn');
+  if(btn?.dataset.busy==='1') return;
+  if(btn) btn.dataset.busy='1';
+  try{
+    const q=await supabaseClient.from('user_blocks').select('id').eq('blocker_id',myId).eq('blocked_id',userId).maybeSingle();
+    if(q.error && q.error.code!=='PGRST116') throw q.error;
+    const isBlocked=!!q.data;
+    if(isBlocked){
+      if(!confirm(`Unblock ${name}?`)) return;
+      const {error}=await supabaseClient.from('user_blocks').delete().eq('blocker_id',myId).eq('blocked_id',userId);
+      if(error) throw error;
+      if(btn){btn.textContent='⛔ Block';btn.dataset.blocked='0';}
+      const msg=modal?.querySelector('.message-user-btn'); if(msg) msg.disabled=false;
+      // Products come back ONLY after successful unblock.
+      await restoreProductsAfterUnblock(userId);
+      if(document.getElementById('blockedAccountsModal')&&!document.getElementById('blockedAccountsModal').classList.contains('hidden')&&typeof window.openBlockedAccounts==='function') window.openBlockedAccounts();
+      return;
+    }
+    if(!confirm(`Block ${name}?`)) return;
+    const {error}=await supabaseClient.from('user_blocks').insert({blocker_id:myId,blocked_id:userId});
+    if(error) throw error;
+    // Immediate UI update and immediate product removal.
+    if(btn){btn.textContent='↩ Unblock';btn.dataset.blocked='1';}
+    const msg=modal?.querySelector('.message-user-btn'); if(msg) msg.disabled=true;
+    removeFarmerProducts(userId);
+    if(document.getElementById('blockedAccountsModal')&&!document.getElementById('blockedAccountsModal').classList.contains('hidden')&&typeof window.openBlockedAccounts==='function') window.openBlockedAccounts();
+  }catch(err){
+    console.error('Block error:',err);
+    alert(err?.message||'Could not update block status.');
+  }finally{
+    if(btn) delete btn.dataset.busy;
+  }
+};
+
+// Any later marketplace render is filtered using the live block list.
+const oldRender=window.renderProducts;
+if(typeof oldRender==='function'&&!window.__agrilinkRenderBlockPatched){
+  window.__agrilinkRenderBlockPatched=true;
+  window.renderProducts=function(products){
+    const list=Array.isArray(products)?products.filter(p=>!hiddenFarmers.has(sid(p.seller_id))):products;
+    return oldRender.call(this,list);
+  };
+}
+})();
+</script>
 </body>
 </html>
