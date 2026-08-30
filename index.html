@@ -8894,8 +8894,8 @@ AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
       alert(`${otherName||'User'} has been blocked.`);
     }
     if($('profileModal')&&!$('profileModal').classList.contains('hidden'))await window.openUserProfile(otherId);
-    if($('blockedAccountsModal')&&!$('blockedAccountsModal').classList.contains('hidden'))await window.openBlockedAccounts();
-    if(typeof loadProducts==='function')await loadProducts();
+    /* Do not reload Manage Blocked here; its dedicated handler removes rows instantly. */
+    if(typeof loadProducts==='function')Promise.resolve(loadProducts()).catch(console.warn);
   };
 
   window.reportUser=async function(otherId,otherName){
@@ -9031,6 +9031,42 @@ AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
     if(typeof selectConversation==='function')await selectConversation(c);
   };
 
+  /* Instant unblock from Manage Blocked Accounts: remove only the clicked row after DB success. */
+  window.unblockFromBlockedManager=async function(button,otherId,otherName){
+    if(!currentProfile||!otherId||!button||button.dataset.busy==='1')return;
+    if(!confirm(`Unblock ${otherName||'this user'}?`))return;
+    button.dataset.busy='1';
+    button.disabled=true;
+    button.textContent='Unblocking...';
+    try{
+      const {error}=await supabaseClient.from('user_blocks').delete()
+        .eq('blocker_id',sid(currentProfile.id))
+        .eq('blocked_id',sid(otherId));
+      if(error)throw error;
+
+      /* Remove immediately from the current Manage Blocked list — no modal reload. */
+      const row=button.closest('.blocked-user');
+      if(row)row.remove();
+
+      const content=$('blockedAccountsContent');
+      if(content&&!content.querySelector('.blocked-user')){
+        content.innerHTML='<div class="blocked-empty"><div style="font-size:36px">🛡️</div><br><strong>No blocked accounts</strong><div style="font-size:12px;margin-top:6px">Accounts you block will appear here.</div></div>';
+      }
+
+      /* Refresh other data in the background without blocking the UI. */
+      if(typeof loadProducts==='function')Promise.resolve(loadProducts()).catch(console.warn);
+      if($('profileModal')&&!$('profileModal').classList.contains('hidden')&&typeof window.openUserProfile==='function'){
+        Promise.resolve(window.openUserProfile(otherId)).catch(console.warn);
+      }
+    }catch(error){
+      console.error('Unblock failed:',error);
+      alert(error.message||'Could not unblock this user.');
+      button.disabled=false;
+      button.dataset.busy='0';
+      button.textContent='↩ Unblock';
+    }
+  };
+
   /* ---------------- Blocked Accounts: both roles ---------------- */
   window.openBlockedAccounts=async function(){
     if(!currentProfile)return;
@@ -9042,7 +9078,7 @@ AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
     if(error){content.innerHTML=`<div class="message error">${esc(error.message)}</div>`;return;}
     if(!blocks?.length){content.innerHTML='<div class="blocked-empty"><div style="font-size:36px">🛡️</div><br><strong>No blocked accounts</strong><div style="font-size:12px;margin-top:6px">Accounts you block will appear here.</div></div>';return;}
     const ids=blocks.map(x=>sid(x.blocked_id));const {data:users}=await supabaseClient.from('users').select('id,full_name,role').in('id',ids);const map=new Map((users||[]).map(x=>[sid(x.id),x]));
-    content.innerHTML=`<div class="blocked-list">${blocks.map(b=>{const u=map.get(sid(b.blocked_id))||{};const n=u.full_name||'User';return `<div class="blocked-user"><div class="blocked-user-info"><div class="blocked-avatar">${u.role==='FARMER'?'👨‍🌾':'🛒'}</div><div><button class="user-profile-link" onclick="openUserProfile('${esc(sid(b.blocked_id))}')">${esc(n)}</button><div class="blocked-user-role">${esc(u.role||'USER')}</div></div></div><button class="unblock-btn" onclick="toggleBlockUser('${esc(sid(b.blocked_id))}','${esc(n).replaceAll("'",'&#39;')}')">↩ Unblock</button></div>`}).join('')}</div>`;
+    content.innerHTML=`<div class="blocked-list">${blocks.map(b=>{const u=map.get(sid(b.blocked_id))||{};const n=u.full_name||'User';return `<div class="blocked-user"><div class="blocked-user-info"><div class="blocked-avatar">${u.role==='FARMER'?'👨‍🌾':'🛒'}</div><div><button class="user-profile-link" onclick="openUserProfile('${esc(sid(b.blocked_id))}')">${esc(n)}</button><div class="blocked-user-role">${esc(u.role||'USER')}</div></div></div><button class="unblock-btn" onclick="unblockFromBlockedManager(this,'${esc(sid(b.blocked_id))}','${esc(n).replaceAll("'",'&#39;')}')">↩ Unblock</button></div>`}).join('')}</div>`;
   };
 
   /* Give mobile users a clear place to manage their blocked accounts. */
