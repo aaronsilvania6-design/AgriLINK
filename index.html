@@ -6424,7 +6424,7 @@ function setupRoleHome(){
     <button class="ghost" onclick="loadOrders();document.getElementById('farmerTransactions').scrollIntoView({behavior:'smooth'})">View Orders</button>
     <button class="ghost" onclick="openMyProfile()">Edit Profile</button>
   ` : `
-    <button onclick="document.getElementById('buyerSearchSection').scrollIntoView({behavior:'smooth'})">🛒 Explore Marketplace</button>
+    <button onclick="loadProducts();document.getElementById('products').scrollIntoView({behavior:'smooth',block:'start'})">🛒 Explore Marketplace</button>
     <button class="ghost" onclick="document.getElementById('buyerOrders').scrollIntoView({behavior:'smooth'})">Track Orders</button>
     <button class="ghost" onclick="openChat()">💬 Message Farmers</button>
   `;
@@ -6446,7 +6446,7 @@ function setupRoleHome(){
       <span>Update your farmer information.</span>
     </div>
   ` : `
-    <div class="quick-card" onclick="document.getElementById('buyerSearchSection').scrollIntoView({behavior:'smooth'})">
+    <div class="quick-card" onclick="loadProducts();document.getElementById('products').scrollIntoView({behavior:'smooth',block:'start'})">
       <div class="quick-icon">🛒</div>
       <strong>Marketplace</strong>
       <span>Find fresh products from farmers.</span>
@@ -8992,7 +8992,7 @@ AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
     nav.setAttribute('aria-label','Mobile navigation');
     nav.innerHTML=`
       <button class="mobile-nav-item active" data-mobile-nav="home" type="button"><span class="mobile-nav-icon">⌂</span><span class="mobile-nav-label">Home</span></button>
-      <button class="mobile-nav-item" data-mobile-nav="market" type="button"><span class="mobile-nav-icon">🛒</span><span class="mobile-nav-label">Marketplace</span></button>
+      <button class="mobile-nav-item" data-mobile-nav="market" type="button"><span class="mobile-nav-icon" id="mobileMarketIcon">🛒</span><span class="mobile-nav-label" id="mobileMarketLabel">Marketplace</span></button>
       <button class="mobile-nav-item" data-mobile-nav="chat" type="button"><span class="mobile-nav-icon">💬</span><span class="mobile-nav-label">Messages</span><span id="mobileChatBadge" class="mobile-nav-badge hidden">0</span></button>
       <button class="mobile-nav-item" data-mobile-nav="notifications" type="button"><span class="mobile-nav-icon">🔔</span><span class="mobile-nav-label">Alerts</span><span id="mobileNotifBadge" class="mobile-nav-badge hidden">0</span></button>
       <button class="mobile-nav-item" data-mobile-nav="profile" type="button"><span class="mobile-nav-icon">👤</span><span class="mobile-nav-label">Profile</span></button>`;
@@ -9004,13 +9004,31 @@ AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
       const action=b.dataset.mobileNav;
       if(action==='home'){window.scrollTo({top:0,behavior:'smooth'});return;}
       if(action==='market'){
-        const target=isFarmer()?($('products')||$('farmerDashboard')):($('buyerSearchSection')||$('products'));
-        target?.scrollIntoView({behavior:'smooth',block:'start'});return;
+        // Buyer: Marketplace -> product list. Farmer: My Products -> product list.
+        const target=$('products');
+        if(typeof loadProducts==='function'){
+          try{ await loadProducts(); }catch(_){ /* scroll even if refresh fails */ }
+        }
+        target?.scrollIntoView({behavior:'smooth',block:'start'});
+        return;
       }
       if(action==='chat'){if(typeof openChat==='function')await openChat();return;}
       if(action==='notifications'){if(typeof toggleNotifications==='function')toggleNotifications();return;}
       if(action==='profile'){if(typeof openMyProfile==='function')await openMyProfile();return;}
     });
+  }
+
+  function updateMobileMarketLabel(){
+    const label=$('mobileMarketLabel');
+    const icon=$('mobileMarketIcon');
+    if(!label)return;
+    if(isFarmer()){
+      label.textContent='My Products';
+      if(icon)icon.textContent='🌾';
+    }else{
+      label.textContent='Marketplace';
+      if(icon)icon.textContent='🛒';
+    }
   }
 
   function setMobileBadge(id,n){
@@ -10810,6 +10828,8 @@ setInterval(run,600);
 
   function boot(){
     syncLoggedInState();
+    ensureMobileNav();
+    updateMobileMarketLabel();
     ensureStateObserver();
     normalizeRoleButton();
     wireMessages();
