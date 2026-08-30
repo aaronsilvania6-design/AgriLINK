@@ -10692,5 +10692,126 @@ if(typeof oldRender==='function'&&!window.__agrilinkRenderBlockPatched){
 }
 })();
 </script>
+
+
+<!-- ABSOLUTE FINAL PROFILE BLOCK BUTTON FIX -->
+<style id="AGRILINK_ABSOLUTE_PROFILE_BLOCK_FIX_CSS">
+#profileModal .profile-block-action{
+  background:#252525!important;
+  color:#fff!important;
+  border:0!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  cursor:pointer!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  position:relative!important;
+  z-index:2147483647!important;
+  min-height:44px!important;
+  -webkit-tap-highlight-color:transparent!important;
+}
+</style>
+<script id="AGRILINK_ABSOLUTE_PROFILE_BLOCK_FIX_JS">
+(function(){
+'use strict';
+const sid=v=>String(v??'');
+const same=(a,b)=>sid(a)===sid(b);
+let busy=false;
+
+function profile(){ return window.currentProfile||null; }
+function button(){ return document.querySelector('#profileModal .profile-block-action'); }
+function parseButton(b){
+  const raw=(b?.dataset.blockArgs||b?.getAttribute('onclick')||'').replace(/&#39;/g,"'");
+  const m=raw.match(/toggleBlockUser\(\s*['\"]([^'\"]+)['\"]\s*,\s*['\"]([^'\"]*)/);
+  return m?{id:m[1],name:m[2]}:null;
+}
+function paint(blocked){
+  const b=button();
+  if(b){ b.textContent=blocked?'↩ Unblock':'⛔ Block'; b.disabled=false; b.dataset.blocked=blocked?'1':'0'; }
+  const msg=document.querySelector('#profileModal .message-user-btn');
+  if(msg) msg.disabled=blocked;
+}
+
+async function finalToggle(otherId,otherName){
+  if(busy)return;
+  const me=profile();
+  if(!me||!otherId||same(otherId,me.id))return;
+  busy=true;
+  const b=button();
+  if(b) b.disabled=true;
+  const myId=sid(me.id), userId=sid(otherId), name=otherName||'this user';
+  try{
+    const {data,error:checkError}=await supabaseClient.from('user_blocks').select('id').eq('blocker_id',myId).eq('blocked_id',userId).maybeSingle();
+    if(checkError && checkError.code!=='PGRST116') throw checkError;
+    const blocked=!!data;
+    if(blocked){
+      if(!confirm(`Unblock ${name}?`))return;
+      const {error}=await supabaseClient.from('user_blocks').delete().eq('blocker_id',myId).eq('blocked_id',userId);
+      if(error)throw error;
+      paint(false);
+      if(window.__agrilinkHiddenFarmers)window.__agrilinkHiddenFarmers.delete(userId);
+      if(typeof window.loadProducts==='function')window.loadProducts().catch(()=>{});
+      const list=document.getElementById('blockedAccountsContent');
+      if(list){
+        [...list.querySelectorAll('.unblock-btn')].forEach(x=>{if((x.getAttribute('onclick')||'').includes(userId))x.closest('.blocked-user')?.remove();});
+        if(!list.querySelector('.blocked-user'))list.innerHTML='<div class="blocked-empty">🛡️<br><br><strong>No blocked accounts</strong></div>';
+      }
+    }else{
+      if(!confirm(`Block ${name}?`))return;
+      const {error}=await supabaseClient.from('user_blocks').upsert({blocker_id:myId,blocked_id:userId},{onConflict:'blocker_id,blocked_id',ignoreDuplicates:true});
+      if(error)throw error;
+      paint(true);
+      if(window.__agrilinkHiddenFarmers)window.__agrilinkHiddenFarmers.add(userId);
+      document.querySelectorAll('[data-seller-id],[data-farmer-id]').forEach(el=>{
+        const id=el.dataset.sellerId||el.dataset.farmerId;
+        if(same(id,userId))(el.closest('.product-card,.product-item,.market-product,article,li')||el).remove();
+      });
+    }
+  }catch(err){ console.error('Final block error:',err); alert(err?.message||'Could not update block status.'); }
+  finally{ busy=false; if(button())button().disabled=false; }
+}
+window.toggleBlockUser=finalToggle;
+
+function convertProfileBlock(){
+  const modal=document.getElementById('profileModal');
+  const old=modal?.querySelector('.block-user-btn');
+  if(!old||old.dataset.absoluteFixed==='1')return;
+  const args=parseButton(old);
+  if(!args)return;
+  old.dataset.blockArgs=old.getAttribute('onclick')||'';
+  old.removeAttribute('onclick');
+  old.classList.remove('block-user-btn');
+  old.classList.add('profile-block-action');
+  old.dataset.absoluteFixed='1';
+  old.type='button';
+  old.addEventListener('click',function(e){
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    finalToggle(args.id,args.name);
+  },true);
+  old.addEventListener('touchend',function(e){
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    finalToggle(args.id,args.name);
+  },true);
+}
+
+const originalOpen=window.openUserProfile;
+if(typeof originalOpen==='function'&&!window.__absoluteProfileBlockWrapped){
+  window.__absoluteProfileBlockWrapped=true;
+  window.openUserProfile=async function(){
+    const out=await originalOpen.apply(this,arguments);
+    convertProfileBlock();
+    return out;
+  };
+  window.openFarmerProfile=window.openUserProfile;
+}
+
+// Also convert an already-open profile without using intervals.
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(convertProfileBlock,100),{once:true});
+else setTimeout(convertProfileBlock,100);
+})();
+</script>
 </body>
 </html>
