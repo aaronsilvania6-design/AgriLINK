@@ -10080,6 +10080,150 @@ setTimeout(run,600);
 })();
 </script>
 
+
+<style id="LUNDUYAN_PROFILE_ONLY_LOGOUT_ROLE_FIX">
+/* =========================================================
+   FINAL NAVIGATION RULE
+   - NO Role Switcher anywhere.
+   - NO Logout button in the top navbar.
+   - Logout exists ONLY after opening Profile.
+   - Mobile Profile button stays in the bottom navigation.
+   ========================================================= */
+
+/* Completely remove the role switcher. */
+#roleSwitcherWrap,
+#roleSwitcherBtn,
+#roleSwitcherMenu{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+
+/* Remove the old top-navbar logout. */
+#app > .navbar .nav-logout-btn,
+#app > .navbar .logout-btn,
+#app > .navbar .logout-button,
+#app > .navbar button[data-action="logout"],
+#app > .navbar button[data-logout]{
+  display:none !important;
+}
+
+/* The previous mobile patch tried to expose generic Logout buttons.
+   Cancel that behavior specifically inside the top navbar. */
+@media(max-width:700px){
+  #app > .navbar [onclick*="logout" i]{
+    display:none !important;
+  }
+
+  /* Bottom navigation remains the phone navigation. */
+  body.lunduyan-logged-in .mobile-bottom-nav{
+    display:grid !important;
+  }
+
+  /* Profile button must remain tappable on phone. */
+  .mobile-bottom-nav [data-mobile-nav="profile"]{
+    display:flex !important;
+    visibility:visible !important;
+    opacity:1 !important;
+    pointer-events:auto !important;
+  }
+}
+
+/* Logout is ONLY the one generated inside My Profile. */
+#agrilinkKeepLogout{
+  display:flex !important;
+  width:100% !important;
+  min-height:48px !important;
+  align-items:center !important;
+  justify-content:center !important;
+  margin-top:14px !important;
+  border-radius:12px !important;
+}
+
+/* Never show the profile-only logout outside My Profile. */
+body > #agrilinkKeepLogout,
+#app > #agrilinkKeepLogout,
+.navbar #agrilinkKeepLogout{
+  display:none !important;
+}
+</style>
+
+<script id="LUNDUYAN_PROFILE_ONLY_LOGOUT_ROLE_FIX_JS">
+(function(){
+  'use strict';
+
+  function removeTopControls(){
+    /* Role switcher: gone everywhere. */
+    ['roleSwitcherWrap','roleSwitcherBtn','roleSwitcherMenu'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el){
+        el.classList.add('hidden');
+        el.style.setProperty('display','none','important');
+        el.style.setProperty('pointer-events','none','important');
+      }
+    });
+
+    /* Navbar logout: gone. */
+    document.querySelectorAll(
+      '#app > .navbar .nav-logout-btn,'+
+      '#app > .navbar .logout-btn,'+
+      '#app > .navbar .logout-button,'+
+      '#app > .navbar button[data-action="logout"],'+
+      '#app > .navbar button[data-logout]'
+    ).forEach(el=>{
+      el.style.setProperty('display','none','important');
+    });
+  }
+
+  function keepLogoutInsideProfile(){
+    const box=document.getElementById('myProfileContent');
+    const modal=document.getElementById('myProfileModal');
+    if(!box || !modal || modal.classList.contains('hidden')) return;
+
+    /* If the existing profile script already created it, leave it there. */
+    let logoutBtn=box.querySelector('#agrilinkKeepLogout');
+
+    /* Safety fallback: create it ONLY inside My Profile. */
+    if(!logoutBtn){
+      logoutBtn=document.createElement('button');
+      logoutBtn.id='agrilinkKeepLogout';
+      logoutBtn.type='button';
+      logoutBtn.className='danger-btn';
+      logoutBtn.textContent='🚪 Logout';
+      logoutBtn.addEventListener('click',async function(){
+        if(!confirm('Are you sure you want to log out?')) return;
+        try{
+          if(typeof logout==='function') await logout();
+          else if(window.supabaseClient?.auth) await window.supabaseClient.auth.signOut();
+        }finally{
+          modal.classList.add('hidden');
+          window.scrollTo(0,0);
+        }
+      });
+      box.appendChild(logoutBtn);
+    }
+
+    logoutBtn.style.setProperty('display','flex','important');
+    logoutBtn.style.setProperty('width','100%','important');
+  }
+
+  function boot(){
+    removeTopControls();
+    keepLogoutInsideProfile();
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',boot,{once:true});
+  }else{
+    boot();
+  }
+
+  setTimeout(boot,200);
+  setTimeout(boot,700);
+  setInterval(boot,1000);
+})();
+</script>
+
 </body>
 </html>
 <style id="AGRI_MESSAGE_BACK_FINAL_FIX">
