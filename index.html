@@ -8872,11 +8872,12 @@ AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
   async function getBlockedUserIds(){
     if(!window.currentProfile)return new Set();
     const me=sid(currentProfile.id);
-    const {data,error}=await supabaseClient.from('user_blocks').select('blocker_id,blocked_id')
-      .or(`blocker_id.eq.${me},blocked_id.eq.${me}`);
+    // Marketplace visibility is based ONLY on users the current buyer blocked.
+    // If a farmer blocked the buyer, that must NOT hide the farmer's products here.
+    const {data,error}=await supabaseClient.from('user_blocks').select('blocked_id')
+      .eq('blocker_id',me);
     if(error){console.warn('Blocked users:',error.message);return new Set();}
-    const set=new Set();(data||[]).forEach(x=>{if(same(x.blocker_id,me))set.add(sid(x.blocked_id));else set.add(sid(x.blocker_id));});
-    return set;
+    return new Set((data||[]).map(x=>sid(x.blocked_id)));
   }
 
   window.toggleBlockUser=async function(otherId,otherName){
@@ -9828,48 +9829,6 @@ setInterval(run,600);
       alert(err?.message||'Could not update block status.');
     }finally{ busy=false; }
   };
-
-
-  /* =========================================================
-     FINAL FIX - BUYER BLOCKED FARMER PRODUCT VISIBILITY
-     A blocked farmer's products are removed from the buyer's
-     working product list, so Search/Clear Search cannot bring
-     them back. After unblock, loadProducts rebuilds the list
-     and the products return automatically.
-     ========================================================= */
-  const __finalLoadProducts = window.loadProducts;
-  if(typeof __finalLoadProducts === 'function'){
-    window.loadProducts = async function(){
-      await __finalLoadProducts.apply(this, arguments);
-
-      if(currentProfile?.role !== 'BUYER') return;
-
-      const {data: blockRows, error: blockError} = await supabaseClient
-        .from('user_blocks')
-        .select('blocked_id')
-        .eq('blocker_id', sid(currentProfile.id));
-
-      if(blockError){
-        console.warn('Could not load blocked farmers:', blockError.message);
-        return;
-      }
-
-      const blockedIds = new Set((blockRows || []).map(row => sid(row.blocked_id)));
-
-      /* Keep the source list itself filtered so Search and Clear Search
-         can never re-display a blocked farmer's products. */
-      const source = Array.isArray(window.allProducts) ? window.allProducts : [];
-      window.allProducts = source.filter(product => !blockedIds.has(sid(product.seller_id)));
-      allProducts = window.allProducts;
-
-      if(typeof renderProducts === 'function'){
-        renderProducts(window.allProducts);
-      }
-    };
-
-    /* Global function binding used elsewhere in the page. */
-    loadProducts = window.loadProducts;
-  }
 
   // Keep the source button genuinely tappable; no MutationObserver or interval loop.
   const fix=()=>document.querySelectorAll('#profileModal .block-user-btn').forEach(btn=>{
