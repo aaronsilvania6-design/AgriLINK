@@ -1440,7 +1440,7 @@ RESPONSIVE
 }
 
 /* =========================================================
-   AGRILINK ENHANCED COMPETITION UI
+   LUNDUYAN ENHANCED COMPETITION UI
    ========================================================= */
 :root{
   --role-primary:#16833b;
@@ -1693,7 +1693,7 @@ body.modal-is-open{overscroll-behavior:none}
 .rating-rule{margin-top:7px;color:#718078;font-size:12px;line-height:1.5;background:#f7faf8;border:1px solid #e4ece6;padding:10px 12px;border-radius:10px}
 
 
-/* AGRILINK UNIVERSAL GREEN TITLE BARS */
+/* LUNDUYAN UNIVERSAL GREEN TITLE BARS */
 :root{--titlebar-green:#199A48;--titlebar-green-dark:#11733A}
 .navbar, .modal-header, .profile-modal-header, .chat-header, .notification-header, .landing-nav{
   background:var(--titlebar-green)!important;
@@ -1721,8 +1721,8 @@ body.modal-is-open{overscroll-behavior:none}
 @media(max-width:600px){#profileContent{padding-bottom:24px}}
 
 </style>
-<meta content="FINAL-ROLE-MOBILE-NAV-FIX-2026-08-29" name="agrilink-build"/>
-<style id="agrilink-buyer-chat-mobile-final">
+<meta content="FINAL-ROLE-MOBILE-NAV-FIX-2026-08-29" name="lunduyan-build"/>
+<style id="lunduyan-buyer-chat-mobile-final">
 /* =========================================================
    BUYER/FARMER CHAT — FINAL MOBILE LAYOUT
    Keeps contacts visible on phones and prevents the chat
@@ -1897,8 +1897,8 @@ body.modal-is-open{overscroll-behavior:none}
   }
 }
 </style>
-<meta content="BUYER-MESSAGES-MOBILE-PERSIST-2026-08-29" name="agrilink-build"/>
-<style id="agrilink-mobile-polish">
+<meta content="BUYER-MESSAGES-MOBILE-PERSIST-2026-08-29" name="lunduyan-build"/>
+<style id="lunduyan-mobile-polish">
 /* =========================================================
    FINAL MOBILE POLISH
    Designed for narrow phones: no cramped 2-column cards,
@@ -2256,7 +2256,7 @@ LANDING
 <p>Discover local products, connect directly with farmers, and make every transaction feel simple, trusted, and personal.</p>
 <div class="hero-buttons">
 <button class="hero-primary" onclick="showAuth()">Start Trading <b>→</b></button>
-<button class="hero-secondary" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">Explore AgriLink <span>↓</span></button>
+<button class="hero-secondary" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">Explore Lunduyan <span>↓</span></button>
 </div>
 <div class="hero-trust">
 <div class="trust-avatars"><span>🌱</span><span>🧑‍🌾</span><span>🛒</span></div>
@@ -2304,7 +2304,7 @@ LANDING
 <div><strong>04</strong><span>Build trust through<br/>ratings</span></div>
 </div>
 <section class="features" id="features">
-<div class="section-kicker">WHY AGRILINK</div>
+<div class="section-kicker">WHY LUNDUYAN</div>
 <h2>Everything agriculture needs,<br/><span>in one place.</span></h2>
 <p class="section-lead">A marketplace designed around real farmers, real buyers, and a smoother way to trade.</p>
 <div class="feature-grid">
@@ -2323,7 +2323,7 @@ AUTH
 <div style="font-size:55px;margin-bottom:25px">🌾</div>
 <h1>Grow your marketplace.</h1>
 <p>
-Join AgriLink and connect agricultural supply with real opportunities.
+Join Lunduyan and connect agricultural supply with real opportunities.
 </p>
 <div class="auth-points">
 <div class="auth-point">✓ Discover agricultural products</div>
@@ -2469,8 +2469,8 @@ Clear
 </div>
 </section>
 <section class="role-home" id="roleHomePanel">
-<div class="eyebrow" id="roleHomeEyebrow">AGRILINK</div>
-<h2 id="roleHomeTitle">Welcome to AgriLink</h2>
+<div class="eyebrow" id="roleHomeEyebrow">LUNDUYAN</div>
+<h2 id="roleHomeTitle">Welcome to Lunduyan</h2>
 <p id="roleHomeText">Your marketplace dashboard is ready.</p>
 <div class="role-home-actions" id="roleHomeActions"></div>
 </section>
@@ -2731,7 +2731,7 @@ AGRIBOT
 <button aria-label="Open AgriBot" class="bot-launcher" id="botLauncher" onclick="toggleAgriBot()">🌱</button>
 <div class="bot-window hidden" id="botWindow">
 <div class="bot-header">
-<div><strong>AgriBot</strong><small>Your AgriLink helper</small></div>
+<div><strong>AgriBot</strong><small>Your Lunduyan helper</small></div>
 <button class="close" onclick="toggleAgriBot()" style="color:#fff">×</button>
 </div>
 <div class="bot-messages" id="botMessages"></div>
@@ -2785,7 +2785,7 @@ CHAT MODAL
 Select a conversation
 </div>
 <div class="online">
-● AgriLink Chat
+● Lunduyan Chat
 </div>
 </div>
 <button class="close" onclick="closeChat()">
@@ -3237,7 +3237,7 @@ async function getOrCreateProfile(user){
     (
       user.email
       ? user.email.split("@")[0]
-      : "AgriLink User"
+      : "Lunduyan User"
     );
 
   const role =
@@ -3320,7 +3320,7 @@ async function initializeApp(user){
   }catch(error){
 
     showAuthMessage(
-      "Your account exists, but AgriLink could not create your profile: " +
+      "Your account exists, but Lunduyan could not create your profile: " +
       error.message,
       "error"
     );
@@ -3897,7 +3897,7 @@ async function openFarmerProfile(farmerId){
       </div>
 
       <div class="profile-bio">
-        Welcome to my AgriLink farmer profile.
+        Welcome to my Lunduyan farmer profile.
         Browse my available agricultural products below.
       </div>
 
@@ -6164,7 +6164,7 @@ START
 checkSession();
 
 /* =========================================================
-   ENHANCED AGRILINK FEATURES
+   ENHANCED LUNDUYAN FEATURES
    ========================================================= */
 
 let reviewRating = 0;
@@ -6448,7 +6448,7 @@ openFarmerProfile = async function(farmerId){
     const productName=card.querySelector('.mini-product-name')?.textContent?.trim();
     const productList=main.querySelectorAll('.mini-product');
     const idx=Array.from(productList).indexOf(card);
-    const ids=window.__agrilinkProfileProductIds||[];
+    const ids=window.__lunduyanProfileProductIds||[];
     if(ids[idx]){
       card.setAttribute('role','button');
       card.setAttribute('tabindex','0');
@@ -6479,7 +6479,7 @@ openFarmerProfile = async function(farmerId){
   const ids=[];
   const {data:products}=await supabaseClient.from('products').select('id').eq('seller_id',farmerId).eq('status','ACTIVE').gt('quantity',0).order('created_at',{ascending:false});
   (products||[]).forEach(p=>ids.push(p.id));
-  window.__agrilinkProfileProductIds=ids;
+  window.__lunduyanProfileProductIds=ids;
   cards.forEach((card,i)=>{
     if(!ids[i]) return;
     card.classList.add('profile-product-clickable');
@@ -6539,7 +6539,7 @@ async function reportFarmer(farmerId,farmerName){
     }else alert(error.message);
     return;
   }
-  alert('Report submitted. Thank you for helping keep AgriLink trustworthy.');
+  alert('Report submitted. Thank you for helping keep Lunduyan trustworthy.');
 }
 
 const __loadProductsWithBlocksBase = loadProducts;
@@ -6628,7 +6628,7 @@ async function reportReview(reviewId){
     else alert(error.message);
     return;
   }
-  alert('Report submitted. Thank you for helping keep AgriLink trustworthy.');
+  alert('Report submitted. Thank you for helping keep Lunduyan trustworthy.');
 }
 
 /* =========================================================
@@ -6642,7 +6642,7 @@ function toggleAgriBot(){
 function openAgriBotWelcome(){
   const w=document.getElementById('botWindow'); if(w.classList.contains('hidden')) w.classList.remove('hidden');
   const box=document.getElementById('botMessages');
-  if(!box.children.length) botSay(`Hi ${currentProfile?.full_name||'there'}! I’m AgriBot 🌱. I can guide you around AgriLink, including buying, selling, profiles, orders and ratings.`);
+  if(!box.children.length) botSay(`Hi ${currentProfile?.full_name||'there'}! I’m AgriBot 🌱. I can guide you around Lunduyan, including buying, selling, profiles, orders and ratings.`);
 }
 function botSay(text){const box=document.getElementById('botMessages');box.insertAdjacentHTML('beforeend',`<div class="bot-msg bot">${escapeHtml(text)}</div>`);box.scrollTop=box.scrollHeight}
 function botUser(text){const box=document.getElementById('botMessages');box.insertAdjacentHTML('beforeend',`<div class="bot-msg user">${escapeHtml(text)}</div>`);box.scrollTop=box.scrollHeight}
@@ -6657,7 +6657,7 @@ function botReply(text){
   else if(q.includes('farmer')) reply='Farmer accounts focus on listings, stock, orders, customer trust and their public farmer profile.';
   else if(q.includes('buyer')) reply='Buyer accounts focus on discovery, search, purchasing, chat, order tracking and ratings.';
   else if(q.includes('hello')||q.includes('hi')) reply='Hello! 🌱 What would you like help with?';
-  else reply='I can help with buying, selling, orders, ratings, profiles and using AgriLink. Try asking “How do I buy?”';
+  else reply='I can help with buying, selling, orders, ratings, profiles and using Lunduyan. Try asking “How do I buy?”';
   botSay(reply);
 }
 document.getElementById('botForm').addEventListener('submit',e=>{e.preventDefault();const input=document.getElementById('botInput');const t=input.value.trim();if(!t)return;input.value='';askAgriBot(t)});
@@ -6764,7 +6764,7 @@ body.modal-open{overflow:hidden!important;touch-action:auto!important}
 </style>
 <style>
 /* =========================================================
-   AGRILINK ALL-IN ENHANCEMENTS
+   LUNDUYAN ALL-IN ENHANCEMENTS
    ========================================================= */
 :root{
   --titlebar-green:#199A48;
@@ -6841,11 +6841,11 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
 </style>
 <script>
 /* =========================================================
-   AGRILINK ALL-IN ENHANCEMENTS JS
+   LUNDUYAN ALL-IN ENHANCEMENTS JS
    ========================================================= */
 (function(){
-  if(window.__agrilinkAllEnhancementsLoaded) return;
-  window.__agrilinkAllEnhancementsLoaded=true;
+  if(window.__lunduyanAllEnhancementsLoaded) return;
+  window.__lunduyanAllEnhancementsLoaded=true;
 
   const $=id=>document.getElementById(id);
   const safeId=v=>String(v||'').replace(/[^a-zA-Z0-9_-]/g,'_');
@@ -6898,7 +6898,7 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
     if(!$('analyticsPanel')){
       const farmerStats=$('farmerDashboard');
       const panel=document.createElement('section');panel.id='analyticsPanel';panel.className='analytics-panel';
-      panel.innerHTML=`<div class="analytics-head"><div><h3>📊 Activity Overview</h3><span id="analyticsSubtitle">Your live AgriLink activity</span></div><button class="secondary-btn" onclick="loadAnalytics()">Refresh</button></div><div id="analyticsGrid" class="analytics-grid"></div><div id="profileBadges" class="badges-row"></div>`;
+      panel.innerHTML=`<div class="analytics-head"><div><h3>📊 Activity Overview</h3><span id="analyticsSubtitle">Your live Lunduyan activity</span></div><button class="secondary-btn" onclick="loadAnalytics()">Refresh</button></div><div id="analyticsGrid" class="analytics-grid"></div><div id="profileBadges" class="badges-row"></div>`;
       if(farmerStats) farmerStats.insertAdjacentElement('afterend',panel);
       else $('roleHomePanel')?.insertAdjacentElement('afterend',panel);
     }
@@ -7254,15 +7254,15 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
    FINAL MESSAGES / CONTACTS / PRODUCT CHAT / SEARCH
    ========================================================= */
 (function(){
-  if(window.__agrilinkFinalMessagesSearch) return;
-  window.__agrilinkFinalMessagesSearch=true;
+  if(window.__lunduyanFinalMessagesSearch) return;
+  window.__lunduyanFinalMessagesSearch=true;
   const $=id=>document.getElementById(id);
   const sid=v=>String(v??'').replace(/[^a-zA-Z0-9_-]/g,'_');
   const esc=v=>escapeHtml(v);
   let finalMessageChannel=null;
 
   function chatSelectionKey(){
-    return currentProfile?.id ? `agrilink:last-chat:${currentProfile.id}` : "agrilink:last-chat";
+    return currentProfile?.id ? `lunduyan:last-chat:${currentProfile.id}` : "lunduyan:last-chat";
   }
 
   function rememberChat(id){
@@ -7662,8 +7662,8 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
 
   function subscribeFinalGlobal(){
     if(!currentProfile)return;
-    if(window.__agrilinkFinalGlobalChannel)supabaseClient.removeChannel(window.__agrilinkFinalGlobalChannel);
-    window.__agrilinkFinalGlobalChannel=supabaseClient.channel('final-global-chat-'+currentProfile.id+'-'+Date.now())
+    if(window.__lunduyanFinalGlobalChannel)supabaseClient.removeChannel(window.__lunduyanFinalGlobalChannel);
+    window.__lunduyanFinalGlobalChannel=supabaseClient.channel('final-global-chat-'+currentProfile.id+'-'+Date.now())
       .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},async payload=>{
         if(String(payload.new.sender_id)===String(currentProfile.id))return;
         await refreshPersistentChatBadge();
@@ -7693,7 +7693,7 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
   setTimeout(()=>{moveSearchNearProducts();wireChatForm();wireSearch();if(currentProfile){finalLoadConversations();refreshPersistentChatBadge();subscribeFinalGlobal()}},300);
 })();
 </script>
-<style id="agrilink-final-chat-stock-fix">
+<style id="lunduyan-final-chat-stock-fix">
 /* =========================================================
    FINAL CHAT + MOBILE + PRODUCT STOCK FIX
    ========================================================= */
@@ -7746,7 +7746,7 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
   .product-actions button{min-height:42px!important}
 }
 </style>
-<script id="agrilink-final-chat-stock-script">
+<script id="lunduyan-final-chat-stock-script">
 (function(){
   'use strict';
 
@@ -7947,7 +7947,7 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
 
 })();
 </script>
-<style id="agrilink-message-badge-final-fix">
+<style id="lunduyan-message-badge-final-fix">
 /* FINAL MESSAGE +1 BADGE FIX */
 .nav-actions,
 .nav-actions button,
@@ -8348,11 +8348,11 @@ body.role-farmer #buyerOrders{
 }
 
 </style>
-<script id="agrilink-message-badge-final-script">
+<script id="lunduyan-message-badge-final-script">
 (function(){
   'use strict';
-  if(window.__agrilinkMessageBadgeFinalFix)return;
-  window.__agrilinkMessageBadgeFinalFix=true;
+  if(window.__lunduyanMessageBadgeFinalFix)return;
+  window.__lunduyanMessageBadgeFinalFix=true;
   const $=id=>document.getElementById(id);
   function currentSide(c){
     return String(c.buyer_id)===String(window.currentProfile?.id||currentProfile?.id)?'buyer':'seller';
@@ -8381,13 +8381,13 @@ body.role-farmer #buyerOrders{
     badge.textContent=count>99?'99+':`+${count}`;
     badge.classList.remove('hidden');
   }
-  window.refreshAgriLinkMessageBadge=refresh;
+  window.refreshLunduyanMessageBadge=refresh;
   function start(){
     if(typeof currentProfile==='undefined'||!currentProfile)return;
     refresh();
-    if(window.__agrilinkBadgeChannel){try{supabaseClient.removeChannel(window.__agrilinkBadgeChannel)}catch(_){} }
+    if(window.__lunduyanBadgeChannel){try{supabaseClient.removeChannel(window.__lunduyanBadgeChannel)}catch(_){} }
     const id=String(currentProfile.id);
-    window.__agrilinkBadgeChannel=supabaseClient.channel('message-badge-final-'+id+'-'+Date.now())
+    window.__lunduyanBadgeChannel=supabaseClient.channel('message-badge-final-'+id+'-'+Date.now())
       .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},async payload=>{
         if(String(payload.new.sender_id)===id)return;
         await refresh();
@@ -8402,7 +8402,7 @@ body.role-farmer #buyerOrders{
 })();
 </script>
 <!-- =======================================================
-AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
+LUNDUYAN TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
 ======================================================= -->
 <style>
 .user-profile-link{border:0;background:transparent;padding:0;color:var(--role-primary,var(--green));font-weight:900;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
@@ -8517,7 +8517,7 @@ AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
     const {data:u,error}=await supabaseClient.from('users').select('id,role,full_name').eq('id',String(otherId)).maybeSingle();
     if(error||!u){alert(error?.message||'User not found.');return;}
     const meRole=String(currentProfile.role).toUpperCase(), theirRole=String(u.role).toUpperCase();
-    if(meRole===theirRole){alert('AgriLink chat connects buyers and farmers.');return;}
+    if(meRole===theirRole){alert('Lunduyan chat connects buyers and farmers.');return;}
     const buyerId=meRole==='BUYER'?currentProfile.id:u.id;
     const sellerId=meRole==='FARMER'?currentProfile.id:u.id;
     let {data:c,error:e}=await supabaseClient.from('conversations').select('*').eq('buyer_id',String(buyerId)).eq('seller_id',String(sellerId)).order('updated_at',{ascending:false}).limit(1).maybeSingle();
@@ -8631,10 +8631,10 @@ AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
 })();
 </script>
 <!-- =========================================================
-     AGRILINK MOBILE UX + TWO-WAY BLOCKING + ROLE-AWARE AGRIBOT
+     LUNDUYAN MOBILE UX + TWO-WAY BLOCKING + ROLE-AWARE AGRIBOT
      Final mobile usability layer
      ========================================================= -->
-<style id="agrilink-final-mobile-ux">
+<style id="lunduyan-final-mobile-ux">
   /* Desktop stays intact. These rules only become active on phones. */
   .mobile-bottom-nav{display:none}
 
@@ -8736,10 +8736,10 @@ AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
     .desktop-only-mobile-hide{display:none!important}
   }
 </style>
-<script id="agrilink-final-mobile-js">
+<script id="lunduyan-final-mobile-js">
 (function(){
-  if(window.__agrilinkFinalMobileLoaded)return;
-  window.__agrilinkFinalMobileLoaded=true;
+  if(window.__lunduyanFinalMobileLoaded)return;
+  window.__lunduyanFinalMobileLoaded=true;
   const $=id=>document.getElementById(id);
   const esc=v=>typeof escapeHtml==='function'?escapeHtml(v):String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   const sid=v=>String(v??'');
@@ -8974,7 +8974,7 @@ AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
     const {data:u,error}=await supabaseClient.from('users').select('id,role,full_name').eq('id',sid(otherId)).maybeSingle();
     if(error||!u){alert(error?.message||'User not found.');return;}
     const meRole=String(currentProfile.role).toUpperCase(),theirRole=String(u.role).toUpperCase();
-    if(meRole===theirRole){alert('AgriLink chat connects buyers and farmers.');return;}
+    if(meRole===theirRole){alert('Lunduyan chat connects buyers and farmers.');return;}
     const buyerId=meRole==='BUYER'?currentProfile.id:u.id,sellerId=meRole==='FARMER'?currentProfile.id:u.id;
     let {data:c,error:e}=await supabaseClient.from('conversations').select('*').eq('buyer_id',sid(buyerId)).eq('seller_id',sid(sellerId)).order('updated_at',{ascending:false}).limit(1).maybeSingle();
     if(e){alert(e.message);return;}
@@ -9066,7 +9066,7 @@ AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
     if(farmer){
       if(q.includes('sell')||q.includes('product'))reply='To sell, open Add Product and enter the product name, price, quantity, unit, location, description and photo. Publish it when everything is correct.';
       else if(q.includes('order')||q.includes('track'))reply='Open your Farmer Orders section to review incoming purchases. Update each order through the available status steps until it is completed.';
-      else if(q.includes('profile')||q.includes('bio'))reply='Open Profile to edit your name, location, phone number and bio. Your saved changes update your AgriLink profile.';
+      else if(q.includes('profile')||q.includes('bio'))reply='Open Profile to edit your name, location, phone number and bio. Your saved changes update your Lunduyan profile.';
       else if(q.includes('block'))reply='Open a buyer profile from Messages or a transaction, then tap Block. Their new messages and transactions with you will be restricted. You can later use Blocked Accounts to Unblock them.';
       else if(q.includes('rating')||q.includes('review'))reply='Completed transactions can generate buyer ratings. Your farmer profile shows your rating and reviews.';
       else if(q.includes('chat')||q.includes('message'))reply='Buyers start conversations from products or your profile. Open Messages to reply and tap the buyer name to view their profile.';
@@ -9112,17 +9112,17 @@ AGRILINK TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
 })();
 </script>
 
-\n<style id="agrilink-definitive-profile-buttons">
-#absoluteManageBlocked,#agrilinkFinalBlockedManager,#agrilinkProfileBlockedManager{display:none!important}
+\n<style id="lunduyan-definitive-profile-buttons">
+#absoluteManageBlocked,#lunduyanFinalBlockedManager,#lunduyanProfileBlockedManager{display:none!important}
 .mobile-blocked-management{display:block!important;width:100%!important;margin-top:12px!important;padding-top:12px!important;border-top:1px solid var(--border,#e5ebe7)!important}
 .mobile-blocked-management button{display:block!important;width:100%!important;min-height:44px!important}
 @media(min-width:701px){.profile-action-row .block-user-btn{display:block!important}}
 </style>
-<script id="agrilink-definitive-profile-buttons-js">
+<script id="lunduyan-definitive-profile-buttons-js">
 (function(){
 'use strict';
 function run(){
- ['absoluteManageBlocked','agrilinkFinalBlockedManager','agrilinkProfileBlockedManager'].forEach(id=>document.getElementById(id)?.remove());
+ ['absoluteManageBlocked','lunduyanFinalBlockedManager','lunduyanProfileBlockedManager'].forEach(id=>document.getElementById(id)?.remove());
  const boxes=document.querySelectorAll('#myProfileContent .mobile-blocked-management');boxes.forEach((x,i)=>{if(i>0)x.remove()});
  const box=document.getElementById('myProfileContent'),modal=document.getElementById('myProfileModal');
  if(box&&modal&&!modal.classList.contains('hidden')&&window.currentProfile&&!box.querySelector('.mobile-blocked-management')){
@@ -9136,13 +9136,13 @@ setTimeout(run,700);
 </script>
 
 <!-- FINAL: KEEP LOGOUT + KEEP ONE MANAGE BLOCKED + REMOVE TOP BLOCK DESKTOP/TABLET -->
-<style id="agrilink-final-profile-actions">
+<style id="lunduyan-final-profile-actions">
 @media(min-width:701px){
   .profile-action-row .block-user-btn{display:block!important}
 }
-#agrilinkKeepLogout{display:block!important;width:100%!important;min-height:44px!important;margin-top:12px!important}
+#lunduyanKeepLogout{display:block!important;width:100%!important;min-height:44px!important;margin-top:12px!important}
 </style>
-<script id="agrilink-final-profile-actions-js">
+<script id="lunduyan-final-profile-actions-js">
 (function(){
 'use strict';
 function fixProfile(){
@@ -9156,9 +9156,9 @@ function fixProfile(){
  buttons.slice(1).forEach(b=>b.closest('.mobile-blocked-management')?.remove()||b.remove());
  if(!box.querySelector('button'))return;
  /* Keep Logout. If the profile renderer removed it, recreate it here. */
- if(!box.querySelector('#agrilinkKeepLogout')){
+ if(!box.querySelector('#lunduyanKeepLogout')){
    const b=document.createElement('button');
-   b.id='agrilinkKeepLogout';b.type='button';b.className='danger-btn';b.textContent='🚪 Logout';
+   b.id='lunduyanKeepLogout';b.type='button';b.className='danger-btn';b.textContent='🚪 Logout';
    b.onclick=async function(){
      if(!confirm('Are you sure you want to log out?'))return;
      try{ if(typeof logout==='function') await logout(); else if(window.supabaseClient?.auth) await window.supabaseClient.auth.signOut(); }
@@ -9188,7 +9188,7 @@ setTimeout(run,600);
 })();
 </script>
 <!-- FINAL PROFILE + MESSENGER RESPONSIVE FIX -->
-<script id="agrilink-block-unblock-final-guard">
+<script id="lunduyan-block-unblock-final-guard">
 (function(){
   'use strict';
   function syncProfileBlockButton(){
@@ -9663,7 +9663,7 @@ setTimeout(run,600);
 </style>
 <!-- FINAL BLOCK PRODUCT VISIBILITY FIX -->
 <!-- ABSOLUTE FINAL PROFILE BLOCK BUTTON FIX -->
-<style id="AGRILINK_ABSOLUTE_PROFILE_BLOCK_FIX_CSS">
+<style id="LUNDUYAN_ABSOLUTE_PROFILE_BLOCK_FIX_CSS">
 #profileModal .profile-block-action{
   background:#252525!important;
   color:#fff!important;
@@ -9681,7 +9681,7 @@ setTimeout(run,600);
 }
 </style>
 <!-- ONE FINAL CLICKABLE BLOCK FIX -->
-<style id="AGRILINK_ONE_FINAL_BLOCK_FIX_CSS">
+<style id="LUNDUYAN_ONE_FINAL_BLOCK_FIX_CSS">
 #profileModal .block-user-btn,#profileModal .profile-block-action{
   pointer-events:auto!important;
   touch-action:manipulation!important;
@@ -9693,8 +9693,8 @@ setTimeout(run,600);
 }
 </style>
 <!-- ACTUAL FINAL FIX: PUBLIC FARMER PROFILE BLOCK BUTTON -->
-<style id="AGRILINK_PUBLIC_FARMER_BLOCK_ACTUAL_FIX_CSS">
-#profileModal .agrilink-profile-block-final{
+<style id="LUNDUYAN_PUBLIC_FARMER_BLOCK_ACTUAL_FIX_CSS">
+#profileModal .lunduyan-profile-block-final{
   pointer-events:auto!important;
   touch-action:manipulation!important;
   position:relative!important;
