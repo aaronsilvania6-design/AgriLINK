@@ -3525,12 +3525,18 @@ async function initializeApp(user){
 
     /* Normalize role so lowercase/legacy role values
        can never show the wrong interface. */
-    currentProfile.role =
-      String(currentProfile.role || "BUYER").trim().toUpperCase();
+    const metadataRole =
+      String(
+        (user.user_metadata || {}).active_role ||
+        (user.user_metadata || {}).role ||
+        currentProfile.role ||
+        "BUYER"
+      ).trim().toUpperCase();
 
-    if(!["BUYER","FARMER"].includes(currentProfile.role)){
-      currentProfile.role = "BUYER";
-    }
+    currentProfile.role =
+      ["BUYER","FARMER"].includes(metadataRole)
+        ? metadataRole
+        : "BUYER";
 
   }catch(error){
 
@@ -10101,10 +10107,12 @@ setInterval(run,600);
     const meta={...(user.user_metadata||{}),roles:clean,active_role:active,role:active};
     const {data,error}=await supabaseClient.auth.updateUser({data:meta});
     if(error)throw error;
+
+    /* Auth metadata is the source of truth for the active role.
+       This avoids breaking the role switcher when public.users has
+       restrictive UPDATE RLS policies. */
     window.currentUser=data.user||user;
     if(window.currentProfile)window.currentProfile.role=active;
-    const {error:dbError}=await supabaseClient.from('users').update({role:active}).eq('auth_user_id',user.id);
-    if(dbError)throw dbError;
   }
   async function switchRole(role){
     role=String(role).toUpperCase();
@@ -10604,3 +10612,392 @@ setInterval(run,600);
   setInterval(boot,200);
 })();
 </script>
+
+<style id="LUNDUYAN_FINAL_PHONE_ROLE_NAV_FIX">
+/* =========================================================
+   FINAL PHONE UX
+   1. Bottom nav is ONLY visible after login.
+   2. Phone users get the same Role menu as PC.
+   3. Messages: Contacts = X, opened chat = —.
+   ========================================================= */
+
+/* Never show the app's bottom navigation on landing/auth. */
+.mobile-bottom-nav{
+  display:none !important;
+}
+body.lunduyan-logged-in .mobile-bottom-nav{
+  display:grid !important;
+}
+
+/* Phone role selector: compact button beside the logo.
+   The bottom navigation remains untouched. */
+@media (max-width:700px){
+  #app>.navbar #roleSwitcherWrap{
+    display:flex !important;
+    flex:0 0 auto !important;
+    margin:0 0 0 auto !important;
+    position:relative !important;
+    z-index:300 !important;
+  }
+
+  #app>.navbar #roleSwitcherBtn{
+    width:42px !important;
+    min-width:42px !important;
+    height:38px !important;
+    padding:0 !important;
+    border-radius:11px !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    font-size:18px !important;
+    line-height:1 !important;
+    overflow:hidden !important;
+  }
+
+  #app>.navbar #roleSwitcherBtn::first-letter{
+    font-size:18px !important;
+  }
+
+  #app>.navbar #roleSwitcherMenu{
+    position:absolute !important;
+    right:0 !important;
+    top:calc(100% + 8px) !important;
+    width:205px !important;
+    max-width:calc(100vw - 20px) !important;
+  }
+
+  /* Don't let the desktop nav action row reappear. */
+  #app>.navbar .nav-actions{
+    display:none !important;
+  }
+}
+
+/* =========================================================
+   MESSAGES HEADER
+   Contacts list always has X.
+   Selected conversation has —.
+   ========================================================= */
+#chatModal .chat-list-header{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:10px !important;
+}
+
+#chatModal .chat-list-header .chat-contacts-close{
+  display:flex !important;
+  flex:0 0 auto !important;
+  width:42px !important;
+  height:42px !important;
+  min-width:42px !important;
+  min-height:42px !important;
+  align-items:center !important;
+  justify-content:center !important;
+  margin-left:auto !important;
+  padding:0 !important;
+  border:1px solid rgba(22,131,59,.15) !important;
+  border-radius:50% !important;
+  background:#eaf8ef !important;
+  color:#176b45 !important;
+  font-size:26px !important;
+  line-height:1 !important;
+  font-weight:500 !important;
+  cursor:pointer !important;
+  z-index:100001 !important;
+}
+
+#chatModal .chat-header > button.close{
+  display:none !important;
+}
+
+#chatModal.chat-has-selection .chat-list-header .chat-contacts-close{
+  display:none !important;
+}
+
+#chatModal.chat-has-selection .chat-header > button.close{
+  display:flex !important;
+  flex:0 0 auto !important;
+  width:44px !important;
+  height:44px !important;
+  min-width:44px !important;
+  min-height:44px !important;
+  align-items:center !important;
+  justify-content:center !important;
+  margin-left:auto !important;
+  padding:0 !important;
+  border-radius:50% !important;
+  color:#fff !important;
+  background:rgba(255,255,255,.16) !important;
+  border:1px solid rgba(255,255,255,.24) !important;
+  font-size:27px !important;
+  line-height:1 !important;
+  cursor:pointer !important;
+  z-index:100002 !important;
+}
+
+@media(max-width:700px){
+  #chatModal .chat-list-header{
+    min-height:58px !important;
+    padding:10px 12px !important;
+    background:#f8fbf9 !important;
+  }
+
+  #chatModal .chat-list-header .chat-contacts-close{
+    width:40px !important;
+    height:40px !important;
+    min-width:40px !important;
+    min-height:40px !important;
+    font-size:25px !important;
+  }
+
+  #chatModal.chat-has-selection .chat-header > button.close{
+    width:42px !important;
+    height:42px !important;
+    min-width:42px !important;
+    min-height:42px !important;
+  }
+}
+</style>
+
+<script id="LUNDUYAN_FINAL_PHONE_ROLE_NAV_FIX_JS">
+(function(){
+  'use strict';
+
+  const $=id=>document.getElementById(id);
+
+  /* ---------------- Logged-in state ---------------- */
+  function syncLoggedInState(){
+    const app=$('app');
+    const loggedIn=!!(app && !app.classList.contains('hidden') && window.currentUser);
+    document.body.classList.toggle('lunduyan-logged-in',loggedIn);
+
+    const bottom=$('mobileBottomNav');
+    if(bottom){
+      bottom.style.setProperty('display',loggedIn?'grid':'none','important');
+    }
+  }
+
+  function ensureStateObserver(){
+    const app=$('app');
+    if(!app || app.dataset.finalAuthObserver==='1')return;
+    app.dataset.finalAuthObserver='1';
+
+    const observer=new MutationObserver(syncLoggedInState);
+    observer.observe(app,{attributes:true,attributeFilter:['class']});
+  }
+
+  /* ---------------- Mobile role button ---------------- */
+  function roleButton(){
+    return $('roleSwitcherBtn');
+  }
+
+  function normalizeRoleButton(){
+    const b=roleButton();
+    const w=$('roleSwitcherWrap');
+    if(!b || !w || !window.currentUser)return;
+
+    w.classList.remove('hidden');
+
+    const role=String(
+      window.currentProfile?.role ||
+      window.currentUser?.user_metadata?.active_role ||
+      window.currentUser?.user_metadata?.role ||
+      'BUYER'
+    ).toUpperCase();
+
+    /* Keep it compact on phone: icon only.
+       PC keeps the normal "Buyer/Farmer" label. */
+    if(window.matchMedia('(max-width:700px)').matches){
+      b.textContent=role==='FARMER'?'🌾':'🛒';
+      b.title='Switch role';
+      b.setAttribute('aria-label','Switch role');
+    }
+  }
+
+  /* ---------------- Messages ---------------- */
+  function chatModal(){return $('chatModal');}
+
+  function hasChatSelection(){
+    const m=chatModal();
+    return !!(
+      m &&
+      (
+        m.classList.contains('chat-has-selection') ||
+        window.currentConversation
+      )
+    );
+  }
+
+  function contactsClose(){
+    return chatModal()?.querySelector('.chat-list-header .chat-contacts-close');
+  }
+
+  function chatClose(){
+    return chatModal()?.querySelector('.chat-header > button.close');
+  }
+
+  function setChatButtons(){
+    const m=chatModal();
+    if(!m)return;
+
+    const selected=hasChatSelection();
+
+    const x=contactsClose();
+    if(x){
+      x.textContent='×';
+      x.type='button';
+      x.title='Close Messages';
+      x.setAttribute('aria-label','Close Messages');
+    }
+
+    const back=chatClose();
+    if(back){
+      back.textContent='—';
+      back.type='button';
+      back.title='Back to contacts';
+      back.setAttribute('aria-label','Back to contacts');
+    }
+
+    m.classList.toggle('chat-has-selection',selected);
+  }
+
+  function closeMessages(){
+    const m=chatModal();
+    if(!m)return;
+    m.classList.add('hidden');
+    m.classList.remove('chat-has-selection');
+    try{
+      if(typeof window.closeChat==='function')window.closeChat();
+    }catch(_){}
+    setChatButtons();
+  }
+
+  function backToContacts(){
+    const m=chatModal();
+    if(!m)return;
+
+    m.classList.remove('chat-has-selection');
+
+    if($('chatWindow'))$('chatWindow').classList.remove('active');
+
+    const name=$('chatUserName');
+    if(name){
+      name.textContent='Select a conversation';
+      name.classList.remove('chat-user-clickable');
+      name.removeAttribute('data-user-id');
+      name.onclick=null;
+    }
+
+    const ctx=$('chatProductContext');
+    if(ctx)ctx.remove();
+
+    const box=$('chatMessages');
+    if(box){
+      box.innerHTML='<div class="chat-empty">Select a conversation to start chatting.</div>';
+    }
+
+    try{window.currentConversation=null;}catch(_){}
+    try{
+      if(typeof currentConversation!=='undefined')currentConversation=null;
+    }catch(_){}
+
+    try{
+      if(typeof chatSelectionKey==='function'){
+        localStorage.removeItem(chatSelectionKey());
+      }
+    }catch(_){}
+
+    setChatButtons();
+  }
+
+  function wireMessages(){
+    const m=chatModal();
+    if(!m)return;
+
+    /* Contacts X: close the entire Messages modal. */
+    const x=contactsClose();
+    if(x && x.dataset.finalPhoneMessages==='1'){
+      /* already wired */
+    }else if(x){
+      x.dataset.finalPhoneMessages='1';
+      x.onclick=function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        closeMessages();
+      };
+    }
+
+    /* Selected-chat —: return to contacts. */
+    const back=chatClose();
+    if(back && back.dataset.finalPhoneMessages==='1'){
+      /* already wired */
+    }else if(back){
+      back.dataset.finalPhoneMessages='1';
+      back.onclick=function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        if(hasChatSelection())backToContacts();
+        else closeMessages();
+      };
+    }
+
+    setChatButtons();
+  }
+
+  /* Contact clicked => selected chat. */
+  document.addEventListener('click',function(e){
+    const item=e.target.closest?.('#chatModal .conversation-item');
+    if(item){
+      setTimeout(function(){
+        const m=chatModal();
+        if(m){
+          m.classList.add('chat-has-selection');
+          setChatButtons();
+        }
+      },100);
+    }
+  },true);
+
+  /* Messages opens to contacts, never an old selected conversation. */
+  document.addEventListener('click',function(e){
+    const btn=e.target.closest?.('button');
+    if(!btn || btn.closest('#chatModal'))return;
+
+    const text=(btn.textContent||'').trim();
+    const isMessages =
+      btn.matches('[data-mobile-nav="chat"]') ||
+      text.includes('Chat');
+
+    if(isMessages){
+      setTimeout(function(){
+        const m=chatModal();
+        if(m && !m.classList.contains('hidden')){
+          m.classList.remove('chat-has-selection');
+          try{window.currentConversation=null;}catch(_){}
+          setChatButtons();
+        }
+      },180);
+    }
+  },true);
+
+  function boot(){
+    syncLoggedInState();
+    ensureStateObserver();
+    normalizeRoleButton();
+    wireMessages();
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,250));
+  }else{
+    setTimeout(boot,250);
+  }
+
+  setInterval(boot,500);
+})();
+</script>
+
+</body>
+</html>
