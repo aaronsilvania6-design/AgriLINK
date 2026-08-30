@@ -10178,266 +10178,235 @@ setInterval(run,600);
   document.addEventListener("DOMContentLoaded",()=>setSignupMethod("email"));
 </script>
 
-<style id="LUNDUYAN_LOGOUT_MESSAGE_X_MOBILE_FINAL">
+<style id="LUNDUYAN_FINAL_MOBILE_PROFILE_LOGOUT">
 /* =========================================================
-   FINAL MOBILE FIX
-   1) Keep Logout accessible on phones.
-   2) Contacts/list view = X that CLOSES the whole Messages modal.
-   3) Open conversation = — that RETURNS to contacts.
+   LUNDUYAN FINAL MOBILE NAV
+   PHONE:
+   - Logout is NOT in the top navbar.
+   - Bottom navigation stays at the bottom.
+   - Profile button opens Profile.
+   - Logout lives INSIDE Profile.
+   PC/DESKTOP:
+   - Existing top navbar Logout remains.
    ========================================================= */
 
 @media (max-width:700px){
-  /* Keep the desktop navbar controls usable on mobile instead of
-     letting the navbar clip/hide the Logout control. */
-  #app > .navbar{
-    overflow:visible !important;
-    min-width:0 !important;
+  /* Restore the intended bottom navigation. */
+  #mobileBottomNav{
+    position:fixed !important;
+    display:grid !important;
+    grid-template-columns:repeat(5,1fr) !important;
+    left:0 !important;
+    right:0 !important;
+    bottom:0 !important;
+    width:100% !important;
+    height:70px !important;
+    padding:7px 7px calc(7px + env(safe-area-inset-bottom)) !important;
+    box-sizing:border-box !important;
+    background:rgba(255,255,255,.97) !important;
+    backdrop-filter:blur(16px) !important;
+    -webkit-backdrop-filter:blur(16px) !important;
+    border-top:1px solid #e4ebe6 !important;
+    box-shadow:0 -8px 24px rgba(19,53,34,.10) !important;
+    z-index:10000 !important;
   }
 
-  #app > .navbar .nav-actions,
-  #app > .navbar .navbar-actions,
-  #app > .navbar .nav-right{
+  #mobileBottomNav .mobile-nav-item{
     display:flex !important;
-    align-items:center !important;
-    flex:0 0 auto !important;
     min-width:0 !important;
-    overflow:visible !important;
-  }
-
-  #app > .navbar .logout-btn,
-  #app > .navbar button[onclick*="logout"],
-  #app > .navbar button[onclick*="Logout"],
-  #app > .navbar button.logout,
-  #app > .navbar .btn-logout{
-    display:inline-flex !important;
+    min-height:52px !important;
     align-items:center !important;
     justify-content:center !important;
-    flex:0 0 auto !important;
-    visibility:visible !important;
-    opacity:1 !important;
-    pointer-events:auto !important;
-    position:relative !important;
-    z-index:500 !important;
+    flex-direction:column !important;
+    gap:2px !important;
+    border:0 !important;
+    background:transparent !important;
+    border-radius:14px !important;
+    cursor:pointer !important;
+    -webkit-tap-highlight-color:transparent !important;
+  }
+
+  #mobileBottomNav .mobile-nav-icon{
+    display:block !important;
+    font-size:21px !important;
+    line-height:22px !important;
+  }
+
+  #mobileBottomNav .mobile-nav-label{
+    display:block !important;
+    font-size:9px !important;
+    font-weight:850 !important;
     white-space:nowrap !important;
   }
 
-  /* If the header is crowded, make Logout compact rather than hiding it. */
+  /* IMPORTANT: no Logout in the top mobile navbar. */
+  #app > .navbar .nav-logout-btn,
   #app > .navbar .logout-btn,
-  #app > .navbar button[onclick*="logout"],
-  #app > .navbar button[onclick*="Logout"],
   #app > .navbar button.logout,
   #app > .navbar .btn-logout{
-    min-width:68px !important;
-    min-height:40px !important;
-    padding:8px 10px !important;
-    font-size:13px !important;
-  }
-
-  /* Messages list header gets a real block-level X area. */
-  #chatModal .chat-list-header{
-    position:relative !important;
-    display:flex !important;
-    align-items:center !important;
-    width:100% !important;
-    box-sizing:border-box !important;
-  }
-
-  #chatModal .chat-list-header .chat-contacts-close{
-    display:flex !important;
-    flex:0 0 42px !important;
-    align-items:center !important;
-    justify-content:center !important;
-    width:42px !important;
-    height:42px !important;
-    min-width:42px !important;
-    min-height:42px !important;
-    margin-left:auto !important;
-    padding:0 !important;
-    box-sizing:border-box !important;
-    border:1px solid rgba(22,131,59,.18) !important;
-    border-radius:10px !important;
-    background:#eaf8ef !important;
-    color:#176b45 !important;
-    font-size:28px !important;
-    font-weight:500 !important;
-    line-height:1 !important;
-    text-align:center !important;
-    cursor:pointer !important;
-    pointer-events:auto !important;
-    visibility:visible !important;
-    opacity:1 !important;
-    z-index:100001 !important;
-  }
-
-  /* Do NOT show the chat-header button on the contacts list. */
-  #chatModal:not(.chat-has-selection) .chat-header > button.close{
     display:none !important;
+    visibility:hidden !important;
+    pointer-events:none !important;
   }
 
-  /* Open conversation: use the header control as the back button. */
-  #chatModal.chat-has-selection .chat-header > button.close{
+  /* Give the dashboard enough room above the bottom nav. */
+  #app .container,
+  #app main.container{
+    padding-bottom:92px !important;
+  }
+
+  /* Logout inside My Profile: full-width and easy to tap. */
+  #myProfileContent #agrilinkKeepLogout,
+  #myProfileContent .profile-logout-btn{
     display:flex !important;
+    width:100% !important;
+    min-height:48px !important;
     align-items:center !important;
     justify-content:center !important;
-    flex:0 0 42px !important;
-    width:42px !important;
-    height:42px !important;
-    min-width:42px !important;
-    min-height:42px !important;
-    margin-left:auto !important;
-    padding:0 !important;
-    border-radius:10px !important;
-    background:rgba(255,255,255,.18) !important;
-    border:1px solid rgba(255,255,255,.28) !important;
-    color:#fff !important;
-    font-size:27px !important;
-    line-height:1 !important;
+    margin:14px 0 8px !important;
+    box-sizing:border-box !important;
+    border-radius:12px !important;
+    font-size:15px !important;
+    font-weight:800 !important;
     cursor:pointer !important;
-    pointer-events:auto !important;
-    z-index:100002 !important;
+    position:relative !important;
+    z-index:20 !important;
+  }
+
+  /* Profile modal scrolls so Logout can always be reached. */
+  #myProfileModal .modal-card{
+    overflow:hidden !important;
+  }
+
+  #myProfileModal #myProfileContent{
+    overflow-y:auto !important;
+    -webkit-overflow-scrolling:touch !important;
+    padding-bottom:28px !important;
   }
 }
 
-/* Extra narrow phones: keep Logout visible and compact. */
-@media (max-width:380px){
-  #app > .navbar .logout-btn,
-  #app > .navbar button[onclick*="logout"],
-  #app > .navbar button[onclick*="Logout"],
-  #app > .navbar button.logout,
-  #app > .navbar .btn-logout{
-    min-width:58px !important;
-    width:auto !important;
-    padding:7px 8px !important;
-    font-size:12px !important;
+@media (min-width:701px){
+  /* Desktop keeps the normal navbar Logout. */
+  #app > .navbar .nav-logout-btn{
+    display:inline-flex !important;
   }
 }
 </style>
 
-<script id="LUNDUYAN_LOGOUT_MESSAGE_X_MOBILE_FINAL_JS">
+<script id="LUNDUYAN_FINAL_MOBILE_PROFILE_LOGOUT_JS">
 (function(){
   'use strict';
 
-  function modal(){ return document.getElementById('chatModal'); }
+  function byId(id){ return document.getElementById(id); }
 
-  function isChatOpen(){
-    const m=modal();
-    return !!(m && m.classList.contains('chat-has-selection'));
-  }
+  function ensureProfileLogout(){
+    const box=byId('myProfileContent');
+    const modal=byId('myProfileModal');
+    if(!box || !modal || modal.classList.contains('hidden')) return;
 
-  function listButton(){
-    const m=modal();
-    return m && m.querySelector('.chat-list-header .chat-contacts-close');
-  }
+    /* Reuse the existing final logout if it already exists. */
+    let btn=byId('agrilinkKeepLogout');
 
-  function headerButton(){
-    const m=modal();
-    return m && m.querySelector('.chat-header > button.close');
-  }
+    if(!btn){
+      btn=document.createElement('button');
+      btn.id='agrilinkKeepLogout';
+      btn.type='button';
+      btn.className='danger-btn profile-logout-btn';
+      btn.textContent='🚪 Logout';
 
-  function closeWholeMessages(){
-    const m=modal();
-    if(!m) return;
-
-    m.classList.add('hidden');
-    m.classList.remove('chat-has-selection');
-
-    const w=document.getElementById('chatWindow');
-    if(w) w.classList.remove('active');
-
-    try{
-      if(typeof window.closeChat==='function') window.closeChat();
-    }catch(_){}
-
-    try{
-      if(typeof window.currentConversation!=='undefined') window.currentConversation=null;
-    }catch(_){}
-
-    try{
-      const ctx=document.getElementById('chatProductContext');
-      if(ctx) ctx.remove();
-    }catch(_){}
-
-    const box=document.getElementById('chatMessages');
-    if(box) box.innerHTML='<div class="chat-empty">Select a conversation to start chatting.</div>';
-  }
-
-  function syncButtons(){
-    const list=listButton();
-    const head=headerButton();
-
-    if(list){
-      list.textContent='×';
-      list.title='Close Messages';
-      list.setAttribute('aria-label','Close Messages');
-
-      const open=isChatOpen();
-      list.style.setProperty('display',open?'none':'flex','important');
-    }
-
-    if(head){
-      head.textContent='—';
-      head.title='Back to contacts';
-      head.setAttribute('aria-label','Back to contacts');
-      head.style.setProperty('display',isChatOpen()?'flex':'none','important');
-    }
-  }
-
-  function wire(){
-    const list=listButton();
-
-    if(list && list.dataset.closeWholeMessages!=='1'){
-      list.dataset.closeWholeMessages='1';
-      list.onclick=function(e){
+      btn.addEventListener('click',async function(e){
         e.preventDefault();
         e.stopPropagation();
-        e.stopImmediatePropagation();
-        closeWholeMessages();
-        syncButtons();
-      };
+
+        if(!confirm('Are you sure you want to log out?')) return;
+
+        try{
+          if(typeof window.logout==='function'){
+            await window.logout();
+          }else if(window.supabaseClient?.auth){
+            await window.supabaseClient.auth.signOut();
+          }
+        }catch(err){
+          console.error('Logout failed:',err);
+        }finally{
+          byId('myProfileModal')?.classList.add('hidden');
+          byId('profileModal')?.classList.add('hidden');
+          byId('blockedAccountsModal')?.classList.add('hidden');
+          byId('chatModal')?.classList.add('hidden');
+          byId('notificationPanel')?.classList.add('hidden');
+          byId('mobileBottomNav')?.style.setProperty('display','none','important');
+          byId('app')?.classList.add('hidden');
+          byId('landingScreen')?.classList.remove('hidden');
+          byId('authScreen')?.classList.remove('hidden');
+          window.scrollTo(0,0);
+        }
+      });
     }
 
-    syncButtons();
+    btn.classList.add('profile-logout-btn');
+
+    /* Make sure it is actually inside Profile, not the navbar. */
+    if(btn.parentElement!==box) box.appendChild(btn);
   }
 
-  /* Contact selected -> conversation mode. */
+  function fixMobileNavbar(){
+    if(window.matchMedia('(max-width:700px)').matches){
+      document.querySelectorAll(
+        '#app > .navbar .nav-logout-btn,'+
+        '#app > .navbar .logout-btn,'+
+        '#app > .navbar button.logout,'+
+        '#app > .navbar .btn-logout'
+      ).forEach(btn=>{
+        btn.style.setProperty('display','none','important');
+        btn.style.setProperty('visibility','hidden','important');
+        btn.style.setProperty('pointer-events','none','important');
+      });
+
+      const nav=byId('mobileBottomNav');
+      const app=byId('app');
+      const loggedIn=!!(app && !app.classList.contains('hidden') && window.currentUser);
+
+      if(nav){
+        nav.style.setProperty('display',loggedIn?'grid':'none','important');
+        nav.style.setProperty('position','fixed','important');
+        nav.style.setProperty('bottom','0','important');
+        nav.style.setProperty('left','0','important');
+        nav.style.setProperty('right','0','important');
+        nav.style.setProperty('z-index','10000','important');
+      }
+    }
+  }
+
+  /* Profile is opened from the bottom Profile button. */
   document.addEventListener('click',function(e){
-    const item=e.target.closest && e.target.closest('#chatModal .conversation-item');
-    if(item){
+    const profileBtn=e.target.closest &&
+      e.target.closest('#mobileBottomNav [data-mobile-nav="profile"]');
+
+    if(profileBtn){
       setTimeout(function(){
-        const m=modal();
-        if(m) m.classList.add('chat-has-selection');
-        syncButtons();
+        ensureProfileLogout();
+        fixMobileNavbar();
       },100);
     }
   },true);
 
-  /* Messages opened -> contacts/list mode. */
-  document.addEventListener('click',function(e){
-    const btn=e.target.closest && e.target.closest('button');
-    if(!btn || btn.closest('#chatModal')) return;
+  /* Catch Profile modal opening from any other existing Profile button too. */
+  const observer=new MutationObserver(function(){
+    ensureProfileLogout();
+    fixMobileNavbar();
+  });
 
-    const text=(btn.textContent||'').trim().toLowerCase();
-    if(text.includes('chat') || text.includes('messages')){
-      setTimeout(function(){
-        const m=modal();
-        if(m && !m.classList.contains('hidden')){
-          m.classList.remove('chat-has-selection');
-          syncButtons();
-        }
-      },180);
-    }
-  },true);
-
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',function(){
-      setTimeout(wire,120);
-    },{once:true});
-  }else{
-    setTimeout(wire,120);
+  function start(){
+    observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style']});
+    ensureProfileLogout();
+    fixMobileNavbar();
   }
 
-  /* Existing app scripts can recreate the contact header. */
-  setInterval(wire,300);
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',function(){setTimeout(start,250);},{once:true});
+  }else{
+    setTimeout(start,250);
+  }
 })();
 </script>
 
@@ -11264,266 +11233,235 @@ body.lunduyan-logged-in .mobile-bottom-nav{
 </script>
 
 
-<style id="LUNDUYAN_LOGOUT_MESSAGE_X_MOBILE_FINAL">
+<style id="LUNDUYAN_FINAL_MOBILE_PROFILE_LOGOUT">
 /* =========================================================
-   FINAL MOBILE FIX
-   1) Keep Logout accessible on phones.
-   2) Contacts/list view = X that CLOSES the whole Messages modal.
-   3) Open conversation = — that RETURNS to contacts.
+   LUNDUYAN FINAL MOBILE NAV
+   PHONE:
+   - Logout is NOT in the top navbar.
+   - Bottom navigation stays at the bottom.
+   - Profile button opens Profile.
+   - Logout lives INSIDE Profile.
+   PC/DESKTOP:
+   - Existing top navbar Logout remains.
    ========================================================= */
 
 @media (max-width:700px){
-  /* Keep the desktop navbar controls usable on mobile instead of
-     letting the navbar clip/hide the Logout control. */
-  #app > .navbar{
-    overflow:visible !important;
-    min-width:0 !important;
+  /* Restore the intended bottom navigation. */
+  #mobileBottomNav{
+    position:fixed !important;
+    display:grid !important;
+    grid-template-columns:repeat(5,1fr) !important;
+    left:0 !important;
+    right:0 !important;
+    bottom:0 !important;
+    width:100% !important;
+    height:70px !important;
+    padding:7px 7px calc(7px + env(safe-area-inset-bottom)) !important;
+    box-sizing:border-box !important;
+    background:rgba(255,255,255,.97) !important;
+    backdrop-filter:blur(16px) !important;
+    -webkit-backdrop-filter:blur(16px) !important;
+    border-top:1px solid #e4ebe6 !important;
+    box-shadow:0 -8px 24px rgba(19,53,34,.10) !important;
+    z-index:10000 !important;
   }
 
-  #app > .navbar .nav-actions,
-  #app > .navbar .navbar-actions,
-  #app > .navbar .nav-right{
+  #mobileBottomNav .mobile-nav-item{
     display:flex !important;
-    align-items:center !important;
-    flex:0 0 auto !important;
     min-width:0 !important;
-    overflow:visible !important;
-  }
-
-  #app > .navbar .logout-btn,
-  #app > .navbar button[onclick*="logout"],
-  #app > .navbar button[onclick*="Logout"],
-  #app > .navbar button.logout,
-  #app > .navbar .btn-logout{
-    display:inline-flex !important;
+    min-height:52px !important;
     align-items:center !important;
     justify-content:center !important;
-    flex:0 0 auto !important;
-    visibility:visible !important;
-    opacity:1 !important;
-    pointer-events:auto !important;
-    position:relative !important;
-    z-index:500 !important;
+    flex-direction:column !important;
+    gap:2px !important;
+    border:0 !important;
+    background:transparent !important;
+    border-radius:14px !important;
+    cursor:pointer !important;
+    -webkit-tap-highlight-color:transparent !important;
+  }
+
+  #mobileBottomNav .mobile-nav-icon{
+    display:block !important;
+    font-size:21px !important;
+    line-height:22px !important;
+  }
+
+  #mobileBottomNav .mobile-nav-label{
+    display:block !important;
+    font-size:9px !important;
+    font-weight:850 !important;
     white-space:nowrap !important;
   }
 
-  /* If the header is crowded, make Logout compact rather than hiding it. */
+  /* IMPORTANT: no Logout in the top mobile navbar. */
+  #app > .navbar .nav-logout-btn,
   #app > .navbar .logout-btn,
-  #app > .navbar button[onclick*="logout"],
-  #app > .navbar button[onclick*="Logout"],
   #app > .navbar button.logout,
   #app > .navbar .btn-logout{
-    min-width:68px !important;
-    min-height:40px !important;
-    padding:8px 10px !important;
-    font-size:13px !important;
-  }
-
-  /* Messages list header gets a real block-level X area. */
-  #chatModal .chat-list-header{
-    position:relative !important;
-    display:flex !important;
-    align-items:center !important;
-    width:100% !important;
-    box-sizing:border-box !important;
-  }
-
-  #chatModal .chat-list-header .chat-contacts-close{
-    display:flex !important;
-    flex:0 0 42px !important;
-    align-items:center !important;
-    justify-content:center !important;
-    width:42px !important;
-    height:42px !important;
-    min-width:42px !important;
-    min-height:42px !important;
-    margin-left:auto !important;
-    padding:0 !important;
-    box-sizing:border-box !important;
-    border:1px solid rgba(22,131,59,.18) !important;
-    border-radius:10px !important;
-    background:#eaf8ef !important;
-    color:#176b45 !important;
-    font-size:28px !important;
-    font-weight:500 !important;
-    line-height:1 !important;
-    text-align:center !important;
-    cursor:pointer !important;
-    pointer-events:auto !important;
-    visibility:visible !important;
-    opacity:1 !important;
-    z-index:100001 !important;
-  }
-
-  /* Do NOT show the chat-header button on the contacts list. */
-  #chatModal:not(.chat-has-selection) .chat-header > button.close{
     display:none !important;
+    visibility:hidden !important;
+    pointer-events:none !important;
   }
 
-  /* Open conversation: use the header control as the back button. */
-  #chatModal.chat-has-selection .chat-header > button.close{
+  /* Give the dashboard enough room above the bottom nav. */
+  #app .container,
+  #app main.container{
+    padding-bottom:92px !important;
+  }
+
+  /* Logout inside My Profile: full-width and easy to tap. */
+  #myProfileContent #agrilinkKeepLogout,
+  #myProfileContent .profile-logout-btn{
     display:flex !important;
+    width:100% !important;
+    min-height:48px !important;
     align-items:center !important;
     justify-content:center !important;
-    flex:0 0 42px !important;
-    width:42px !important;
-    height:42px !important;
-    min-width:42px !important;
-    min-height:42px !important;
-    margin-left:auto !important;
-    padding:0 !important;
-    border-radius:10px !important;
-    background:rgba(255,255,255,.18) !important;
-    border:1px solid rgba(255,255,255,.28) !important;
-    color:#fff !important;
-    font-size:27px !important;
-    line-height:1 !important;
+    margin:14px 0 8px !important;
+    box-sizing:border-box !important;
+    border-radius:12px !important;
+    font-size:15px !important;
+    font-weight:800 !important;
     cursor:pointer !important;
-    pointer-events:auto !important;
-    z-index:100002 !important;
+    position:relative !important;
+    z-index:20 !important;
+  }
+
+  /* Profile modal scrolls so Logout can always be reached. */
+  #myProfileModal .modal-card{
+    overflow:hidden !important;
+  }
+
+  #myProfileModal #myProfileContent{
+    overflow-y:auto !important;
+    -webkit-overflow-scrolling:touch !important;
+    padding-bottom:28px !important;
   }
 }
 
-/* Extra narrow phones: keep Logout visible and compact. */
-@media (max-width:380px){
-  #app > .navbar .logout-btn,
-  #app > .navbar button[onclick*="logout"],
-  #app > .navbar button[onclick*="Logout"],
-  #app > .navbar button.logout,
-  #app > .navbar .btn-logout{
-    min-width:58px !important;
-    width:auto !important;
-    padding:7px 8px !important;
-    font-size:12px !important;
+@media (min-width:701px){
+  /* Desktop keeps the normal navbar Logout. */
+  #app > .navbar .nav-logout-btn{
+    display:inline-flex !important;
   }
 }
 </style>
 
-<script id="LUNDUYAN_LOGOUT_MESSAGE_X_MOBILE_FINAL_JS">
+<script id="LUNDUYAN_FINAL_MOBILE_PROFILE_LOGOUT_JS">
 (function(){
   'use strict';
 
-  function modal(){ return document.getElementById('chatModal'); }
+  function byId(id){ return document.getElementById(id); }
 
-  function isChatOpen(){
-    const m=modal();
-    return !!(m && m.classList.contains('chat-has-selection'));
-  }
+  function ensureProfileLogout(){
+    const box=byId('myProfileContent');
+    const modal=byId('myProfileModal');
+    if(!box || !modal || modal.classList.contains('hidden')) return;
 
-  function listButton(){
-    const m=modal();
-    return m && m.querySelector('.chat-list-header .chat-contacts-close');
-  }
+    /* Reuse the existing final logout if it already exists. */
+    let btn=byId('agrilinkKeepLogout');
 
-  function headerButton(){
-    const m=modal();
-    return m && m.querySelector('.chat-header > button.close');
-  }
+    if(!btn){
+      btn=document.createElement('button');
+      btn.id='agrilinkKeepLogout';
+      btn.type='button';
+      btn.className='danger-btn profile-logout-btn';
+      btn.textContent='🚪 Logout';
 
-  function closeWholeMessages(){
-    const m=modal();
-    if(!m) return;
-
-    m.classList.add('hidden');
-    m.classList.remove('chat-has-selection');
-
-    const w=document.getElementById('chatWindow');
-    if(w) w.classList.remove('active');
-
-    try{
-      if(typeof window.closeChat==='function') window.closeChat();
-    }catch(_){}
-
-    try{
-      if(typeof window.currentConversation!=='undefined') window.currentConversation=null;
-    }catch(_){}
-
-    try{
-      const ctx=document.getElementById('chatProductContext');
-      if(ctx) ctx.remove();
-    }catch(_){}
-
-    const box=document.getElementById('chatMessages');
-    if(box) box.innerHTML='<div class="chat-empty">Select a conversation to start chatting.</div>';
-  }
-
-  function syncButtons(){
-    const list=listButton();
-    const head=headerButton();
-
-    if(list){
-      list.textContent='×';
-      list.title='Close Messages';
-      list.setAttribute('aria-label','Close Messages');
-
-      const open=isChatOpen();
-      list.style.setProperty('display',open?'none':'flex','important');
-    }
-
-    if(head){
-      head.textContent='—';
-      head.title='Back to contacts';
-      head.setAttribute('aria-label','Back to contacts');
-      head.style.setProperty('display',isChatOpen()?'flex':'none','important');
-    }
-  }
-
-  function wire(){
-    const list=listButton();
-
-    if(list && list.dataset.closeWholeMessages!=='1'){
-      list.dataset.closeWholeMessages='1';
-      list.onclick=function(e){
+      btn.addEventListener('click',async function(e){
         e.preventDefault();
         e.stopPropagation();
-        e.stopImmediatePropagation();
-        closeWholeMessages();
-        syncButtons();
-      };
+
+        if(!confirm('Are you sure you want to log out?')) return;
+
+        try{
+          if(typeof window.logout==='function'){
+            await window.logout();
+          }else if(window.supabaseClient?.auth){
+            await window.supabaseClient.auth.signOut();
+          }
+        }catch(err){
+          console.error('Logout failed:',err);
+        }finally{
+          byId('myProfileModal')?.classList.add('hidden');
+          byId('profileModal')?.classList.add('hidden');
+          byId('blockedAccountsModal')?.classList.add('hidden');
+          byId('chatModal')?.classList.add('hidden');
+          byId('notificationPanel')?.classList.add('hidden');
+          byId('mobileBottomNav')?.style.setProperty('display','none','important');
+          byId('app')?.classList.add('hidden');
+          byId('landingScreen')?.classList.remove('hidden');
+          byId('authScreen')?.classList.remove('hidden');
+          window.scrollTo(0,0);
+        }
+      });
     }
 
-    syncButtons();
+    btn.classList.add('profile-logout-btn');
+
+    /* Make sure it is actually inside Profile, not the navbar. */
+    if(btn.parentElement!==box) box.appendChild(btn);
   }
 
-  /* Contact selected -> conversation mode. */
+  function fixMobileNavbar(){
+    if(window.matchMedia('(max-width:700px)').matches){
+      document.querySelectorAll(
+        '#app > .navbar .nav-logout-btn,'+
+        '#app > .navbar .logout-btn,'+
+        '#app > .navbar button.logout,'+
+        '#app > .navbar .btn-logout'
+      ).forEach(btn=>{
+        btn.style.setProperty('display','none','important');
+        btn.style.setProperty('visibility','hidden','important');
+        btn.style.setProperty('pointer-events','none','important');
+      });
+
+      const nav=byId('mobileBottomNav');
+      const app=byId('app');
+      const loggedIn=!!(app && !app.classList.contains('hidden') && window.currentUser);
+
+      if(nav){
+        nav.style.setProperty('display',loggedIn?'grid':'none','important');
+        nav.style.setProperty('position','fixed','important');
+        nav.style.setProperty('bottom','0','important');
+        nav.style.setProperty('left','0','important');
+        nav.style.setProperty('right','0','important');
+        nav.style.setProperty('z-index','10000','important');
+      }
+    }
+  }
+
+  /* Profile is opened from the bottom Profile button. */
   document.addEventListener('click',function(e){
-    const item=e.target.closest && e.target.closest('#chatModal .conversation-item');
-    if(item){
+    const profileBtn=e.target.closest &&
+      e.target.closest('#mobileBottomNav [data-mobile-nav="profile"]');
+
+    if(profileBtn){
       setTimeout(function(){
-        const m=modal();
-        if(m) m.classList.add('chat-has-selection');
-        syncButtons();
+        ensureProfileLogout();
+        fixMobileNavbar();
       },100);
     }
   },true);
 
-  /* Messages opened -> contacts/list mode. */
-  document.addEventListener('click',function(e){
-    const btn=e.target.closest && e.target.closest('button');
-    if(!btn || btn.closest('#chatModal')) return;
+  /* Catch Profile modal opening from any other existing Profile button too. */
+  const observer=new MutationObserver(function(){
+    ensureProfileLogout();
+    fixMobileNavbar();
+  });
 
-    const text=(btn.textContent||'').trim().toLowerCase();
-    if(text.includes('chat') || text.includes('messages')){
-      setTimeout(function(){
-        const m=modal();
-        if(m && !m.classList.contains('hidden')){
-          m.classList.remove('chat-has-selection');
-          syncButtons();
-        }
-      },180);
-    }
-  },true);
-
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',function(){
-      setTimeout(wire,120);
-    },{once:true});
-  }else{
-    setTimeout(wire,120);
+  function start(){
+    observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style']});
+    ensureProfileLogout();
+    fixMobileNavbar();
   }
 
-  /* Existing app scripts can recreate the contact header. */
-  setInterval(wire,300);
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',function(){setTimeout(start,250);},{once:true});
+  }else{
+    setTimeout(start,250);
+  }
 })();
 </script>
 
