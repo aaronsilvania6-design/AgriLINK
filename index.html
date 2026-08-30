@@ -10522,5 +10522,85 @@ window.toggleBlockUser=async function(otherId,otherName){
   };
 })();
 </script>
+
+<!-- PROFILE BLOCK CLICKABILITY FINAL FIX -->
+<style id="PROFILE_BLOCK_CLICKABILITY_FINAL">
+#profileModal .profile-action-row .block-user-btn{
+  pointer-events:auto!important;
+  cursor:pointer!important;
+  display:inline-flex!important;
+  visibility:visible!important;
+  position:relative!important;
+  z-index:9999!important;
+}
+</style>
+<script id="PROFILE_BLOCK_CLICKABILITY_FINAL_JS">
+(function(){
+  'use strict';
+  const sid=v=>String(v??'');
+  const $=id=>document.getElementById(id);
+  let busy=false;
+  function me(){
+    try{ if(typeof currentProfile!=='undefined' && currentProfile) return currentProfile; }catch(e){}
+    return window.currentProfile||window.currentUser||null;
+  }
+  function updateUI(otherId,byMe){
+    const modal=$('profileModal');
+    if(!modal||modal.classList.contains('hidden')) return;
+    const row=modal.querySelector('.profile-action-row');
+    if(!row) return;
+    const b=row.querySelector('.block-user-btn');
+    const m=row.querySelector('.message-user-btn');
+    if(b){
+      b.textContent=byMe?'↩ Unblock':'⛔ Block';
+      b.disabled=false;
+      b.style.pointerEvents='auto';
+    }
+    if(m) m.disabled=byMe;
+  }
+  window.toggleBlockUser=async function(otherId,otherName){
+    if(busy) return;
+    const profile=me();
+    if(!profile||!otherId||sid(otherId)===sid(profile.id)) return;
+    const mine=sid(profile.id), other=sid(otherId), name=otherName||'this user';
+    busy=true;
+    try{
+      const {data:existing,error:checkError}=await supabaseClient
+        .from('user_blocks').select('id').eq('blocker_id',mine).eq('blocked_id',other).maybeSingle();
+      if(checkError){ alert('Could not check block status. '+checkError.message); return; }
+      if(existing){
+        if(!confirm(`Unblock ${name}?`)) return;
+        const {error}=await supabaseClient.from('user_blocks').delete().eq('blocker_id',mine).eq('blocked_id',other);
+        if(error){ alert('Could not unblock this user. '+error.message); return; }
+        updateUI(other,false);
+        const list=$('blockedAccountsContent');
+        if(list){
+          const btns=[...list.querySelectorAll('.unblock-btn')];
+          for(const btn of btns){ if((btn.getAttribute('onclick')||'').includes(other)){ btn.closest('.blocked-user')?.remove(); } }
+          if(!list.querySelector('.blocked-user')) list.innerHTML='<div class="blocked-empty">🛡️<br><br><strong>No blocked accounts</strong></div>';
+        }
+      }else{
+        if(!confirm(`Block ${name}?`)) return;
+        const {error}=await supabaseClient.from('user_blocks').upsert({blocker_id:mine,blocked_id:other},{onConflict:'blocker_id,blocked_id',ignoreDuplicates:true});
+        if(error){ alert('Could not block this user. '+error.message); return; }
+        updateUI(other,true);
+      }
+      if(typeof loadProducts==='function') setTimeout(()=>{ try{loadProducts()}catch(e){} },0);
+    }catch(e){ console.error('Block error:',e); alert('Something went wrong while changing the block status.'); }
+    finally{ busy=false; }
+  };
+  // Capture-phase fallback: make dynamically-rendered profile Block button always clickable.
+  document.addEventListener('click',function(e){
+    const b=e.target.closest('#profileModal .block-user-btn');
+    if(!b||busy) return;
+    const onclick=b.getAttribute('onclick')||'';
+    const match=onclick.match(/toggleBlockUser\(\s*['\"]([^'\"]+)['\"]\s*,\s*['\"]([^'\"]*)/);
+    if(!match) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    window.toggleBlockUser(match[1],match[2].replace(/&#39;/g,"'"));
+  },true);
+})();
+</script>
+
 </body>
 </html>
