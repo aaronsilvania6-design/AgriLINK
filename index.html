@@ -2507,9 +2507,9 @@ Refresh
     <div>
       <div class="eyebrow">COMMUNITY</div>
       <h2>Community Aggregations</h2>
-      <p>Buyers can request a large quantity while smaller farmers pool their contributions to fulfill it together.</p>
+      <p>Farmers pool their harvest together, then buyers can purchase the complete pooled supply.</p>
     </div>
-    <button id="createAggregationBtn" class="hero-primary" type="button" onclick="openAggregationRequest()">+ Create Buying Request</button>
+    <button id="createAggregationBtn" class="hero-primary" type="button" onclick="openAggregationRequest()">+ Create Farmer Pool</button>
   </div>
   <div id="aggregationGrid" class="aggregation-grid">
     <div class="aggregation-empty">Loading community requests...</div>
@@ -2543,17 +2543,17 @@ COMMUNITY AGGREGATION
 
 <div id="aggregationRequestModal" class="modal hidden">
   <div class="modal-card aggregation-modal-card">
-    <div class="profile-modal-header"><strong>Create Buying Request</strong><button class="close" type="button" onclick="closeAggregationRequest()">×</button></div>
+    <div class="profile-modal-header"><strong>Create Farmer Pool</strong><button class="close" type="button" onclick="closeAggregationRequest()">×</button></div>
     <form id="aggregationRequestForm" class="aggregation-form-grid" style="padding:18px">
-      <div class="full"><label for="aggProductName">What do you need?</label><input id="aggProductName" required placeholder="e.g. Potato"></div>
-      <div><label for="aggTargetQty">Quantity needed</label><input id="aggTargetQty" type="number" min="0.01" step="0.01" required placeholder="1200"></div>
+      <div class="full"><label for="aggProductName">What are you pooling?</label><input id="aggProductName" required placeholder="e.g. Potato"></div>
+      <div><label for="aggTargetQty">Target quantity</label><input id="aggTargetQty" type="number" min="0.01" step="0.01" required placeholder="1200"></div>
       <div><label for="aggUnit">Unit</label><select id="aggUnit"><option value="KG">KG</option><option value="SACK">Sack</option><option value="TON">Ton</option><option value="BUNDLE">Bundle</option><option value="PIECE">Piece</option></select></div>
-      <div><label for="aggOfferPrice">Offer price</label><input id="aggOfferPrice" type="number" min="0" step="0.01" required placeholder="35"></div>
+      <div><label for="aggOfferPrice">Price per unit</label><input id="aggOfferPrice" type="number" min="0" step="0.01" required placeholder="35"></div>
       <div><label for="aggLocation">Location</label><input id="aggLocation" required placeholder="Ilocos Norte"></div>
       <div><label for="aggNeededBy">Needed by</label><input id="aggNeededBy" type="date"></div>
       <div class="full"><label for="aggDescription">Additional details</label><textarea id="aggDescription" placeholder="Quality, delivery, variety, or other notes..."></textarea></div>
-      <div class="full aggregation-summary"><strong>How it works:</strong> farmers can contribute part of the requested quantity. The system adds all contributions automatically and closes the request once the target is reached.</div>
-      <div class="full aggregation-actions"><button class="secondary-btn" type="button" onclick="closeAggregationRequest()">Cancel</button><button class="hero-primary" type="submit">Post Buying Request</button></div>
+      <div class="full aggregation-summary"><strong>How it works:</strong> a farmer creates the community pool, then other farmers contribute their own harvest. When the target is reached, a buyer can purchase the full pooled supply as one community deal.</div>
+      <div class="full aggregation-actions"><button class="secondary-btn" type="button" onclick="closeAggregationRequest()">Cancel</button><button class="hero-primary" type="submit">Create Farmer Pool</button></div>
     </form>
   </div>
 </div>
@@ -2826,8 +2826,8 @@ window.supabase.createClient(
 GLOBALS
 ========================================================= */
 
-let currentUser = null;
-let currentProfile = null;
+var currentUser = null;
+var currentProfile = null;
 let currentConversation = null;
 let currentProduct = null;
 
@@ -10542,130 +10542,121 @@ setTimeout(run,600);
 
 <script id="lunduyan-aggregation-js">
 /* =========================================================
-   COMMUNITY AGGREGATION LOGIC
+   COMMUNITY AGGREGATION — FARMERS CREATE, BUYERS PURCHASE
    ========================================================= */
 let currentAggregation = null;
-
 function aggregationEsc(v){ return typeof escapeHtml==='function' ? escapeHtml(v ?? '') : String(v ?? '').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 function aggregationMoney(v){ return typeof formatMoney==='function' ? formatMoney(v) : Number(v||0).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function aggregationRole(){ return String(currentProfile?.role||'').toUpperCase(); }
+function aggregationIsFarmer(){ return aggregationRole()==='FARMER'; }
 function updateAggregationRoleUI(){
   const btn=document.getElementById('createAggregationBtn');
-  if(btn) btn.style.display=aggregationRole()==='BUYER'?'inline-flex':'none';
+  if(btn){ btn.style.display=aggregationIsFarmer()?'inline-flex':'none'; btn.textContent='+ Create Farmer Pool'; }
   const section=document.getElementById('aggregationSection');
-  if(section) section.classList.toggle('aggregation-farmer-view',aggregationRole()==='FARMER');
+  if(section) section.classList.toggle('aggregation-farmer-view',aggregationIsFarmer());
 }
-
 function openAggregationRequest(){
-  if(aggregationRole()!=='BUYER'){ alert('Only buyer accounts can create buying requests.'); return; }
+  if(!aggregationIsFarmer()){ alert('Only farmer accounts can create a community pool. Buyers can purchase a completed pool.'); return; }
   document.getElementById('aggregationRequestModal')?.classList.remove('hidden');
   if(typeof setModalScrollLock==='function') setModalScrollLock(true);
 }
-function closeAggregationRequest(){
-  document.getElementById('aggregationRequestModal')?.classList.add('hidden');
-  if(typeof setModalScrollLock==='function') setModalScrollLock(false);
-}
+function closeAggregationRequest(){ document.getElementById('aggregationRequestModal')?.classList.add('hidden'); if(typeof setModalScrollLock==='function')setModalScrollLock(false); }
 function openAggregationContribution(id){
-  if(aggregationRole()!=='FARMER'){ alert('Only farmer accounts can contribute to a community aggregation.'); return; }
-  currentAggregation = (window.__aggregations||[]).find(x=>String(x.id)===String(id)) || null;
-  if(!currentAggregation) return;
-  const total=Number(currentAggregation.total_contributed||0), target=Number(currentAggregation.target_quantity||0);
-  const remaining=Math.max(0,target-total);
+  if(!aggregationIsFarmer()){ alert('Only farmers can contribute to a community pool.'); return; }
+  currentAggregation=(window.__aggregations||[]).find(x=>String(x.id)===String(id))||null;
+  if(!currentAggregation)return;
+  const total=Number(currentAggregation.total_contributed||0),target=Number(currentAggregation.target_quantity||0),remaining=Math.max(0,target-total);
+  if(remaining<=0){alert('This pool is already complete.');return;}
   document.getElementById('aggContributionRequestId').value=currentAggregation.id;
-  document.getElementById('aggContributionQty').value=remaining>0?Math.min(100,remaining):'';
-  document.getElementById('aggContributionInfo').innerHTML=`<div class="aggregation-summary"><strong>${aggregationEsc(currentAggregation.product_name)}</strong><br>Target: ${aggregationEsc(target)} ${aggregationEsc(currentAggregation.unit)} · Offer: ₱${aggregationMoney(currentAggregation.offer_price)} / ${aggregationEsc(currentAggregation.unit)}<br>Remaining: <strong>${aggregationEsc(remaining)} ${aggregationEsc(currentAggregation.unit)}</strong></div>`;
+  document.getElementById('aggContributionQty').value=Math.min(100,remaining);
+  document.getElementById('aggContributionInfo').innerHTML=`<div class="aggregation-summary"><strong>${aggregationEsc(currentAggregation.product_name)}</strong><br>Target: ${aggregationEsc(target)} ${aggregationEsc(currentAggregation.unit)} · ₱${aggregationMoney(currentAggregation.offer_price)} / ${aggregationEsc(currentAggregation.unit)}<br>Still needed: <strong>${aggregationEsc(remaining)} ${aggregationEsc(currentAggregation.unit)}</strong></div>`;
   document.getElementById('aggregationContributionModal')?.classList.remove('hidden');
-  if(typeof setModalScrollLock==='function') setModalScrollLock(true);
+  if(typeof setModalScrollLock==='function')setModalScrollLock(true);
 }
-function closeAggregationContribution(){
-  document.getElementById('aggregationContributionModal')?.classList.add('hidden');
-  if(typeof setModalScrollLock==='function') setModalScrollLock(false);
-  currentAggregation=null;
-}
-
+function closeAggregationContribution(){document.getElementById('aggregationContributionModal')?.classList.add('hidden');if(typeof setModalScrollLock==='function')setModalScrollLock(false);currentAggregation=null;}
 async function loadAggregations(){
   const grid=document.getElementById('aggregationGrid');
   updateAggregationRoleUI();
-  if(!grid || !currentProfile) return;
-  grid.innerHTML='<div class="aggregation-empty">Loading community requests...</div>';
+  if(!grid||!currentProfile)return;
+  grid.innerHTML='<div class="aggregation-empty">Loading community pools...</div>';
   const {data,error}=await supabaseClient.from('aggregation_requests').select('*, buyer:buyer_id(full_name), aggregation_contributions(id,farmer_id,quantity,status,farmer:farmer_id(full_name))').order('created_at',{ascending:false});
-  if(error){
-    grid.innerHTML=`<div class="aggregation-empty"><strong>Community aggregation is not configured yet.</strong><br><small>${aggregationEsc(error.message)}</small></div>`;
-    return;
-  }
+  if(error){grid.innerHTML=`<div class="aggregation-empty"><strong>Community pools are not configured yet.</strong><br><small>${aggregationEsc(error.message)}</small></div>`;return;}
   const rows=(data||[]).map(r=>{
     const contributions=(r.aggregation_contributions||[]).filter(c=>String(c.status||'ACTIVE').toUpperCase()!=='CANCELLED');
     const total=contributions.reduce((sum,c)=>sum+Number(c.quantity||0),0);
     return {...r,total_contributed:total,contributors:contributions};
   });
-  window.__aggregations=rows;
-  renderAggregations(rows);
+  window.__aggregations=rows;renderAggregations(rows);
 }
-
 function renderAggregations(rows){
-  const grid=document.getElementById('aggregationGrid'); if(!grid) return;
-  const role=aggregationRole();
-  updateAggregationRoleUI();
-  if(!rows.length){ grid.innerHTML='<div class="aggregation-empty">No community buying requests yet. Buyers can create the first one.</div>'; return; }
+  const grid=document.getElementById('aggregationGrid');if(!grid)return;
+  const role=aggregationRole();updateAggregationRoleUI();
+  if(!rows.length){grid.innerHTML='<div class="aggregation-empty">No farmer community pools yet. Farmers can create the first pool.</div>';return;}
   grid.innerHTML=rows.map(r=>{
-    const target=Number(r.target_quantity||0), total=Number(r.total_contributed||0), pct=target?Math.min(100,(total/target)*100):0;
-    const remaining=Math.max(0,target-total), status=String(r.status||'OPEN').toUpperCase();
-    const statusClass=status==='TARGET_REACHED'||status==='CONFIRMED'?'target':(status==='COMPLETED'||status==='CANCELLED'?'closed':'');
+    const target=Number(r.target_quantity||0),total=Number(r.total_contributed||0),pct=target?Math.min(100,total/target*100):0,remaining=Math.max(0,target-total),status=String(r.status||'OPEN').toUpperCase();
+    const statusClass=status==='TARGET_REACHED'||status==='CONFIRMED'||status==='SOLD'?'target':(status==='COMPLETED'||status==='CANCELLED'?'closed':'');
     const contributors=(r.contributors||[]).map(c=>`<div class="aggregation-contributor"><span>👨‍🌾 ${aggregationEsc(c.farmer?.full_name||'Farmer')}</span><span>${aggregationEsc(c.quantity)} ${aggregationEsc(r.unit)}</span></div>`).join('');
-    const action = role==='FARMER' && remaining>0 && ['OPEN'].includes(status) ? `<button class="hero-primary" type="button" onclick="openAggregationContribution('${r.id}')">Contribute</button>` : (role==='BUYER' && String(r.buyer_id)===String(currentProfile.id) && status==='TARGET_REACHED' ? `<button class="hero-primary" type="button" onclick="confirmAggregation('${r.id}')">Confirm Aggregation</button>` : '');
-    return `<article class="aggregation-card"><div class="aggregation-card-top"><div><div class="aggregation-product">🥔 ${aggregationEsc(String(r.product_name||'').toUpperCase())} AGGREGATION</div><div class="aggregation-meta">Buyer: ${aggregationEsc(r.buyer?.full_name||'Buyer')} · ${aggregationEsc(r.location||'Location not set')}</div></div><span class="aggregation-status ${statusClass}">${aggregationEsc(status.replaceAll('_',' '))}</span></div><div class="aggregation-progress"><span style="width:${pct}%"></span></div><div class="aggregation-numbers"><span>${aggregationEsc(total)} / ${aggregationEsc(target)} ${aggregationEsc(r.unit)}</span><span>${aggregationEsc(remaining)} remaining</span></div><div class="aggregation-price">₱${aggregationMoney(r.offer_price)} / ${aggregationEsc(r.unit)}</div><div class="aggregation-contributors">${contributors||'<div class="aggregation-meta">No farmer contributions yet.</div>'}</div><div class="aggregation-actions">${action}</div></article>`;
+    let action='';
+    if(role==='FARMER' && remaining>0 && status==='OPEN') action=`<button class="hero-primary" type="button" onclick="openAggregationContribution('${r.id}')">＋ Contribute Harvest</button>`;
+    if(role==='BUYER' && total>0 && status==='TARGET_REACHED') action=`<button class="hero-primary" type="button" onclick="buyAggregatedSupply('${r.id}')">🛒 Buy Full Pooled Supply</button>`;
+    if(role==='BUYER' && status==='OPEN' && total>0) action=`<span class="aggregation-waiting">Waiting for farmers to complete the pool</span>`;
+    if(status==='SOLD'||status==='CONFIRMED') action=`<span class="aggregation-waiting success">Community pool purchased</span>`;
+    return `<article class="aggregation-card"><div class="aggregation-card-top"><div><div class="aggregation-product">🥔 ${aggregationEsc(String(r.product_name||'').toUpperCase())} COMMUNITY POOL</div><div class="aggregation-meta">Created by: ${aggregationEsc(r.buyer?.full_name||'Farmer')} · ${aggregationEsc(r.location||'Location not set')}</div></div><span class="aggregation-status ${statusClass}">${aggregationEsc(status.replaceAll('_',' '))}</span></div><div class="aggregation-progress"><span style="width:${pct}%"></span></div><div class="aggregation-numbers"><span>${aggregationEsc(total)} / ${aggregationEsc(target)} ${aggregationEsc(r.unit)}</span><span>${aggregationEsc(remaining)} remaining</span></div><div class="aggregation-price">₱${aggregationMoney(r.offer_price)} / ${aggregationEsc(r.unit)}</div><div class="aggregation-contributors">${contributors||'<div class="aggregation-meta">No farmer contributions yet.</div>'}</div><div class="aggregation-actions">${action}</div></article>`;
   }).join('');
 }
-
-async function confirmAggregation(id){
-  if(aggregationRole()!=='BUYER') return;
-  if(!confirm('Confirm this aggregation as your demo transaction? No real payment will be made.')) return;
-  const {data,error}=await supabaseClient.rpc('confirm_aggregation',{p_request_id:id});
-  if(error){ alert(error.message); return; }
-  alert('Aggregation confirmed. The pooled farmer contributions are now recorded as a demo transaction.');
+async function buyAggregatedSupply(id){
+  if(aggregationRole()!=='BUYER')return;
+  const r=(window.__aggregations||[]).find(x=>String(x.id)===String(id));
+  if(!r)return;
+  const total=Number(r.total_contributed||0),target=Number(r.target_quantity||0);
+  if(String(r.status||'OPEN').toUpperCase()!=='TARGET_REACHED' || total<target){alert('The farmer pool must reach its target before a buyer can purchase it.');return;}
+  const amount=total*Number(r.offer_price||0);
+  if(!confirm(`Buy the full pooled supply of ${total} ${r.unit} for ₱${aggregationMoney(amount)}?\n\nDemo transaction only — no real payment will be charged.`))return;
+  const {data,error}=await supabaseClient.from('aggregation_requests').update({status:'SOLD'}).eq('id',id).eq('status','TARGET_REACHED').select('*').maybeSingle();
+  if(error){alert(error.message);return;}
+  if(!data){alert('This community pool was already purchased or changed. Refresh and try again.');return;}
+  const farmers=[...(r.contributors||[])].map(c=>c.farmer_id).filter(Boolean);
+  if(farmers.length){
+    try{await supabaseClient.from('notifications').insert(farmers.map(fid=>({user_id:fid,title:'Community Pool Purchased',message:`Your ${r.product_name} contribution was included in a completed community purchase.`,type:'ORDER'})));}catch(_){}
+  }
+  alert(`Community purchase completed!\n${total} ${r.unit} pooled supply\nTotal demo value: ₱${aggregationMoney(amount)}`);
   await loadAggregations();
+  if(typeof loadOrders==='function')await loadOrders();
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
   const requestForm=document.getElementById('aggregationRequestForm');
-  if(requestForm) requestForm.addEventListener('submit',async e=>{
-    e.preventDefault();
-    if(aggregationRole()!=='BUYER'){alert('Only buyer accounts can create buying requests.');return;}
-    const product_name=document.getElementById('aggProductName').value.trim();
-    const target_quantity=Number(document.getElementById('aggTargetQty').value);
-    const unit=document.getElementById('aggUnit').value;
-    const offer_price=Number(document.getElementById('aggOfferPrice').value);
-    const location=document.getElementById('aggLocation').value.trim();
-    const needed_by=document.getElementById('aggNeededBy').value||null;
-    const description=document.getElementById('aggDescription').value.trim()||null;
-    if(!product_name||target_quantity<=0||offer_price<0||!location){alert('Please complete the required fields.');return;}
-    const {error}=await supabaseClient.from('aggregation_requests').insert({buyer_id:currentProfile.id,product_name,target_quantity,unit,offer_price,location,needed_by,description,status:'OPEN'});
-    if(error){alert(error.message);return;}
-    requestForm.reset(); closeAggregationRequest(); await loadAggregations();
-  });
+  if(requestForm&&!requestForm.dataset.farmerPoolWired){
+    requestForm.dataset.farmerPoolWired='1';
+    requestForm.addEventListener('submit',async e=>{
+      e.preventDefault();
+      if(!aggregationIsFarmer()){alert('Only farmers can create a community pool.');return;}
+      const product_name=document.getElementById('aggProductName').value.trim(),target_quantity=Number(document.getElementById('aggTargetQty').value),unit=document.getElementById('aggUnit').value,offer_price=Number(document.getElementById('aggOfferPrice').value),location=document.getElementById('aggLocation').value.trim(),needed_by=document.getElementById('aggNeededBy').value||null,description=document.getElementById('aggDescription').value.trim()||null;
+      if(!product_name||target_quantity<=0||offer_price<0||!location){alert('Please complete the required fields.');return;}
+      /* Existing schema uses buyer_id; for community pools it stores the farmer who created the pool. */
+      const {error}=await supabaseClient.from('aggregation_requests').insert({buyer_id:currentProfile.id,product_name,target_quantity,unit,offer_price,location,needed_by,description,status:'OPEN'});
+      if(error){alert(error.message);return;}
+      requestForm.reset();closeAggregationRequest();await loadAggregations();
+    });
+  }
   const contributionForm=document.getElementById('aggregationContributionForm');
-  if(contributionForm) contributionForm.addEventListener('submit',async e=>{
-    e.preventDefault();
-    if(aggregationRole()!=='FARMER'||!currentAggregation) return;
-    const requestId=document.getElementById('aggContributionRequestId').value;
-    const quantity=Number(document.getElementById('aggContributionQty').value);
-    if(quantity<=0){alert('Enter a valid contribution.');return;}
-    const {data,error}=await supabaseClient.rpc('contribute_to_aggregation',{p_request_id:requestId,p_quantity:quantity});
-    if(error){alert(error.message);return;}
-    closeAggregationContribution(); await loadAggregations();
-    const result=data||{};
-    alert(result.target_reached ? 'Contribution saved. The target has been reached and is ready for buyer confirmation.' : 'Contribution saved successfully.');
-  });
+  if(contributionForm&&!contributionForm.dataset.farmerPoolWired){
+    contributionForm.dataset.farmerPoolWired='1';
+    contributionForm.addEventListener('submit',async e=>{
+      e.preventDefault();if(!aggregationIsFarmer()||!currentAggregation)return;
+      const requestId=document.getElementById('aggContributionRequestId').value,quantity=Number(document.getElementById('aggContributionQty').value);
+      if(quantity<=0){alert('Enter a valid contribution.');return;}
+      const {data,error}=await supabaseClient.rpc('contribute_to_aggregation',{p_request_id:requestId,p_quantity:quantity});
+      if(error){alert(error.message);return;}
+      closeAggregationContribution();await loadAggregations();
+      alert(data?.target_reached?'Contribution saved. The community pool is now complete and ready for a buyer.':'Contribution saved successfully.');
+    });
+  }
 });
-
-/* Refresh aggregation data whenever the main dashboard loads. */
 (function patchAggregationLoader(){
   const original=window.loadProducts;
-  if(typeof original==='function' && !original.__aggregationPatched){
-    const wrapped=async function(){ const result=await original.apply(this,arguments); if(window.currentProfile) await loadAggregations(); return result; };
-    wrapped.__aggregationPatched=true; window.loadProducts=wrapped;
-  }
-  setTimeout(()=>{ if(window.currentProfile) loadAggregations(); },900);
+  if(typeof original==='function'&&!original.__aggregationPatched){const wrapped=async function(){const result=await original.apply(this,arguments);if(typeof currentProfile!=='undefined'&&currentProfile)await loadAggregations();return result;};wrapped.__aggregationPatched=true;window.loadProducts=wrapped;}
+  setTimeout(()=>{if(typeof currentProfile!=='undefined'&&currentProfile)loadAggregations();},900);
 })();
 </script>
 
@@ -10886,6 +10877,64 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(nav && window.innerWidth<=700 && $('app')&&!$('app').classList.contains('hidden'))nav.style.setProperty('display','grid','important');
     else if(nav)nav.style.setProperty('display','none','important');
   });
+})();
+</script>
+
+<style id="LUNDUYAN-USER-FINAL-PATCH">
+/* Final mobile/profile/message/aggregation corrections */
+.aggregation-waiting{display:inline-flex;align-items:center;min-height:42px;padding:9px 13px;border-radius:12px;background:#f2f6f3;color:#617067;font-size:12px;font-weight:800}
+.aggregation-waiting.success{background:#eaf8ef;color:#16833b}
+@media(max-width:700px){
+  #myProfileModal .modal-card{width:calc(100vw - 20px)!important;max-width:none!important;max-height:calc(100dvh - 20px)!important;margin:10px!important;border-radius:20px!important}
+  #myProfileModal #myProfileContent{padding:16px!important;padding-bottom:24px!important;overflow-y:auto!important}
+  #myProfileContent .lunduyan-profile-actions{display:grid!important;grid-template-columns:1fr!important;gap:10px!important;margin-top:16px!important;padding-top:14px!important}
+  #myProfileContent .lunduyan-logout-btn{display:flex!important;visibility:visible!important;opacity:1!important;width:100%!important;min-height:48px!important;align-items:center!important;justify-content:center!important}
+  #chatModal .chat-header{min-height:64px!important;padding:10px 14px!important;display:flex!important;align-items:center!important}
+  #chatModal .chat-header>.close{display:flex!important;visibility:visible!important;opacity:1!important;flex:0 0 42px!important;width:42px!important;height:42px!important;min-width:42px!important;align-items:center!important;justify-content:center!important;position:relative!important;z-index:999999!important;pointer-events:auto!important}
+  #chatModal .chat-list-header>.chat-contacts-close{display:flex!important;visibility:visible!important;opacity:1!important;position:absolute!important;right:10px!important;top:10px!important;z-index:999999!important}
+  #chatModal .chat-list-header{position:relative!important;padding-right:58px!important}
+  #aggregationSection{margin-top:18px!important;margin-bottom:90px!important;scroll-margin-top:72px!important}
+  #aggregationSection .aggregation-head{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:10px!important}
+  #aggregationSection #createAggregationBtn{width:100%!important;min-height:48px!important}
+}
+</style>
+<script id="LUNDUYAN-USER-FINAL-PATCH-JS">
+(function(){
+  'use strict';
+  const $=id=>document.getElementById(id);
+  function ensureProfileLogout(){
+    const modal=$('myProfileModal'),box=$('myProfileContent');
+    if(!modal||!box||modal.classList.contains('hidden'))return;
+    if(typeof currentProfile==='undefined'||!currentProfile)return;
+    let actions=box.querySelector('.lunduyan-profile-actions');
+    if(!actions){actions=document.createElement('div');actions.className='lunduyan-profile-actions';box.appendChild(actions);}
+    let b=actions.querySelector('.lunduyan-logout-btn');
+    if(!b){
+      b=document.createElement('button');b.type='button';b.className='danger-btn lunduyan-logout-btn';b.textContent='🚪 Logout';
+      b.onclick=async()=>{if(!confirm('Are you sure you want to log out?'))return;try{await logout();}catch(e){alert(e?.message||'Could not log out.');}};
+      actions.appendChild(b);
+    }
+    b.style.setProperty('display','flex','important');b.style.setProperty('visibility','visible','important');b.style.setProperty('opacity','1','important');
+  }
+  function ensureMessageClose(){
+    const modal=$('chatModal');if(!modal)return;
+    const header=modal.querySelector('.chat-header');if(!header)return;
+    let close=header.querySelector('.chat-header-close-final');
+    if(!close){close=document.createElement('button');close.type='button';close.className='close chat-header-close-final';header.appendChild(close);}
+    close.textContent='×';close.title='Close Messages';close.setAttribute('aria-label','Close Messages');
+    close.onclick=e=>{e.preventDefault();e.stopPropagation();if(typeof closeChat==='function')closeChat();else modal.classList.add('hidden');};
+  }
+  function cleanStrayNewlines(){
+    [...document.body.childNodes].forEach(n=>{if(n.nodeType===3&&/^\s*(\\n\s*)+$/.test(n.nodeValue||''))n.remove();});
+  }
+  function sync(){ensureProfileLogout();ensureMessageClose();cleanStrayNewlines();}
+  document.addEventListener('click',e=>{
+    if(e.target.closest('#mobileBottomNav [data-mobile-nav="profile"]'))setTimeout(ensureProfileLogout,80);
+    if(e.target.closest('#chatModal'))setTimeout(ensureMessageClose,20);
+  },true);
+  const pm=$('myProfileModal');if(pm)new MutationObserver(()=>setTimeout(ensureProfileLogout,0)).observe(pm,{attributes:true,attributeFilter:['class']});
+  const cm=$('chatModal');if(cm)new MutationObserver(()=>setTimeout(ensureMessageClose,0)).observe(cm,{attributes:true,attributeFilter:['class']});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{sync();setTimeout(sync,300);setTimeout(sync,1000);});else{sync();setTimeout(sync,300);setTimeout(sync,1000);}
 })();
 </script>
 </body>
