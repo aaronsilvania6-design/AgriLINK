@@ -10918,5 +10918,126 @@ repair();
 })();
 </script>
 
+
+
+<!-- ACTUAL FINAL FIX: PUBLIC FARMER PROFILE BLOCK BUTTON -->
+<style id="AGRILINK_PUBLIC_FARMER_BLOCK_ACTUAL_FIX_CSS">
+#profileModal .agrilink-profile-block-final{
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  position:relative!important;
+  z-index:2147483647!important;
+  cursor:pointer!important;
+  -webkit-tap-highlight-color:transparent!important;
+}
+</style>
+<script id="AGRILINK_PUBLIC_FARMER_BLOCK_ACTUAL_FIX_JS">
+(function(){
+  'use strict';
+  if(window.__AGRILINK_PUBLIC_FARMER_BLOCK_ACTUAL_FIX__) return;
+  window.__AGRILINK_PUBLIC_FARMER_BLOCK_ACTUAL_FIX__=true;
+
+  let viewingId=null;
+  let busy=false;
+
+  /* Remember exactly which farmer profile is currently open. */
+  const previousOpenFarmerProfile=window.openFarmerProfile;
+  if(typeof previousOpenFarmerProfile==='function'){
+    window.openFarmerProfile=async function(farmerId){
+      viewingId=String(farmerId||'');
+      return previousOpenFarmerProfile.apply(this,arguments);
+    };
+  }
+
+  function currentUser(){
+    return window.currentProfile || (typeof currentProfile!=='undefined'?currentProfile:null);
+  }
+
+  function getFarmerName(){
+    const root=document.getElementById('profileContent');
+    const el=root?.querySelector('.profile-name,h1,h2');
+    return (el?.textContent||'this farmer').trim();
+  }
+
+  async function finalToggle(btn){
+    if(busy) return;
+    const me=currentUser();
+    const farmerId=String(btn.dataset.farmerId||viewingId||'');
+    if(!me?.id || !farmerId || String(me.id)===farmerId){
+      alert('Could not identify this profile. Please close and open the farmer profile again.');
+      return;
+    }
+
+    const name=btn.dataset.farmerName || getFarmerName();
+    busy=true;
+    btn.disabled=true;
+    const wasBlocked=btn.dataset.blocked==='1';
+
+    try{
+      if(!wasBlocked){
+        if(!confirm(`Block ${name}? Their products will be hidden from your marketplace.`)) return;
+        const {error}=await supabaseClient.from('user_blocks').upsert(
+          {blocker_id:String(me.id),blocked_id:farmerId},
+          {onConflict:'blocker_id,blocked_id',ignoreDuplicates:true}
+        );
+        if(error) throw error;
+        btn.dataset.blocked='1';
+        btn.textContent='↩ Unblock';
+        if(typeof loadProducts==='function') loadProducts().catch(()=>{});
+      }else{
+        if(!confirm(`Unblock ${name}?`)) return;
+        const {error}=await supabaseClient.from('user_blocks').delete()
+          .eq('blocker_id',String(me.id)).eq('blocked_id',farmerId);
+        if(error) throw error;
+        btn.dataset.blocked='0';
+        btn.textContent='⚫ Block';
+        if(typeof loadProducts==='function') loadProducts().catch(()=>{});
+      }
+    }catch(err){
+      console.error('Block button error:',err);
+      alert(err?.message || 'Could not update the block status.');
+    }finally{
+      btn.disabled=false;
+      busy=false;
+    }
+  }
+
+  function patchButton(){
+    const modal=document.getElementById('profileModal');
+    const root=document.getElementById('profileContent');
+    if(!modal||!root) return;
+    const old=root.querySelector('.profile-block-btn,.agrilink-profile-block-final');
+    if(!old || old.dataset.actualPatched==='1') return;
+
+    /* Clone removes the old addEventListener handlers that were conflicting. */
+    const btn=old.cloneNode(true);
+    btn.dataset.actualPatched='1';
+    btn.dataset.farmerId=String(viewingId||btn.dataset.farmerId||'');
+    btn.dataset.farmerName=getFarmerName();
+    btn.classList.remove('profile-block-btn','block-user-btn','profile-block-action');
+    btn.classList.add('agrilink-profile-block-final');
+    btn.type='button';
+    btn.disabled=false;
+    btn.style.pointerEvents='auto';
+    btn.style.touchAction='manipulation';
+    btn.onclick=function(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+      finalToggle(btn);
+      return false;
+    };
+    old.replaceWith(btn);
+  }
+
+  const modal=document.getElementById('profileModal');
+  if(modal){
+    const observer=new MutationObserver(()=>patchButton());
+    observer.observe(modal,{childList:true,subtree:true});
+  }
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(patchButton,0));
+  setTimeout(patchButton,300);
+  window.addEventListener('click',()=>setTimeout(patchButton,0),true);
+})();
+</script>
 </body>
 </html>
