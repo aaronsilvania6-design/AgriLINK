@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
 <meta content="#16833b" name="theme-color"/>
-<title>LUNDUYAN — Agricultural Marketplace</title>
+<title>LUNDUYAN — Local Agriculture Marketplace</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
 </script>
 <style>
@@ -3003,6 +3003,78 @@ input:focus,select:focus,textarea:focus{
   *,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;
   scroll-behavior:auto!important;transition-duration:.01ms!important}
 }
+</style>
+
+
+<style id="LUNDUYAN_FINAL_BONGGA_DESIGN">
+:root{
+  --lund-green:#176B45;
+  --lund-deep:#0b3b27;
+  --lund-lime:#8ee36b;
+  --lund-mint:#eafff0;
+  --lund-cream:#f7f5ec;
+  --lund-ink:#10261b;
+  --lund-line:rgba(23,107,69,.13);
+}
+html{scroll-behavior:smooth}
+body{background:linear-gradient(180deg,#f7faf7 0%,#f1f7f3 100%);color:var(--lund-ink)}
+
+/* ===================== LANDING: NEW VISUAL IDENTITY ===================== */
+.landing{min-height:100vh!important;overflow:hidden!important;position:relative!important;background:
+  radial-gradient(circle at 83% 13%,rgba(142,227,107,.26),transparent 22%),
+  radial-gradient(circle at 12% 78%,rgba(23,107,69,.12),transparent 24%),
+  linear-gradient(145deg,#fbfdf9 0%,#edf8f1 45%,#f8f4e8 100%)!important;
+}
+.landing:before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(23,107,69,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(23,107,69,.045) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,black,transparent 70%);pointer-events:none}
+.landing:after{content:"";position:absolute;width:720px;height:720px;right:-260px;top:150px;border-radius:50%;background:radial-gradient(circle,rgba(142,227,107,.25),rgba(23,107,69,.04) 48%,transparent 70%);filter:blur(3px);pointer-events:none}
+.landing-nav{height:82px!important;padding:0 clamp(18px,5vw,72px)!important;background:rgba(23,107,69,.96)!important;color:#fff!important;border:0!important;box-shadow:0 16px 40px rgba(11,59,39,.18)!important;position:sticky!important;z-index:500!important}
+.landing-nav .brand{color:#fff!important;font-size:22px!important;letter-spacing:-.5px}
+.landing-nav .brand small{color:rgba(255,255,255,.72)!important;letter-spacing:2px!important}
+.landing-nav .brand-icon{background:#fff!important;color:var(--lund-green)!important;box-shadow:0 8px 24px rgba(0,0,0,.18)!important;border-radius:15px!important}
+.landing-nav-links{gap:30px!important}.landing-nav-links a{color:rgba(255,255,255,.82)!important}.landing-nav-links a:hover{color:#fff!important}
+.landing-nav button{background:#0a1710!important;color:#fff!important;border:1px solid rgba(255,255,255,.15)!important;border-radius:16px!important;padding:14px 22px!important;box-shadow:0 12px 25px rgba(0,0,0,.18)!important}
+.hero{max-width:1400px!important;min-height:calc(100vh - 82px)!important;padding:72px 30px 64px!important;grid-template-columns:minmax(0,1fr) minmax(420px,.92fr)!important;gap:70px!important;position:relative!important;z-index:2!important}
+.hero-copy{max-width:700px!important}
+.hero-tag{background:rgba(255,255,255,.74)!important;border:1px solid rgba(23,107,69,.16)!important;color:var(--lund-green)!important;border-radius:999px!important;padding:10px 15px!important;box-shadow:0 12px 30px rgba(23,107,69,.08)!important}
+.hero h1{font-size:clamp(52px,7vw,100px)!important;line-height:.91!important;letter-spacing:-5px!important;color:var(--lund-deep)!important;margin-bottom:28px!important}
+.hero h1 span{background:linear-gradient(100deg,#176B45 15%,#34a85c 52%,#8bcf53 95%)!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent!important}
+.hero p{font-size:18px!important;line-height:1.75!important;color:#5d6e65!important;max-width:620px!important}
+.hero-buttons{margin-top:34px!important;gap:14px!important}.hero-primary{background:linear-gradient(135deg,#176B45,#22905d)!important;border-radius:17px!important;padding:16px 24px!important;box-shadow:0 18px 38px rgba(23,107,69,.22)!important}.hero-primary:hover{transform:translateY(-4px) scale(1.01)!important}.hero-secondary{background:rgba(255,255,255,.82)!important;border:1px solid rgba(23,107,69,.15)!important;border-radius:17px!important;padding:16px 24px!important;color:var(--lund-green)!important}
+.hero-trust{margin-top:28px!important}.trust-avatars span{border-color:#edf8f1!important}
+.hero-visual{min-height:590px!important}
+.visual-glow{filter:blur(10px)!important}.glow-a{width:500px!important;height:500px!important;background:rgba(142,227,107,.22)!important;right:-20px!important;top:30px!important}.glow-b{width:300px!important;height:300px!important;background:rgba(23,107,69,.10)!important;left:-10px!important;bottom:10px!important}
+.market-preview{width:min(560px,92vw)!important;border-radius:34px!important;padding:24px!important;background:rgba(255,255,255,.74)!important;border:1px solid rgba(255,255,255,.95)!important;box-shadow:0 45px 100px rgba(11,59,39,.19)!important;transform:rotate(2deg)!important}
+.preview-product{background:linear-gradient(135deg,#f4fbf5,#fffaf0)!important;border:1px solid rgba(23,107,69,.08)!important}.produce-art{background:linear-gradient(145deg,#dff7e6,#fff0cf)!important;border-radius:20px!important}.preview-row{gap:12px!important}.mini-product{background:rgba(255,255,255,.8)!important}.floating-card{border:1px solid rgba(23,107,69,.11)!important;background:rgba(255,255,255,.9)!important;backdrop-filter:blur(14px)!important;border-radius:18px!important}.float-one{left:-55px!important;top:38px!important}.float-two{right:-28px!important;bottom:30px!important}.float-three{right:-45px!important}
+.landing-stats{max-width:1200px!important;padding-bottom:85px!important;gap:10px!important}.landing-stats>div{border:1px solid var(--lund-line)!important;border-radius:18px!important;box-shadow:0 12px 30px rgba(23,107,69,.05)!important}
+.features{max-width:1250px!important;padding:45px 24px 120px!important}.features h2{font-size:clamp(34px,5vw,56px)!important;letter-spacing:-2.5px!important;color:var(--lund-deep)!important}.feature-grid{grid-template-columns:repeat(3,1fr)!important;gap:20px!important}.feature-card{min-height:260px!important;border-radius:26px!important;padding:30px!important;border:1px solid rgba(23,107,69,.11)!important;box-shadow:0 18px 50px rgba(23,107,69,.07)!important;background:rgba(255,255,255,.83)!important}.feature-card:hover{transform:translateY(-8px)!important;box-shadow:0 28px 65px rgba(23,107,69,.13)!important}
+
+/* ===================== APP CHROME ===================== */
+.navbar,.modal-header,.profile-modal-header,.chat-header,.notification-header{background:var(--lund-green)!important;color:#fff!important;border-color:var(--lund-green)!important}
+.navbar{height:72px!important;box-shadow:0 12px 35px rgba(23,107,69,.20)!important}.nav-brand{color:#fff!important}.nav-logo{background:#fff!important;color:var(--lund-green)!important;border-radius:13px!important}.navbar .secondary-btn,.navbar .profile-nav-btn,.navbar .live-pill{background:rgba(255,255,255,.13)!important;color:#fff!important;border-color:rgba(255,255,255,.24)!important}.navbar .danger-btn{background:#0a1710!important;color:#fff!important;border-color:#0a1710!important;border-radius:13px!important}
+.welcome{background:linear-gradient(135deg,#0d422c 0%,#176B45 48%,#35a765 100%)!important;border-radius:28px!important;padding:38px!important;box-shadow:0 28px 60px rgba(23,107,69,.19)!important}.welcome h1{font-size:clamp(26px,4vw,42px)!important}.role-badge{background:rgba(255,255,255,.13)!important;border-color:rgba(255,255,255,.2)!important}
+.search-box,.product-card,.stat-card,.order-card,.profile-card,.aggregation-card,.feature-card{border-color:rgba(23,107,69,.12)!important;box-shadow:0 16px 45px rgba(23,107,69,.06)!important}
+.product-card{border-radius:23px!important}.product-card:hover{transform:translateY(-7px)!important;box-shadow:0 24px 50px rgba(23,107,69,.12)!important}.product-image{background:linear-gradient(135deg,#e9f8ee,#fff8e9)!important}
+.primary-btn,.buy-btn{background:linear-gradient(135deg,#176B45,#23915f)!important;border-radius:13px!important}
+
+/* ===================== PHONE: NEVER LOSE THE BUTTONS ===================== */
+@media(max-width:700px){
+  html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!important}
+  body{padding-bottom:calc(82px + env(safe-area-inset-bottom))!important}
+  #app>.navbar{height:60px!important;min-height:60px!important;padding:0 12px!important;position:sticky!important;top:0!important;z-index:5000!important;overflow:visible!important}
+  #app>.navbar .nav-actions{display:none!important}.nav-brand{font-size:16px!important}.nav-logo{width:35px!important;height:35px!important}
+  #mobileBottomNav.mobile-bottom-nav{display:grid!important;position:fixed!important;left:0!important;right:0!important;bottom:0!important;width:100%!important;height:calc(76px + env(safe-area-inset-bottom))!important;padding:6px 6px calc(6px + env(safe-area-inset-bottom))!important;grid-template-columns:repeat(5,1fr)!important;background:rgba(255,255,255,.98)!important;border-top:1px solid rgba(23,107,69,.12)!important;box-shadow:0 -14px 40px rgba(11,59,39,.14)!important;z-index:2147483000!important;transform:translateZ(0)!important;contain:layout paint!important}
+  .mobile-nav-item{min-width:0!important;min-height:58px!important;padding:5px 2px!important;border:1px solid transparent!important;border-radius:16px!important;background:transparent!important;color:#708077!important;font-size:10px!important;font-weight:900!important}
+  .mobile-nav-item .mobile-nav-icon{font-size:22px!important;line-height:24px!important}.mobile-nav-item.active{background:#eaf8ef!important;color:var(--lund-green)!important;border-color:rgba(23,107,69,.10)!important}.mobile-nav-label{font-size:10px!important}
+  .container{padding:12px 10px 100px!important}.welcome{padding:22px 17px!important;border-radius:22px!important}.search-box{border-radius:20px!important}.products{grid-template-columns:1fr!important}.product-card{border-radius:20px!important}.product-actions{grid-template-columns:1fr 1fr!important}.product-actions button{min-height:46px!important}
+  #chatModal{padding:0!important}#chatModal .modal-card{width:100%!important;height:100dvh!important;max-height:none!important;border-radius:0!important;margin:0!important}.chat-header{min-height:66px!important}.chat-header>.close,#chatModal .chat-list-header>.chat-contacts-close{display:flex!important;align-items:center!important;justify-content:center!important;width:44px!important;height:44px!important;min-width:44px!important;border-radius:50%!important;background:rgba(255,255,255,.17)!important;color:#fff!important;border:1px solid rgba(255,255,255,.25)!important;font-size:28px!important;line-height:1!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important;z-index:99999!important}
+  #chatModal .chat-layout{height:100dvh!important}.chat-messages{overflow-y:auto!important;-webkit-overflow-scrolling:touch!important}.chat-input{position:sticky!important;bottom:0!important;background:#fff!important;z-index:20!important;padding-bottom:calc(9px + env(safe-area-inset-bottom))!important}.chat-input input,.chat-input button{min-height:46px!important}
+  #myProfileModal{padding:0!important}#myProfileModal .modal-card{width:100%!important;height:100dvh!important;max-height:none!important;border-radius:0!important;margin:0!important}.profile-modal-card{height:100dvh!important;max-height:none!important;border-radius:0!important}.profile-modal-header{min-height:62px!important;padding:12px 14px!important}.profile-modal-header>.close{display:flex!important;width:42px!important;height:42px!important;align-items:center!important;justify-content:center!important;border-radius:50%!important;background:rgba(255,255,255,.16)!important;color:#fff!important;font-size:27px!important;border:1px solid rgba(255,255,255,.25)!important}
+  #myProfileContent{overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;padding:16px 14px 35px!important}.profile-action-row{grid-template-columns:1fr!important}.profile-action-row button,#myProfileContent button{min-height:46px!important}
+  #lunduyanMobileLogout{display:flex!important;width:100%!important;min-height:48px!important;align-items:center!important;justify-content:center!important;margin-top:14px!important;border:0!important;border-radius:14px!important;background:#111!important;color:#fff!important;font-weight:900!important}
+  #aggregationSection{scroll-margin-top:78px!important}.aggregation-head{gap:14px!important}.aggregation-grid{grid-template-columns:1fr!important}.aggregation-card{border-radius:22px!important}.aggregation-actions button{width:100%!important;min-height:46px!important}
+  .landing-nav{height:68px!important;padding:0 14px!important}.landing-nav .brand small{display:none!important}.landing-nav-links{display:none!important}.landing-nav button{padding:11px 14px!important;border-radius:13px!important}.hero{grid-template-columns:1fr!important;min-height:auto!important;padding:48px 18px 45px!important;gap:28px!important}.hero h1{font-size:clamp(47px,14vw,70px)!important;letter-spacing:-3.5px!important}.hero p{font-size:15px!important}.hero-buttons{display:grid!important;grid-template-columns:1fr!important}.hero-primary,.hero-secondary{justify-content:center!important;width:100%!important}.hero-visual{min-height:420px!important}.market-preview{width:100%!important;transform:none!important;padding:16px!important;border-radius:25px!important}.float-one{left:-2px!important;top:10px!important}.float-three{right:-2px!important;bottom:95px!important;top:auto!important}.float-two{right:-2px!important;bottom:10px!important}.landing-stats{grid-template-columns:1fr 1fr!important;padding:0 12px 65px!important}.landing-stats>div{border-radius:16px!important}.feature-grid{grid-template-columns:1fr!important}.features{padding:25px 14px 85px!important}.features h2{font-size:34px!important}
+}
+@media(max-width:390px){.mobile-nav-item .mobile-nav-icon{font-size:20px!important}.mobile-nav-label{font-size:9px!important}.hero h1{font-size:45px!important}.landing-stats>div{padding:13px 10px!important}}
 </style>
 
 </head>
@@ -12362,6 +12434,57 @@ button:active{transform:translateY(0) scale(.98)}
 /* Kill accidental literal newline artifacts sometimes appended by template strings */
 body>br:last-child{display:none!important}
 </style>
+
+
+<script id="LUNDUYAN_FINAL_BEHAVIOR_FIXES">
+(function(){
+  'use strict';
+  function ensureMobileLogout(){
+    const box=document.getElementById('myProfileContent');
+    const modal=document.getElementById('myProfileModal');
+    if(!box||!modal||modal.classList.contains('hidden')) return;
+    let btn=document.getElementById('lunduyanMobileLogout');
+    if(!btn){
+      btn=document.createElement('button');
+      btn.id='lunduyanMobileLogout';
+      btn.type='button';
+      btn.textContent='🚪 Log Out';
+      btn.onclick=async function(){
+        if(!confirm('Are you sure you want to log out?')) return;
+        if(typeof window.logout==='function') await window.logout();
+        else if(window.supabaseClient?.auth) await window.supabaseClient.auth.signOut();
+      };
+      box.appendChild(btn);
+    }
+  }
+  function ensureChatClose(){
+    const modal=document.getElementById('chatModal'); if(!modal)return;
+    const header=modal.querySelector('.chat-header');
+    if(header){
+      let close=header.querySelector(':scope > .close');
+      if(!close){
+        close=document.createElement('button');close.type='button';close.className='close';close.textContent='×';close.setAttribute('aria-label','Close Messages');close.onclick=()=>window.closeChat?.();header.appendChild(close);
+      }
+      close.style.setProperty('display','flex','important');close.style.setProperty('visibility','visible','important');close.style.setProperty('opacity','1','important');close.style.setProperty('pointer-events','auto','important');
+    }
+    const listHeader=modal.querySelector('.chat-list-header');
+    if(listHeader&&!listHeader.querySelector('.chat-contacts-close')){
+      const b=document.createElement('button');b.type='button';b.className='close chat-contacts-close';b.textContent='×';b.setAttribute('aria-label','Close Messages');b.onclick=()=>window.closeChat?.();listHeader.appendChild(b);
+    }
+  }
+  function ensureRoleText(){
+    const b=document.getElementById('createAggregationBtn');
+    if(b && window.currentProfile){
+      const farmer=String(window.currentProfile.role||'').toUpperCase()==='FARMER';
+      b.textContent=farmer?'＋ Create Farmer Pool':'Community Pools';
+      b.style.display=farmer?'inline-flex':'none';
+    }
+  }
+  function run(){ensureMobileLogout();ensureChatClose();ensureRoleText();}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(run,500));else setTimeout(run,500);
+  setInterval(run,700);
+})();
+</script>
 
 </body>
 </html>
