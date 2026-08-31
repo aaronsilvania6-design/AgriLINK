@@ -2491,6 +2491,19 @@ Clear
 <div class="stat-value" id="statCompleted">0</div>
 </div>
 </section>
+<section id="aggregationSection" class="section aggregation-section">
+  <div class="aggregation-head">
+    <div>
+      <div class="eyebrow">COMMUNITY</div>
+      <h2>Community Aggregations</h2><p id="aggregationRoleNote" class="aggregation-role-note">Farmers create pools, contribute harvest, and vote on the final price.</p>
+      <p>Farmers can pool their harvest together. When the target is complete, buyers can purchase the full community pool.</p>
+    </div>
+    <button id="createAggregationBtn" class="hero-primary" type="button" onclick="openAggregationRequest()">＋ Create Community Pool</button>
+  </div>
+  <div id="aggregationGrid" class="aggregation-grid">
+    <div class="aggregation-empty">Loading farmer community pools...</div>
+  </div>
+</section>
 <section class="section">
 <div class="section-title">
 <h2 id="marketplaceTitle">
@@ -2520,19 +2533,7 @@ Refresh
 </div>
 <div class="orders" id="orders"></div>
 </section>
-<section id="aggregationSection" class="section aggregation-section">
-  <div class="aggregation-head">
-    <div>
-      <div class="eyebrow">COMMUNITY</div>
-      <h2>Community Aggregations</h2><p id="aggregationRoleNote" class="aggregation-role-note">Farmers create pools, contribute harvest, and vote on the final price.</p>
-      <p>Farmers can pool their harvest together. When the target is complete, buyers can purchase the full community pool.</p>
-    </div>
-    <button id="createAggregationBtn" class="hero-primary" type="button" onclick="openAggregationRequest()">+ Create Buying Request</button>
-  </div>
-  <div id="aggregationGrid" class="aggregation-grid">
-    <div class="aggregation-empty">Loading community requests...</div>
-  </div>
-</section>
+
 </main>
 </div>
 <!-- =======================================================
@@ -2542,16 +2543,16 @@ COMMUNITY AGGREGATION
 
 <div id="aggregationRequestModal" class="modal hidden">
   <div class="modal-card aggregation-modal-card">
-    <div class="profile-modal-header"><strong>Create Buying Request</strong><button class="close" type="button" onclick="closeAggregationRequest()">×</button></div>
+    <div class="profile-modal-header"><strong>Create Community Pool</strong><button class="close" type="button" onclick="closeAggregationRequest()">×</button></div>
     <form id="aggregationRequestForm" class="aggregation-form-grid" style="padding:18px">
-      <div class="full"><label for="aggProductName">What do you need?</label><input id="aggProductName" required placeholder="e.g. Potato"></div>
+      <div class="full"><label for="aggProductName">What are you pooling?</label><input id="aggProductName" required placeholder="e.g. Potato"></div>
       <div><label for="aggTargetQty">Quantity needed</label><input id="aggTargetQty" type="number" min="0.01" step="0.01" required placeholder="1200"></div>
       <div><label for="aggUnit">Unit</label><select id="aggUnit"><option value="KG">KG</option><option value="SACK">Sack</option><option value="TON">Ton</option><option value="BUNDLE">Bundle</option><option value="PIECE">Piece</option></select></div>
       <div><label for="aggOfferPrice">Offer price</label><input id="aggOfferPrice" type="number" min="0" step="0.01" required placeholder="35"></div>
       <div><label for="aggLocation">Location</label><input id="aggLocation" required placeholder="Ilocos Norte"></div>
       <div><label for="aggNeededBy">Needed by</label><input id="aggNeededBy" type="date"></div>
       <div class="full"><label for="aggDescription">Additional details</label><textarea id="aggDescription" placeholder="Quality, delivery, variety, or other notes..."></textarea></div>
-      <div class="full aggregation-summary"><strong>How it works:</strong> farmers can contribute part of the requested quantity. The system adds all contributions automatically and closes the request once the target is reached.</div>
+      <div class="full aggregation-summary"><strong>How it works:</strong> You create the farmer pool, other farmers contribute their harvest, and contributing farmers vote on the community selling price. When the target is reached, buyers can purchase the full pooled supply.</div>
       <div class="full aggregation-actions"><button class="secondary-btn" type="button" onclick="closeAggregationRequest()">Cancel</button><button class="hero-primary" type="submit">Post Buying Request</button></div>
     </form>
   </div>
@@ -9104,7 +9105,7 @@ LUNDUYAN TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
 })();
 </script>
 
-\n<style id="agrilink-definitive-profile-buttons">
+<style id="agrilink-definitive-profile-buttons">
 #absoluteManageBlocked,#agrilinkFinalBlockedManager,#agrilinkProfileBlockedManager{display:none!important}
 .mobile-blocked-management{display:block!important;width:100%!important;margin-top:12px!important;padding-top:12px!important;border-top:1px solid var(--border,#e5ebe7)!important}
 .mobile-blocked-management button{display:block!important;width:100%!important;min-height:44px!important}
@@ -9125,7 +9126,8 @@ function run(){
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(run,300));else setTimeout(run,300);
 setTimeout(run,700);
 })();
-</script>\n
+</script>
+
 <!-- FINAL: KEEP LOGOUT + KEEP ONE MANAGE BLOCKED + REMOVE TOP BLOCK DESKTOP/TABLET -->
 <style id="agrilink-final-profile-actions">
 @media(min-width:701px){
@@ -10839,6 +10841,29 @@ setTimeout(run,600);
   function boot(){ensureAuthBack();ensureProfileLogout();ensureMessageClose();wireMobileMarket();}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,100));else setTimeout(boot,100);
   setInterval(boot,1200);
+})();
+</script>
+
+<style id="LUNDUYAN_AGGREGATION_LAYOUT_FIX">
+/* Community pools belong in the main marketplace flow, not at the page tail. */
+#aggregationSection{scroll-margin-top:90px;}
+.aggregation-progress{width:100%;height:14px;background:#e8efe9;border-radius:999px;overflow:hidden;margin:14px 0 8px;}
+.aggregation-progress>span{display:block;height:100%;background:var(--green,#16833b);border-radius:inherit;transition:width .3s ease;}
+.aggregation-numbers{display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:13px;}
+.aggregation-numbers strong{font-size:15px;color:#12351f;}
+.aggregation-pool-stats{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:10px 0;padding:10px 12px;background:#f5faf6;border:1px solid #e1ebe4;border-radius:12px;color:#4d5d53;font-size:12px;}
+.aggregation-pool-stats b{color:var(--green,#16833b);font-size:14px;}
+@media(max-width:700px){#aggregationSection{margin-bottom:24px!important;} .aggregation-numbers{font-size:12px;} .aggregation-card{overflow:hidden;}}
+</style>
+
+<script id="LUNDUYAN_LITERAL_NEWLINE_CLEANUP">
+(function(){
+  function clean(root){
+    const walker=document.createTreeWalker(root||document.body,NodeFilter.SHOW_TEXT);
+    const nodes=[]; let n; while(n=walker.nextNode()) nodes.push(n);
+    nodes.forEach(node=>{ if(node.nodeValue && /^\s*\\n\s*$/.test(node.nodeValue)) node.remove(); });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>clean(document.body)); else clean(document.body);
 })();
 </script>
 </body>
