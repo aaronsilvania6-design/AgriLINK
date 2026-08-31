@@ -2176,6 +2176,7 @@ body.modal-is-open{overscroll-behavior:none}
 .aggregation-section{margin-top:28px;scroll-margin-top:82px;border-top:3px solid #199A48;padding-top:24px}
 .aggregation-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:16px;position:relative;z-index:2}
 .aggregation-head .hero-primary{display:inline-flex!important;visibility:visible!important;opacity:1!important;flex:0 0 auto}
+.aggregation-create-card{cursor:pointer}
 @media(max-width:700px){.aggregation-head .hero-primary{width:100%;justify-content:center;position:relative;z-index:5}}
 .aggregation-head h2{margin:0}.aggregation-head p{margin:6px 0 0;color:#6d7b73}
 .aggregation-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
@@ -6184,6 +6185,11 @@ function setupRoleHome(){
       <div class="quick-icon">＋</div>
       <strong>Add Product</strong>
       <span>Publish a new farm listing.</span>
+    </div>
+    <div class="quick-card aggregation-create-card" onclick="openAggregationRequest()">
+      <div class="quick-icon">🤝</div>
+      <strong>Create Aggregation</strong>
+      <span>Create a farmer pool and invite other farmers to contribute.</span>
     </div>
     <div class="quick-card" onclick="loadOrders();document.getElementById('farmerTransactions').scrollIntoView({behavior:'smooth'})">
       <div class="quick-icon">📦</div>
@@ -11153,6 +11159,22 @@ setTimeout(run,600);
 (function(){
   'use strict';
   function farmer(){return String(window.currentProfile?.role||'').toUpperCase()==='FARMER';}
+  function fixRoleHome(){
+    const actions=document.getElementById('roleHomeActions');
+    if(!actions||!window.currentProfile)return;
+    if(!farmer())return;
+    if(!actions.querySelector('[data-lunduyan-create-aggregation]')){
+      const b=document.createElement('button');
+      b.type='button';b.dataset.lunduyanCreateAggregation='1';
+      b.textContent='🤝 Create Aggregation';
+      b.onclick=function(){
+        if(typeof openAggregationRequest==='function')openAggregationRequest();
+        document.getElementById('aggregationSection')?.scrollIntoView({behavior:'smooth',block:'start'});
+      };
+      const first=actions.querySelector('button');
+      first?.insertAdjacentElement('afterend',b) || actions.appendChild(b);
+    }
+  }
   function fixPhoneNav(){
     if(window.innerWidth>700)return;
     const nav=document.getElementById('mobileBottomNav');
@@ -11164,117 +11186,11 @@ setTimeout(run,600);
     if(label)label.textContent=farmer()?'My Products':'Marketplace';
     if(icon)icon.textContent=farmer()?'🌾':'🛒';
   }
-  function run(){fixPhoneNav();}
+  function run(){fixRoleHome();fixPhoneNav();}
   run();
   setTimeout(run,100);setTimeout(run,400);setTimeout(run,1000);
   if(window.supabaseClient?.auth?.onAuthStateChange)window.supabaseClient.auth.onAuthStateChange(()=>setTimeout(run,100));
 })();
 </script>
-
-<!-- LUNDUYAN V4: SAFE PHONE PANEL FIX -->
-<style id="lunduyan-v4-phone-fix">
-@media (max-width:700px){
-  #chatModal{z-index:200000!important}
-  #chatModal .chat-header{display:flex!important;align-items:center!important;min-height:64px!important}
-  #lunduyanChatCloseV4{display:flex!important;align-items:center!important;justify-content:center!important;visibility:visible!important;opacity:1!important;flex:0 0 44px!important;width:44px!important;height:44px!important;margin-left:auto!important;border:1px solid rgba(255,255,255,.45)!important;border-radius:50%!important;background:rgba(255,255,255,.16)!important;color:#fff!important;font-size:30px!important;line-height:1!important;cursor:pointer!important;z-index:2147483647!important}
-  #botWindow{z-index:190000!important}
-  #mobileBottomNav{z-index:2147483647!important}
-}
-</style>
-<script id="lunduyan-v4-phone-fix-js">
-(function(){
-  'use strict';
-  if(window.__LUNDUYAN_V4_PHONE_FIX__) return;
-  window.__LUNDUYAN_V4_PHONE_FIX__=true;
-
-  const byId=id=>document.getElementById(id);
-  const panelIds=['notificationPanel','botWindow','chatModal','profileModal','myProfileModal','blockedAccountsModal','productModal','buyModal','reviewModal','orderDetailsModal','aggregationRequestModal','aggregationContributionModal'];
-
-  function closePanel(id){
-    const el=byId(id);
-    if(!el) return;
-    el.classList.add('hidden');
-    el.classList.remove('chat-has-selection');
-  }
-  function closeAll(except){
-    panelIds.forEach(id=>{ if(id!==except) closePanel(id); });
-    try{ if(typeof setModalScrollLock==='function') setModalScrollLock(false); }catch(e){}
-  }
-  window.lunduyanClosePanels=closeAll;
-
-  function ensureChatX(){
-    const modal=byId('chatModal');
-    if(!modal) return;
-    const header=modal.querySelector('.chat-header');
-    if(!header) return;
-    let x=byId('lunduyanChatCloseV4');
-    if(!x){
-      x=document.createElement('button');
-      x.id='lunduyanChatCloseV4';
-      x.type='button';
-      x.textContent='×';
-      x.setAttribute('aria-label','Close Messages');
-      header.appendChild(x);
-    }
-    if(x.dataset.bound!=='1'){
-      x.dataset.bound='1';
-      x.addEventListener('click',function(e){
-        e.preventDefault(); e.stopPropagation();
-        closePanel('chatModal');
-        try{ if(typeof window.closeChat==='function') window.closeChat(); }catch(err){}
-        try{ if(typeof setModalScrollLock==='function') setModalScrollLock(false); }catch(err){}
-      });
-    }
-  }
-
-  function phoneNav(e){
-    if(window.innerWidth>700) return;
-    const button=e.target && e.target.closest ? e.target.closest('#mobileBottomNav [data-mobile-nav]') : null;
-    if(!button) return;
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-    const action=button.getAttribute('data-mobile-nav');
-    const nav=byId('mobileBottomNav');
-    if(nav) nav.querySelectorAll('.mobile-nav-item').forEach(x=>x.classList.remove('active'));
-    button.classList.add('active');
-    closeAll();
-
-    if(action==='home'){
-      window.scrollTo({top:0,behavior:'smooth'});
-    }else if(action==='market'){
-      const target=byId('products');
-      if(target) target.scrollIntoView({behavior:'smooth',block:'start'});
-      try{ if(typeof loadProducts==='function') loadProducts(); }catch(err){}
-    }else if(action==='chat'){
-      try{ if(typeof window.openChat==='function') window.openChat(); }catch(err){}
-      setTimeout(ensureChatX,80);
-    }else if(action==='notifications'){
-      try{ if(typeof window.toggleNotifications==='function') window.toggleNotifications(); }catch(err){}
-    }else if(action==='profile'){
-      try{ if(typeof window.openMyProfile==='function') window.openMyProfile(); }catch(err){}
-    }
-  }
-
-  function bind(){
-    ensureChatX();
-    const nav=byId('mobileBottomNav');
-    if(nav && nav.dataset.v4Bound!=='1'){
-      nav.dataset.v4Bound='1';
-      nav.addEventListener('click',phoneNav,true);
-    }
-  }
-
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',function(){
-      bind(); setTimeout(bind,250); setTimeout(bind,800);
-    });
-  }else{
-    bind(); setTimeout(bind,250); setTimeout(bind,800);
-  }
-  window.addEventListener('resize',bind,{passive:true});
-})();
-</script>
-
 </body>
 </html>
