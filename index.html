@@ -10866,5 +10866,139 @@ setTimeout(run,600);
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>clean(document.body)); else clean(document.body);
 })();
 </script>
+
+
+<!-- LUNDUYAN FINAL STABILITY FIX: mobile nav + farmer aggregation CTA -->
+<style id="LUNDUYAN_FINAL_STABILITY_CSS">
+@media (max-width:700px){
+  body{padding-bottom:calc(82px + env(safe-area-inset-bottom))!important;}
+  #mobileBottomNav.mobile-bottom-nav{
+    display:grid!important;visibility:visible!important;opacity:1!important;
+    position:fixed!important;left:0!important;right:0!important;bottom:0!important;
+    width:100%!important;height:calc(72px + env(safe-area-inset-bottom))!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    z-index:2147483647!important;background:#fff!important;
+    padding:6px 6px calc(6px + env(safe-area-inset-bottom))!important;
+    box-sizing:border-box!important;
+  }
+  #mobileBottomNav .mobile-nav-item{
+    display:flex!important;visibility:visible!important;opacity:1!important;
+    min-width:0!important;min-height:58px!important;
+    align-items:center!important;justify-content:center!important;
+    flex-direction:column!important;
+  }
+  #aggregationSection{position:relative!important;display:block!important;visibility:visible!important;}
+  #createAggregationBtn{min-height:48px!important;touch-action:manipulation!important;}
+}
+@media(min-width:701px){#mobileBottomNav{display:none!important;}}
+</style>
+<script id="LUNDUYAN_FINAL_STABILITY_JS">
+(function(){
+  'use strict';
+  if(window.__lunduyanFinalStabilityFix)return;
+  window.__lunduyanFinalStabilityFix=true;
+  const $=id=>document.getElementById(id);
+  const isLoggedIn=()=>{
+    const app=$('app');
+    return !!(app && !app.classList.contains('hidden') && (window.currentProfile||window.currentUser));
+  };
+  const isFarmer=()=>String(window.currentProfile?.role||'').trim().toUpperCase()==='FARMER';
+
+  function ensureNav(){
+    if(window.innerWidth>700 || !isLoggedIn())return;
+    let nav=$('mobileBottomNav');
+    if(!nav){
+      nav=document.createElement('nav');
+      nav.id='mobileBottomNav';
+      nav.className='mobile-bottom-nav';
+      nav.setAttribute('aria-label','Mobile navigation');
+      nav.innerHTML=''+
+        '<button class="mobile-nav-item active" data-mobile-nav="home" type="button"><span class="mobile-nav-icon">⌂</span><span class="mobile-nav-label">Home</span></button>'+
+        '<button class="mobile-nav-item" data-mobile-nav="market" type="button"><span class="mobile-nav-icon" id="mobileMarketIcon">🛒</span><span class="mobile-nav-label" id="mobileMarketLabel">Marketplace</span></button>'+
+        '<button class="mobile-nav-item" data-mobile-nav="chat" type="button"><span class="mobile-nav-icon">💬</span><span class="mobile-nav-label">Messages</span><span id="mobileChatBadge" class="mobile-nav-badge hidden">0</span></button>'+
+        '<button class="mobile-nav-item" data-mobile-nav="notifications" type="button"><span class="mobile-nav-icon">🔔</span><span class="mobile-nav-label">Alerts</span><span id="mobileNotifBadge" class="mobile-nav-badge hidden">0</span></button>'+
+        '<button class="mobile-nav-item" data-mobile-nav="profile" type="button"><span class="mobile-nav-icon">👤</span><span class="mobile-nav-label">Profile</span></button>';
+      document.body.appendChild(nav);
+    }
+    nav.style.setProperty('display','grid','important');
+    nav.style.setProperty('visibility','visible','important');
+    nav.style.setProperty('opacity','1','important');
+    const label=$('mobileMarketLabel'),icon=$('mobileMarketIcon');
+    if(label)label.textContent=isFarmer()?'My Products':'Marketplace';
+    if(icon)icon.textContent=isFarmer()?'🌾':'🛒';
+    if(nav.dataset.lunduyanStableBound!=='1'){
+      nav.dataset.lunduyanStableBound='1';
+      nav.addEventListener('click',async function(e){
+        const b=e.target.closest('[data-mobile-nav]');
+        if(!b)return;
+        e.preventDefault();
+        nav.querySelectorAll('.mobile-nav-item').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+        const action=b.dataset.mobileNav;
+        if(action==='home'){window.scrollTo({top:0,behavior:'smooth'});return;}
+        if(action==='market'){
+          const target=$('products');
+          try{if(typeof loadProducts==='function')await loadProducts();}catch(_){ }
+          requestAnimationFrame(()=>target?.scrollIntoView({behavior:'smooth',block:'start'}));
+          return;
+        }
+        if(action==='chat'){if(typeof openChat==='function')await openChat();return;}
+        if(action==='notifications'){if(typeof toggleNotifications==='function')toggleNotifications();return;}
+        if(action==='profile'){if(typeof openMyProfile==='function')await openMyProfile();return;}
+      });
+    }
+  }
+
+  function ensureAggregationCTA(){
+    const section=$('aggregationSection'),btn=$('createAggregationBtn'),note=$('aggregationRoleNote');
+    if(!section||!btn)return;
+    section.style.removeProperty('display');
+    section.style.setProperty('display','block','important');
+    if(isFarmer()){
+      btn.style.setProperty('display','inline-flex','important');
+      btn.style.setProperty('visibility','visible','important');
+      btn.style.setProperty('opacity','1','important');
+      btn.textContent='＋ Create Farmer Pool';
+      if(note)note.textContent='Farmers create pools, contribute harvest, and vote on the final price.';
+    }else{
+      btn.style.setProperty('display','none','important');
+      if(note)note.textContent='Buyers wait for a completed farmer pool, then buy the entire pooled supply.';
+    }
+  }
+
+  function sync(){
+    if(isLoggedIn()){
+      ensureNav();
+      ensureAggregationCTA();
+    }else{
+      const nav=$('mobileBottomNav');
+      if(nav)nav.style.setProperty('display','none','important');
+    }
+  }
+
+  function bind(){
+    sync();
+    const app=$('app');
+    if(app&&!app.dataset.lunduyanStableObserver){
+      app.dataset.lunduyanStableObserver='1';
+      new MutationObserver(sync).observe(app,{attributes:true,attributeFilter:['class']});
+    }
+    const auth=$('authScreen');
+    if(auth&&!auth.dataset.lunduyanStableObserver){
+      auth.dataset.lunduyanStableObserver='1';
+      new MutationObserver(sync).observe(auth,{attributes:true,attributeFilter:['class']});
+    }
+    if(window.supabaseClient?.auth?.onAuthStateChange && !window.__lunduyanStableAuthBound){
+      window.__lunduyanStableAuthBound=true;
+      window.supabaseClient.auth.onAuthStateChange(()=>setTimeout(sync,50));
+    }
+    /* Profile data can be populated shortly after auth. A short startup retry handles that race only. */
+    let tries=0;
+    const retry=()=>{sync();if(++tries<20 && !window.currentProfile)setTimeout(retry,250);};
+    setTimeout(retry,50);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind);else bind();
+})();
+</script>
 </body>
 </html>
