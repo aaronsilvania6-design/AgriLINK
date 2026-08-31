@@ -2174,7 +2174,10 @@ body.modal-is-open{overscroll-behavior:none}
    Buyer requests + pooled farmer contributions
    ========================================================= */
 .aggregation-section{margin-top:28px;scroll-margin-top:82px;border-top:3px solid #199A48;padding-top:24px}
-.aggregation-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:16px}
+.aggregation-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:16px;position:relative;z-index:2}
+.aggregation-head .hero-primary{display:inline-flex!important;visibility:visible!important;opacity:1!important;flex:0 0 auto}
+.aggregation-create-card{cursor:pointer}
+@media(max-width:700px){.aggregation-head .hero-primary{width:100%;justify-content:center;position:relative;z-index:5}}
 .aggregation-head h2{margin:0}.aggregation-head p{margin:6px 0 0;color:#6d7b73}
 .aggregation-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
 .aggregation-card{background:#fff;border:1px solid #dce9e0;border-radius:22px;padding:20px;box-shadow:0 10px 30px rgba(17,72,39,.07)}
@@ -6190,6 +6193,7 @@ function setupRoleHome(){
 
   actions.innerHTML = farmer ? `
     <button onclick="openAddProduct()">＋ Add Product</button>
+    <button onclick="openAggregationRequest();document.getElementById('aggregationSection')?.scrollIntoView({behavior:'smooth',block:'start'})">🤝 Create Aggregation</button>
     <button class="ghost" onclick="loadOrders();document.getElementById('farmerTransactions').scrollIntoView({behavior:'smooth'})">View Orders</button>
     <button class="ghost" onclick="openMyProfile()">Edit Profile</button>
   ` : `
@@ -6203,6 +6207,11 @@ function setupRoleHome(){
       <div class="quick-icon">＋</div>
       <strong>Add Product</strong>
       <span>Publish a new farm listing.</span>
+    </div>
+    <div class="quick-card aggregation-create-card" onclick="openAggregationRequest()">
+      <div class="quick-icon">🤝</div>
+      <strong>Create Aggregation</strong>
+      <span>Create a farmer pool and invite other farmers to contribute.</span>
     </div>
     <div class="quick-card" onclick="loadOrders();document.getElementById('farmerTransactions').scrollIntoView({behavior:'smooth'})">
       <div class="quick-icon">📦</div>
@@ -10525,6 +10534,7 @@ setTimeout(run,600);
     const btn=$('createAggregationBtn');
     if(btn){
       btn.style.display=isFarmer()?'inline-flex':'none';
+      btn.hidden=!isFarmer();
       btn.textContent='+ Create Farmer Pool';
     }
     const note=$('aggregationRoleNote');
