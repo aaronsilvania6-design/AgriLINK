@@ -2824,6 +2824,10 @@ window.supabase.createClient(
   SUPABASE_KEY
 );
 
+// Expose the initialized client to the LUNDUYAN enhancement layers.
+// Several mobile/AI modules intentionally use window.supabaseClient.
+window.supabaseClient = supabaseClient;
+
 
 /* =========================================================
 GLOBALS
@@ -3317,6 +3321,10 @@ async function initializeApp(user){
       ["BUYER","FARMER"].includes(metadataRole)
         ? metadataRole
         : "BUYER";
+
+    // Keep the profile/user available to the mobile, aggregation, and AI layers.
+    window.currentUser = currentUser;
+    window.currentProfile = currentProfile;
 
   }catch(error){
 
@@ -6051,61 +6059,31 @@ LOGOUT
 ========================================================= */
 
 async function logout(){
+  // Close the visible app immediately. Do not make the user wait for network/signOut cleanup.
+  const app=document.getElementById("app");
+  const landing=document.getElementById("landingScreen");
+  const auth=document.getElementById("authScreen");
+  document.querySelectorAll(".modal").forEach(m=>m.classList.add("hidden"));
+  document.getElementById("notificationPanel")?.classList.add("hidden");
+  document.getElementById("botWindow")?.classList.add("hidden");
+  document.getElementById("mobileBottomNav")?.style.setProperty("display","none","important");
+  app?.classList.add("hidden");
+  auth?.classList.add("hidden");
+  landing?.classList.remove("hidden");
+  window.scrollTo(0,0);
 
-  if(messageChannel){
-
-    await supabaseClient
-      .removeChannel(
-        messageChannel
-      );
-
-    messageChannel = null;
-  }
-
-  if(orderChannel){
-
-    await supabaseClient
-      .removeChannel(
-        orderChannel
-      );
-
-    orderChannel = null;
-  }
-
-  if(productChannel){
-    await supabaseClient.removeChannel(productChannel);
-    productChannel = null;
-  }
-
-  if(notificationChannel){
-    await supabaseClient.removeChannel(notificationChannel);
-    notificationChannel = null;
-  }
-
-  if(reviewChannel){
-    await supabaseClient.removeChannel(reviewChannel);
-    reviewChannel = null;
-  }
-
-  await supabaseClient
-    .auth
-    .signOut();
-
-  currentUser = null;
-  currentProfile = null;
-  currentConversation = null;
-
-  document
-    .getElementById("app")
-    .classList.add("hidden");
-
-  document
-    .getElementById("authScreen")
-    .classList.add("hidden");
-
-  document
-    .getElementById("landingScreen")
-    .classList.remove("hidden");
+  // Sign out in the background; the landing screen is already visible.
+  const channels=[messageChannel,orderChannel,productChannel,notificationChannel,reviewChannel].filter(Boolean);
+  messageChannel=orderChannel=productChannel=notificationChannel=reviewChannel=null;
+  try{
+    await Promise.allSettled(channels.map(ch=>supabaseClient.removeChannel(ch)));
+    await supabaseClient.auth.signOut();
+  }catch(e){ console.warn("LUNDUYAN logout cleanup:",e); }
+  currentUser=null;
+  currentProfile=null;
+  currentConversation=null;
+  window.currentUser=null;
+  window.currentProfile=null;
 }
 
 
@@ -6172,7 +6150,7 @@ let reviewRating = 0;
 let reviewedOrderIds = new Set();
 
 function setupRoleHome(){
-  const farmer = currentProfile?.role === "FARMER";
+  const farmer = String(currentProfile?.role || "").toUpperCase() === "FARMER";
   const title = document.getElementById("roleHomeTitle");
   const text = document.getElementById("roleHomeText");
   const eyebrow = document.getElementById("roleHomeEyebrow");
@@ -8742,12 +8720,12 @@ LUNDUYAN TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
       const action=b.dataset.mobileNav;
       if(action==='home'){window.scrollTo({top:0,behavior:'smooth'});return;}
       if(action==='market'){
-        // Buyer: Marketplace -> product list. Farmer: My Products -> product list.
+        // Scroll FIRST so mobile navigation feels instant; refresh products in the background.
         const target=$('products');
-        if(typeof loadProducts==='function'){
-          try{ await loadProducts(); }catch(_){ /* scroll even if refresh fails */ }
-        }
         target?.scrollIntoView({behavior:'smooth',block:'start'});
+        if(typeof loadProducts==='function'){
+          Promise.resolve().then(()=>loadProducts()).catch(()=>{});
+        }
         return;
       }
       if(action==='chat'){if(typeof openChat==='function')await openChat();return;}
@@ -10917,8 +10895,8 @@ setTimeout(run,600);
         if(action==='home'){window.scrollTo({top:0,behavior:'smooth'});return;}
         if(action==='market'){
           const target=$('products');
-          try{if(typeof loadProducts==='function')await loadProducts();}catch(_){ }
-          requestAnimationFrame(()=>target?.scrollIntoView({behavior:'smooth',block:'start'}));
+          target?.scrollIntoView({behavior:'smooth',block:'start'});
+          if(typeof loadProducts==='function')Promise.resolve().then(()=>loadProducts()).catch(()=>{});
           return;
         }
         if(action==='chat'){if(typeof openChat==='function')await openChat();return;}
@@ -11040,8 +11018,10 @@ setTimeout(run,600);
        n.querySelectorAll('.mobile-nav-item').forEach(x=>x.classList.remove('active'));b.classList.add('active');
        if(a==='home'){scrollTo({top:0,behavior:'smooth'});return;}
        if(a==='market'){
-         try{if(typeof loadProducts==='function')await loadProducts();}catch(_){ }
-         requestAnimationFrame(()=>setTimeout(()=>$("products")?.scrollIntoView({behavior:'smooth',block:'start'}),40));return;
+         // Instant scroll first; refresh product data without blocking navigation.
+         $("products")?.scrollIntoView({behavior:'smooth',block:'start'});
+         if(typeof loadProducts==='function')Promise.resolve().then(()=>loadProducts()).catch(()=>{});
+         return;
        }
        if(a==='chat'){if(typeof openChat==='function')return openChat(); if(typeof toggleMessages==='function')return toggleMessages();}
        if(a==='notifications'){if(typeof toggleNotifications==='function')toggleNotifications();return;}
@@ -11164,5 +11144,53 @@ setTimeout(run,600);
 })();
 </script>
 
+
+<style id="LUNDUYAN-final-phone-actions">
+@media(max-width:700px){
+  /* Keep the five phone buttons visible and above everything else. */
+  #mobileBottomNav{display:grid!important;visibility:visible!important;opacity:1!important;z-index:2147483647!important;}
+  #mobileBottomNav .mobile-nav-item{display:flex!important;visibility:visible!important;opacity:1!important;}
+  #roleHomeActions{display:grid!important;grid-template-columns:1fr!important;gap:8px!important;}
+  #roleHomeActions button{display:block!important;width:100%!important;min-height:48px!important;}
+  #aggregationSection{scroll-margin-top:82px!important;}
+}
+</style>
+<script id="LUNDUYAN-final-phone-actions-js">
+(function(){
+  'use strict';
+  function farmer(){return String(window.currentProfile?.role||'').toUpperCase()==='FARMER';}
+  function fixRoleHome(){
+    const actions=document.getElementById('roleHomeActions');
+    if(!actions||!window.currentProfile)return;
+    if(!farmer())return;
+    if(!actions.querySelector('[data-lunduyan-create-aggregation]')){
+      const b=document.createElement('button');
+      b.type='button';b.dataset.lunduyanCreateAggregation='1';
+      b.textContent='🤝 Create Aggregation';
+      b.onclick=function(){
+        if(typeof openAggregationRequest==='function')openAggregationRequest();
+        document.getElementById('aggregationSection')?.scrollIntoView({behavior:'smooth',block:'start'});
+      };
+      const first=actions.querySelector('button');
+      first?.insertAdjacentElement('afterend',b) || actions.appendChild(b);
+    }
+  }
+  function fixPhoneNav(){
+    if(window.innerWidth>700)return;
+    const nav=document.getElementById('mobileBottomNav');
+    if(!nav||!window.currentProfile)return;
+    nav.style.setProperty('display','grid','important');
+    nav.style.setProperty('visibility','visible','important');
+    const label=document.getElementById('mobileMarketLabel')||document.getElementById('lunduyanMobileMarketLabel');
+    const icon=document.getElementById('mobileMarketIcon')||document.getElementById('lunduyanMobileMarketIcon');
+    if(label)label.textContent=farmer()?'My Products':'Marketplace';
+    if(icon)icon.textContent=farmer()?'🌾':'🛒';
+  }
+  function run(){fixRoleHome();fixPhoneNav();}
+  run();
+  setTimeout(run,100);setTimeout(run,400);setTimeout(run,1000);
+  if(window.supabaseClient?.auth?.onAuthStateChange)window.supabaseClient.auth.onAuthStateChange(()=>setTimeout(run,100));
+})();
+</script>
 </body>
 </html>
