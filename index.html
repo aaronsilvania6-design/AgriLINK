@@ -11170,5 +11170,268 @@ setTimeout(run,600);
   if(window.supabaseClient?.auth?.onAuthStateChange)window.supabaseClient.auth.onAuthStateChange(()=>setTimeout(run,100));
 })();
 </script>
+
+
+<!-- LUNDUYAN FINAL OVERLAY / PHONE CHAT FIX V3 -->
+<style id="LUNDUYAN-FINAL-OVERLAY-PHONE-V3">
+/* Never allow panels to become a stacked/sandwich overlay on phones. */
+@media (max-width:700px){
+  #chatModal{z-index:200000!important;}
+  #chatModal .modal-card{position:relative!important;z-index:200001!important;}
+
+  /* Messages header X must always be visible on the phone. */
+  #chatModal .chat-header > button.close{
+    display:flex!important;
+    visibility:visible!important;
+    opacity:1!important;
+    position:relative!important;
+    z-index:999999!important;
+    width:46px!important;
+    min-width:46px!important;
+    height:46px!important;
+    min-height:46px!important;
+    flex:0 0 46px!important;
+    align-items:center!important;
+    justify-content:center!important;
+    margin-left:auto!important;
+    padding:0!important;
+    color:#fff!important;
+    background:rgba(255,255,255,.18)!important;
+    border:1px solid rgba(255,255,255,.35)!important;
+    border-radius:50%!important;
+    font-size:30px!important;
+    line-height:1!important;
+    pointer-events:auto!important;
+  }
+  #chatModal .chat-header > button.close::before{content:none!important;}
+
+  /* Contacts list also gets its own visible X if that header is shown. */
+  #chatModal .chat-contacts-close{
+    display:flex!important;
+    visibility:visible!important;
+    opacity:1!important;
+    align-items:center!important;
+    justify-content:center!important;
+    width:42px!important;
+    height:42px!important;
+    min-width:42px!important;
+    border-radius:50%!important;
+    color:#fff!important;
+    background:rgba(22,131,59,.88)!important;
+    border:1px solid rgba(255,255,255,.35)!important;
+    z-index:999999!important;
+  }
+
+  /* Keep the AI window below its own close button and never covering the bottom nav. */
+  #botWindow{z-index:1002!important;}
+  #botWindow .bot-header .close{
+    display:flex!important;
+    visibility:visible!important;
+    opacity:1!important;
+    position:relative!important;
+    z-index:1003!important;
+  }
+}
+</style>
+<script id="LUNDUYAN-FINAL-OVERLAY-PHONE-V3-JS">
+(function(){
+  'use strict';
+  if(window.__LUNDUYAN_OVERLAY_PHONE_V3__)return;
+  window.__LUNDUYAN_OVERLAY_PHONE_V3__=true;
+
+  const $=id=>document.getElementById(id);
+  const hidden=id=>$(id)?.classList.contains('hidden');
+
+  /* Close every floating/modal panel before opening another one. */
+  window.closeLUNDUYANOverlays=function(except){
+    const ids=['notificationPanel','botWindow','chatModal','profileModal','myProfileModal',
+      'blockedAccountsModal','productModal','buyModal','reviewModal','orderDetailsModal',
+      'aggregationRequestModal','aggregationContributionModal'];
+    ids.forEach(id=>{
+      if(id===except)return;
+      const el=$(id);
+      if(!el)return;
+      el.classList.add('hidden');
+      el.classList.remove('chat-has-selection');
+    });
+    /* Unlock body if a closed modal left the scroll lock behind. */
+    try{ if(typeof setModalScrollLock==='function') setModalScrollLock(false); }catch(_){ }
+  };
+
+  function setChatCloseButton(){
+    const m=$('chatModal');
+    if(!m)return;
+    const buttons=[...m.querySelectorAll('.chat-header > button')];
+    let b=m.querySelector('.chat-header > button.close');
+    if(!b){
+      b=document.createElement('button');
+      b.type='button'; b.className='close';
+      m.querySelector('.chat-header')?.appendChild(b);
+    }
+    /* There should be exactly one main header close/back button. */
+    buttons.forEach(x=>{if(x!==b)x.remove();});
+    b.style.setProperty('display','flex','important');
+    b.style.setProperty('visibility','visible','important');
+    b.style.setProperty('opacity','1','important');
+    b.style.setProperty('pointer-events','auto','important');
+    b.textContent=m.classList.contains('chat-has-selection')?'×':'×';
+    b.title='Close Messages';
+    b.setAttribute('aria-label','Close Messages');
+    b.type='button';
+    if(b.dataset.v3Bound!=='1'){
+      b.dataset.v3Bound='1';
+      b.onclick=function(e){
+        e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+        /* X always closes the entire Messages panel, even inside a conversation. */
+        m.classList.add('hidden');
+        m.classList.remove('chat-has-selection');
+        try{ if(typeof window.closeChat==='function')window.closeChat(); }catch(_){ }
+        try{ if(typeof setModalScrollLock==='function')setModalScrollLock(false); }catch(_){ }
+      };
+    }
+  }
+
+  function bindBottomNav(){
+    const nav=$('mobileBottomNav');
+    if(!nav||nav.dataset.v3Bound==='1')return;
+    nav.dataset.v3Bound='1';
+    nav.addEventListener('click',async function(e){
+      const b=e.target.closest('[data-mobile-nav]');
+      if(!b)return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      const action=b.dataset.mobileNav;
+      nav.querySelectorAll('.mobile-nav-item').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+
+      /* The important part: NEVER stack the next panel on top of the previous one. */
+      window.closeLUNDUYANOverlays();
+
+      if(action==='home'){
+        window.scrollTo({top:0,behavior:'smooth'});
+        return;
+      }
+      if(action==='market'){
+        const target=$('products');
+        if(target) target.scrollIntoView({behavior:'smooth',block:'start'});
+        if(typeof loadProducts==='function')Promise.resolve().then(()=>loadProducts()).catch(()=>{});
+        return;
+      }
+      if(action==='chat'){
+        if(typeof window.openChat==='function')await window.openChat();
+        setTimeout(setChatCloseButton,50);
+        return;
+      }
+      if(action==='notifications'){
+        if(typeof window.toggleNotifications==='function')window.toggleNotifications();
+        return;
+      }
+      if(action==='profile'){
+        if(typeof window.openMyProfile==='function')await window.openMyProfile();
+        return;
+      }
+    },true);
+  }
+
+  /* Intercept phone bottom-nav taps BEFORE the older nav listeners.
+     This prevents two handlers from opening two panels at once. */
+  document.addEventListener('click',async function(e){
+    if(window.innerWidth>700)return;
+    const b=e.target.closest?.('#mobileBottomNav [data-mobile-nav]');
+    if(!b)return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    const nav=$('mobileBottomNav');
+    const action=b.dataset.mobileNav;
+    nav?.querySelectorAll('.mobile-nav-item').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    window.closeLUNDUYANOverlays();
+    if(action==='home'){window.scrollTo({top:0,behavior:'smooth'});return;}
+    if(action==='market'){
+      $('products')?.scrollIntoView({behavior:'smooth',block:'start'});
+      if(typeof loadProducts==='function')Promise.resolve().then(()=>loadProducts()).catch(()=>{});
+      return;
+    }
+    if(action==='chat'){
+      if(typeof window.openChat==='function')await window.openChat();
+      setTimeout(setChatCloseButton,80);
+      return;
+    }
+    if(action==='notifications'){
+      if(typeof window.toggleNotifications==='function')window.toggleNotifications();
+      return;
+    }
+    if(action==='profile'){
+      if(typeof window.openMyProfile==='function')await window.openMyProfile();
+      return;
+    }
+  },true);
+
+  /* Also prevent the desktop/header buttons from creating stacked panels on phones. */
+  document.addEventListener('click',function(e){
+    if(window.innerWidth>700)return;
+    const el=e.target.closest('button,a');
+    if(!el)return;
+    if(el.closest('#mobileBottomNav'))return;
+    if(el.closest('#chatModal') || el.closest('#botWindow'))return;
+
+    const text=(el.textContent||'').trim().toLowerCase();
+    const id=el.id||'';
+    if(id==='botLauncher' || el.closest('#botLauncher')){
+      window.closeLUNDUYANOverlays('botWindow');
+      return;
+    }
+    if(text.includes('chat') && !text.includes('close')){
+      window.closeLUNDUYANOverlays('chatModal');
+      setTimeout(setChatCloseButton,80);
+      return;
+    }
+    if(text.includes('profile') && !text.includes('edit profile')){
+      window.closeLUNDUYANOverlays('myProfileModal');
+      return;
+    }
+    if(text.includes('alert') || text.includes('notification') || text.includes('🔔')){
+      window.closeLUNDUYANOverlays('notificationPanel');
+      return;
+    }
+    if(text.includes('marketplace') || text.includes('my products')){
+      window.closeLUNDUYANOverlays();
+      return;
+    }
+  },true);
+
+  /* When AI opens, close Messages; when Messages opens, close AI. */
+  const oldToggle=window.toggleLUNDUYANAI;
+  if(typeof oldToggle==='function' && !oldToggle.__v3Wrapped){
+    const wrapped=function(){
+      const w=$('botWindow');
+      const opening=!!w?.classList.contains('hidden');
+      if(opening)window.closeLUNDUYANOverlays('botWindow');
+      return oldToggle.apply(this,arguments);
+    };
+    wrapped.__v3Wrapped=true;
+    window.toggleLUNDUYANAI=wrapped;
+  }
+
+  function sync(){
+    bindBottomNav();
+    setChatCloseButton();
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(sync,200));
+  else setTimeout(sync,200);
+  setTimeout(sync,700);
+  setTimeout(sync,1500);
+  window.addEventListener('resize',sync,{passive:true});
+
+  /* If another script changes the chat DOM, restore the X. */
+  const observer=new MutationObserver(()=>{
+    if($('chatModal'))setChatCloseButton();
+    bindBottomNav();
+  });
+  observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});
+})();
+</script>
+
 </body>
 </html>
