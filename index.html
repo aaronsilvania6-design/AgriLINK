@@ -2821,6 +2821,9 @@ window.supabase.createClient(
   SUPABASE_KEY
 );
 
+// IMPORTANT: expose the client globally for LUNDUYAN AI and other modules.
+// The AI panel calls window.supabaseClient.functions.invoke(...).
+window.supabaseClient = supabaseClient;
 
 /* =========================================================
 GLOBALS
