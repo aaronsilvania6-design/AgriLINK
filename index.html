@@ -2176,7 +2176,6 @@ body.modal-is-open{overscroll-behavior:none}
 .aggregation-section{margin-top:28px;scroll-margin-top:82px;border-top:3px solid #199A48;padding-top:24px}
 .aggregation-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:16px;position:relative;z-index:2}
 .aggregation-head .hero-primary{display:inline-flex!important;visibility:visible!important;opacity:1!important;flex:0 0 auto}
-.aggregation-create-card{cursor:pointer}
 @media(max-width:700px){.aggregation-head .hero-primary{width:100%;justify-content:center;position:relative;z-index:5}}
 .aggregation-head h2{margin:0}.aggregation-head p{margin:6px 0 0;color:#6d7b73}
 .aggregation-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
@@ -6185,11 +6184,6 @@ function setupRoleHome(){
       <div class="quick-icon">＋</div>
       <strong>Add Product</strong>
       <span>Publish a new farm listing.</span>
-    </div>
-    <div class="quick-card aggregation-create-card" onclick="openAggregationRequest()">
-      <div class="quick-icon">🤝</div>
-      <strong>Create Aggregation</strong>
-      <span>Create a farmer pool and invite other farmers to contribute.</span>
     </div>
     <div class="quick-card" onclick="loadOrders();document.getElementById('farmerTransactions').scrollIntoView({behavior:'smooth'})">
       <div class="quick-icon">📦</div>
@@ -11159,22 +11153,6 @@ setTimeout(run,600);
 (function(){
   'use strict';
   function farmer(){return String(window.currentProfile?.role||'').toUpperCase()==='FARMER';}
-  function fixRoleHome(){
-    const actions=document.getElementById('roleHomeActions');
-    if(!actions||!window.currentProfile)return;
-    if(!farmer())return;
-    if(!actions.querySelector('[data-lunduyan-create-aggregation]')){
-      const b=document.createElement('button');
-      b.type='button';b.dataset.lunduyanCreateAggregation='1';
-      b.textContent='🤝 Create Aggregation';
-      b.onclick=function(){
-        if(typeof openAggregationRequest==='function')openAggregationRequest();
-        document.getElementById('aggregationSection')?.scrollIntoView({behavior:'smooth',block:'start'});
-      };
-      const first=actions.querySelector('button');
-      first?.insertAdjacentElement('afterend',b) || actions.appendChild(b);
-    }
-  }
   function fixPhoneNav(){
     if(window.innerWidth>700)return;
     const nav=document.getElementById('mobileBottomNav');
@@ -11186,7 +11164,7 @@ setTimeout(run,600);
     if(label)label.textContent=farmer()?'My Products':'Marketplace';
     if(icon)icon.textContent=farmer()?'🌾':'🛒';
   }
-  function run(){fixRoleHome();fixPhoneNav();}
+  function run(){fixPhoneNav();}
   run();
   setTimeout(run,100);setTimeout(run,400);setTimeout(run,1000);
   if(window.supabaseClient?.auth?.onAuthStateChange)window.supabaseClient.auth.onAuthStateChange(()=>setTimeout(run,100));
