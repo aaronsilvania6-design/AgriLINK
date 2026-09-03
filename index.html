@@ -1519,7 +1519,7 @@ body.role-buyer{
 .review-star.active{background:#fff5d9;border-color:#f1c45b;color:#e9a400}
 .review-summary{background:#f7faf8;border-radius:16px;padding:15px;margin:12px 0}
 
-/* Agribot */
+/* LUNDUYAN AI */
 .bot-launcher{position:fixed;right:22px;bottom:22px;width:62px;height:62px;border-radius:20px;border:0;background:linear-gradient(135deg,#16833b,#22a447);color:#fff;box-shadow:0 16px 35px rgba(22,131,59,.28);font-size:25px;z-index:90}
 body.role-farmer .bot-launcher{background:linear-gradient(135deg,#9f2f2b,#d95a4f)}
 .bot-window{position:fixed;right:22px;bottom:94px;width:min(380px,calc(100vw - 30px));height:500px;background:#fff;border:1px solid #dfe8e2;border-radius:24px;box-shadow:0 25px 70px rgba(18,53,31,.2);z-index:90;overflow:hidden;display:flex;flex-direction:column}
@@ -2174,7 +2174,9 @@ body.modal-is-open{overscroll-behavior:none}
    Buyer requests + pooled farmer contributions
    ========================================================= */
 .aggregation-section{margin-top:28px;scroll-margin-top:82px;border-top:3px solid #199A48;padding-top:24px}
-.aggregation-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:16px}
+.aggregation-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:16px;position:relative;z-index:2}
+.aggregation-head .hero-primary{display:inline-flex!important;visibility:visible!important;opacity:1!important;flex:0 0 auto}
+@media(max-width:700px){.aggregation-head .hero-primary{width:100%;justify-content:center;position:relative;z-index:5}}
 .aggregation-head h2{margin:0}.aggregation-head p{margin:6px 0 0;color:#6d7b73}
 .aggregation-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
 .aggregation-card{background:#fff;border:1px solid #dce9e0;border-radius:22px;padding:20px;box-shadow:0 10px 30px rgba(17,72,39,.07)}
@@ -2420,7 +2422,7 @@ APP
 <button class="secondary-btn blocked-open-btn nav-blocked-btn" onclick="openBlockedAccounts()">
 🚫 Blocked
 </button>
-<button class="secondary-btn nav-bot-btn" onclick="toggleAgriBot()">
+<button class="secondary-btn nav-bot-btn" onclick="toggleLUNDUYANAI()">
 🌱 LUNDUYAN AI
 </button>
 <button class="secondary-btn nav-add-product-btn hidden" id="addProductButton" onclick="openAddProduct()">
@@ -2724,20 +2726,20 @@ REVIEW MODAL
 </div>
 </div>
 <!-- =======================================================
-AGRIBOT
+LUNDUYAN AI
 ======================================================= -->
-<button aria-label="Open LUNDUYAN AI" class="bot-launcher" id="botLauncher" onclick="toggleAgriBot()">🌱</button>
+<button aria-label="Open LUNDUYAN AI" class="bot-launcher" id="botLauncher" onclick="toggleLUNDUYANAI()">🌱</button>
 <div class="bot-window hidden" id="botWindow">
 <div class="bot-header">
 <div><strong>LUNDUYAN AI</strong><small>Your LUNDUYAN helper</small></div>
-<button class="close" onclick="toggleAgriBot()" style="color:#fff">×</button>
+<button class="close" onclick="toggleLUNDUYANAI()" style="color:#fff">×</button>
 </div>
 <div class="bot-messages" id="botMessages"></div>
 <div class="bot-suggestions">
-<button onclick="askAgriBot('How do I buy a product?')">How do I buy?</button>
-<button onclick="askAgriBot('How do I sell?')">How do I sell?</button>
-<button onclick="askAgriBot('How do ratings work?')">Ratings</button>
-<button onclick="askAgriBot('How do I edit my profile?')">Profile</button>
+<button onclick="askLUNDUYANAI('How do I buy a product?')">How do I buy?</button>
+<button onclick="askLUNDUYANAI('How do I sell?')">How do I sell?</button>
+<button onclick="askLUNDUYANAI('How do ratings work?')">Ratings</button>
+<button onclick="askLUNDUYANAI('How do I edit my profile?')">Profile</button>
 </div>
 <form class="bot-input" id="botForm">
 <input autocomplete="off" id="botInput" placeholder="Ask LUNDUYAN AI anything..."/>
@@ -2820,6 +2822,10 @@ window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
+
+// Expose the initialized client to the LUNDUYAN enhancement layers.
+// Several mobile/AI modules intentionally use window.supabaseClient.
+window.supabaseClient = supabaseClient;
 
 
 /* =========================================================
@@ -3314,6 +3320,10 @@ async function initializeApp(user){
       ["BUYER","FARMER"].includes(metadataRole)
         ? metadataRole
         : "BUYER";
+
+    // Keep the profile/user available to the mobile, aggregation, and AI layers.
+    window.currentUser = currentUser;
+    window.currentProfile = currentProfile;
 
   }catch(error){
 
@@ -6048,61 +6058,31 @@ LOGOUT
 ========================================================= */
 
 async function logout(){
+  // Close the visible app immediately. Do not make the user wait for network/signOut cleanup.
+  const app=document.getElementById("app");
+  const landing=document.getElementById("landingScreen");
+  const auth=document.getElementById("authScreen");
+  document.querySelectorAll(".modal").forEach(m=>m.classList.add("hidden"));
+  document.getElementById("notificationPanel")?.classList.add("hidden");
+  document.getElementById("botWindow")?.classList.add("hidden");
+  document.getElementById("mobileBottomNav")?.style.setProperty("display","none","important");
+  app?.classList.add("hidden");
+  auth?.classList.add("hidden");
+  landing?.classList.remove("hidden");
+  window.scrollTo(0,0);
 
-  if(messageChannel){
-
-    await supabaseClient
-      .removeChannel(
-        messageChannel
-      );
-
-    messageChannel = null;
-  }
-
-  if(orderChannel){
-
-    await supabaseClient
-      .removeChannel(
-        orderChannel
-      );
-
-    orderChannel = null;
-  }
-
-  if(productChannel){
-    await supabaseClient.removeChannel(productChannel);
-    productChannel = null;
-  }
-
-  if(notificationChannel){
-    await supabaseClient.removeChannel(notificationChannel);
-    notificationChannel = null;
-  }
-
-  if(reviewChannel){
-    await supabaseClient.removeChannel(reviewChannel);
-    reviewChannel = null;
-  }
-
-  await supabaseClient
-    .auth
-    .signOut();
-
-  currentUser = null;
-  currentProfile = null;
-  currentConversation = null;
-
-  document
-    .getElementById("app")
-    .classList.add("hidden");
-
-  document
-    .getElementById("authScreen")
-    .classList.add("hidden");
-
-  document
-    .getElementById("landingScreen")
-    .classList.remove("hidden");
+  // Sign out in the background; the landing screen is already visible.
+  const channels=[messageChannel,orderChannel,productChannel,notificationChannel,reviewChannel].filter(Boolean);
+  messageChannel=orderChannel=productChannel=notificationChannel=reviewChannel=null;
+  try{
+    await Promise.allSettled(channels.map(ch=>supabaseClient.removeChannel(ch)));
+    await supabaseClient.auth.signOut();
+  }catch(e){ console.warn("LUNDUYAN logout cleanup:",e); }
+  currentUser=null;
+  currentProfile=null;
+  currentConversation=null;
+  window.currentUser=null;
+  window.currentProfile=null;
 }
 
 
@@ -6169,7 +6149,7 @@ let reviewRating = 0;
 let reviewedOrderIds = new Set();
 
 function setupRoleHome(){
-  const farmer = currentProfile?.role === "FARMER";
+  const farmer = String(currentProfile?.role || "").toUpperCase() === "FARMER";
   const title = document.getElementById("roleHomeTitle");
   const text = document.getElementById("roleHomeText");
   const eyebrow = document.getElementById("roleHomeEyebrow");
@@ -6190,6 +6170,7 @@ function setupRoleHome(){
 
   actions.innerHTML = farmer ? `
     <button onclick="openAddProduct()">＋ Add Product</button>
+    <button onclick="openAggregationRequest();document.getElementById('aggregationSection')?.scrollIntoView({behavior:'smooth',block:'start'})">🤝 Create Aggregation</button>
     <button class="ghost" onclick="loadOrders();document.getElementById('farmerTransactions').scrollIntoView({behavior:'smooth'})">View Orders</button>
     <button class="ghost" onclick="openMyProfile()">Edit Profile</button>
   ` : `
@@ -6624,37 +6605,6 @@ async function reportReview(reviewId){
   alert('Report submitted. Thank you for helping keep LUNDUYAN trustworthy.');
 }
 
-/* =========================================================
-   AGRIBOT - lightweight built-in helper
-   ========================================================= */
-function toggleAgriBot(){
-  const w=document.getElementById('botWindow'); if(!w)return;
-  const opening=w.classList.contains('hidden'); w.classList.toggle('hidden',!opening);
-  if(opening && !document.getElementById('botMessages').children.length) openAgriBotWelcome();
-}
-function openAgriBotWelcome(){
-  const w=document.getElementById('botWindow'); if(w.classList.contains('hidden')) w.classList.remove('hidden');
-  const box=document.getElementById('botMessages');
-  if(!box.children.length) botSay(`Hi ${currentProfile?.full_name||'there'}! I’m LUNDUYAN AI 🌱. I can guide you around LUNDUYAN, including buying, selling, profiles, orders and ratings.`);
-}
-function botSay(text){const box=document.getElementById('botMessages');box.insertAdjacentHTML('beforeend',`<div class="bot-msg bot">${escapeHtml(text)}</div>`);box.scrollTop=box.scrollHeight}
-function botUser(text){const box=document.getElementById('botMessages');box.insertAdjacentHTML('beforeend',`<div class="bot-msg user">${escapeHtml(text)}</div>`);box.scrollTop=box.scrollHeight}
-function askAgriBot(text){botUser(text);setTimeout(()=>botReply(text),180)}
-function botReply(text){
-  const q=String(text).toLowerCase(); const farmer=currentProfile?.role==='FARMER'; let reply;
-  if(q.includes('buy')) reply='To buy, open Marketplace, choose a product, set the quantity, then place the Competition Demo Order. No real money is charged.';
-  else if(q.includes('sell')||q.includes('product')) reply=farmer?'Use + Product to publish a listing. Add a clear name, price, stock, location, description and photo.':'Only farmer accounts can publish products. You can contact a farmer through Chat.';
-  else if(q.includes('rating')||q.includes('review')||q.includes('star')) reply='After a completed purchase, the buyer gets a Rate Purchase button. Choose 1–5 stars and optionally write a review.';
-  else if(q.includes('profile')||q.includes('bio')) reply='Tap Profile in the top bar. You can edit your display name, location, short bio and optional contact number.';
-  else if(q.includes('order')||q.includes('track')) reply='Your order status moves through the marketplace workflow. Realtime updates let both sides see status changes without refreshing.';
-  else if(q.includes('farmer')) reply='Farmer accounts focus on listings, stock, orders, customer trust and their public farmer profile.';
-  else if(q.includes('buyer')) reply='Buyer accounts focus on discovery, search, purchasing, chat, order tracking and ratings.';
-  else if(q.includes('hello')||q.includes('hi')) reply='Hello! 🌱 What would you like help with?';
-  else reply='I can help with buying, selling, orders, ratings, profiles and using LUNDUYAN. Try asking “How do I buy?”';
-  botSay(reply);
-}
-document.getElementById('botForm').addEventListener('submit',e=>{e.preventDefault();const input=document.getElementById('botInput');const t=input.value.trim();if(!t)return;input.value='';askAgriBot(t)});
-
 /* Realtime products + notifications + reviews */
 let reviewChannel = null;
 function subscribeReviewRealtime(){
@@ -6906,7 +6856,7 @@ html.modal-is-open,body.modal-is-open,body.modal-open{overflow:hidden!important;
     const suggestions=document.querySelector('.bot-suggestions');
     if(!suggestions || suggestions.dataset.enhanced) return;
     suggestions.dataset.enhanced='1';
-    suggestions.insertAdjacentHTML('beforeend',`<button class="bot-action" onclick="askAgriBot('Show my orders')">My orders</button><button class="bot-action" onclick="askAgriBot('What is low stock?')">Low stock</button><button class="bot-action" onclick="askAgriBot('Show my saved products')">Saved</button>`);
+    suggestions.insertAdjacentHTML('beforeend',`<button class="bot-action" onclick="askLUNDUYANAI('Show my orders')">My orders</button><button class="bot-action" onclick="askLUNDUYANAI('What is low stock?')">Low stock</button><button class="bot-action" onclick="askLUNDUYANAI('Show my saved products')">Saved</button>`);
   }
 
   /* ---------- favorites ---------- */
@@ -8624,7 +8574,7 @@ LUNDUYAN TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
 })();
 </script>
 <!-- =========================================================
-     LUNDUYAN MOBILE UX + TWO-WAY BLOCKING + ROLE-AWARE AGRIBOT
+     LUNDUYAN MOBILE UX + TWO-WAY BLOCKING + ROLE-AWARE LUNDUYAN AI
      Final mobile usability layer
      ========================================================= -->
 <style id="LUNDUYAN-final-mobile-ux">
@@ -8764,12 +8714,12 @@ LUNDUYAN TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
       const action=b.dataset.mobileNav;
       if(action==='home'){window.scrollTo({top:0,behavior:'smooth'});return;}
       if(action==='market'){
-        // Buyer: Marketplace -> product list. Farmer: My Products -> product list.
+        // Scroll FIRST so mobile navigation feels instant; refresh products in the background.
         const target=$('products');
-        if(typeof loadProducts==='function'){
-          try{ await loadProducts(); }catch(_){ /* scroll even if refresh fails */ }
-        }
         target?.scrollIntoView({behavior:'smooth',block:'start'});
+        if(typeof loadProducts==='function'){
+          Promise.resolve().then(()=>loadProducts()).catch(()=>{});
+        }
         return;
       }
       if(action==='chat'){if(typeof openChat==='function')await openChat();return;}
@@ -9042,12 +8992,12 @@ LUNDUYAN TWO-WAY PROFILE / BLOCK / REPORT SECURITY PATCH
   function botSuggestions(){
     const box=document.querySelector('.bot-suggestions');if(!box)return;
     if(isFarmer()){
-      box.innerHTML=`<button onclick="askAgriBot('How do I sell a product?')">🌾 Sell a product</button><button onclick="askAgriBot('How do I manage orders?')">📦 Manage orders</button><button onclick="askAgriBot('How do I edit my profile?')">👤 Edit profile</button><button onclick="askAgriBot('How do I block a buyer?')">🛡️ Block buyer</button>`;
+      box.innerHTML=`<button onclick="askLUNDUYANAI('How do I sell a product?')">🌾 Sell a product</button><button onclick="askLUNDUYANAI('How do I manage orders?')">📦 Manage orders</button><button onclick="askLUNDUYANAI('How do I edit my profile?')">👤 Edit profile</button><button onclick="askLUNDUYANAI('How do I block a buyer?')">🛡️ Block buyer</button>`;
     }else{
-      box.innerHTML=`<button onclick="askAgriBot('How do I buy a product?')">🛒 How to buy</button><button onclick="askAgriBot('How do I message a farmer?')">💬 Message farmer</button><button onclick="askAgriBot('How do I track my order?')">📦 Track order</button><button onclick="askAgriBot('How do I block a farmer?')">🛡️ Block farmer</button>`;
+      box.innerHTML=`<button onclick="askLUNDUYANAI('How do I buy a product?')">🛒 How to buy</button><button onclick="askLUNDUYANAI('How do I message a farmer?')">💬 Message farmer</button><button onclick="askLUNDUYANAI('How do I track my order?')">📦 Track order</button><button onclick="askLUNDUYANAI('How do I block a farmer?')">🛡️ Block farmer</button>`;
     }
   }
-  window.openAgriBotWelcome=function(){
+  window.openLUNDUYANAIWelcome=function(){
     const w=$('botWindow');if(!w)return;w.classList.remove('hidden');const box=$('botMessages');botSuggestions();
     if(!box.children.length){
       const name=currentProfile?.full_name||'there';
@@ -9587,7 +9537,7 @@ setTimeout(run,600);
 
     if(action.includes('toggleNotifications(')){
       target=document.getElementById('notificationPanel');
-    }else if(action.includes('toggleAgriBot(')){
+    }else if(action.includes('toggleLUNDUYANAI(')){
       target=document.getElementById('botWindow');
     }else if(action.includes('openChat(')){
       target=document.getElementById('chatModal');
@@ -10556,6 +10506,7 @@ setTimeout(run,600);
     const btn=$('createAggregationBtn');
     if(btn){
       btn.style.display=isFarmer()?'inline-flex':'none';
+      btn.hidden=!isFarmer();
       btn.textContent='+ Create Farmer Pool';
     }
     const note=$('aggregationRoleNote');
@@ -10938,8 +10889,8 @@ setTimeout(run,600);
         if(action==='home'){window.scrollTo({top:0,behavior:'smooth'});return;}
         if(action==='market'){
           const target=$('products');
-          try{if(typeof loadProducts==='function')await loadProducts();}catch(_){ }
-          requestAnimationFrame(()=>target?.scrollIntoView({behavior:'smooth',block:'start'}));
+          target?.scrollIntoView({behavior:'smooth',block:'start'});
+          if(typeof loadProducts==='function')Promise.resolve().then(()=>loadProducts()).catch(()=>{});
           return;
         }
         if(action==='chat'){if(typeof openChat==='function')await openChat();return;}
@@ -11061,8 +11012,10 @@ setTimeout(run,600);
        n.querySelectorAll('.mobile-nav-item').forEach(x=>x.classList.remove('active'));b.classList.add('active');
        if(a==='home'){scrollTo({top:0,behavior:'smooth'});return;}
        if(a==='market'){
-         try{if(typeof loadProducts==='function')await loadProducts();}catch(_){ }
-         requestAnimationFrame(()=>setTimeout(()=>$("products")?.scrollIntoView({behavior:'smooth',block:'start'}),40));return;
+         // Instant scroll first; refresh product data without blocking navigation.
+         $("products")?.scrollIntoView({behavior:'smooth',block:'start'});
+         if(typeof loadProducts==='function')Promise.resolve().then(()=>loadProducts()).catch(()=>{});
+         return;
        }
        if(a==='chat'){if(typeof openChat==='function')return openChat(); if(typeof toggleMessages==='function')return toggleMessages();}
        if(a==='notifications'){if(typeof toggleNotifications==='function')toggleNotifications();return;}
@@ -11087,187 +11040,183 @@ setTimeout(run,600);
 </script>
 
 
-
-<!-- LUNDUYAN FINAL CLEAN UI + FAST AI PATCH -->
-<style id="LUNDUYAN_FINAL_CLEAN_UI_PATCH">
-/* Messages: ONE close/back control only. */
-#chatModal .chat-contacts-close{display:none!important;}
-#chatModal .chat-header > .close{
-  display:flex!important;align-items:center;justify-content:center;
-  width:44px!important;height:44px!important;min-width:44px!important;
-  padding:0!important;margin-left:auto!important;border-radius:50%!important;
-  color:#fff!important;background:rgba(255,255,255,.18)!important;
-  border:1px solid rgba(255,255,255,.28)!important;z-index:999999!important;
-  pointer-events:auto!important;
-}
-/* Prevent a second panel from looking like a sandwich. */
-body.lunduyan-panel-open .modal.hidden,
-body.lunduyan-panel-open #notificationPanel.hidden,
-body.lunduyan-panel-open #botWindow.hidden{display:none!important;}
-/* AI request state */
-#botForm.lunduyan-ai-busy #botInput{opacity:.65;}
-#botForm.lunduyan-ai-busy button{opacity:.6;}
-.bot-typing{display:flex!important;gap:5px;align-items:center;min-width:48px;}
-.bot-typing i{width:6px;height:6px;border-radius:50%;background:#16833b;animation:lundyTyping 1s infinite ease-in-out;}
+<style id="LUNDUYAN-AI-FINAL-INTELLIGENT">
+.bot-window{z-index:2147483000!important}
+.bot-launcher{z-index:2147482999!important}
+.bot-status{font-size:10px;opacity:.8;margin-top:3px}
+.bot-msg a{color:#16833b;text-decoration:underline;word-break:break-word}
+.bot-typing{display:inline-flex;gap:4px;align-items:center;padding:9px 12px!important}
+.bot-typing i{width:6px;height:6px;border-radius:50%;background:#8a9790;display:block;animation:lunduBotDot 1s infinite ease-in-out}
 .bot-typing i:nth-child(2){animation-delay:.15s}.bot-typing i:nth-child(3){animation-delay:.3s}
-@keyframes lundyTyping{0%,80%,100%{transform:scale(.65);opacity:.45}40%{transform:scale(1);opacity:1}}
+@keyframes lunduBotDot{0%,80%,100%{transform:translateY(0);opacity:.45}40%{transform:translateY(-4px);opacity:1}}
+.bot-sources{margin-top:7px;padding-top:7px;border-top:1px solid #e5ece7;font-size:10px;color:#68776e}
+.bot-sources a{display:block;margin-top:4px}
 @media(max-width:700px){
-  #chatModal .chat-header > .close{width:42px!important;height:42px!important;min-width:42px!important;}
-  #botWindow{right:10px!important;left:10px!important;bottom:84px!important;width:auto!important;max-width:none!important;height:min(70vh,560px)!important;border-radius:20px!important;}
-  #botWindow .bot-header{min-height:58px!important;}
+  .bot-window{right:10px!important;left:10px!important;bottom:84px!important;width:auto!important;height:min(72vh,560px)!important;border-radius:20px!important}
+  .bot-launcher{right:14px!important;bottom:86px!important;width:56px!important;height:56px!important;border-radius:18px!important}
 }
 </style>
-<script id="LUNDUYAN_FINAL_CLEAN_UI_PATCH_JS">
+<script id="LUNDUYAN-AI-FINAL-INTELLIGENT-JS">
 (function(){
   'use strict';
-  if(window.__LUNDUYAN_FINAL_CLEAN_UI_PATCH)return;
-  window.__LUNDUYAN_FINAL_CLEAN_UI_PATCH=true;
-
-  const $=id=>document.getElementById(id);
-  const panelIds=['notificationPanel','botWindow','chatModal','profileModal','myProfileModal','blockedAccountsModal','buyModal','orderDetailsModal','reviewModal','addProductModal','aggregationRequestModal','aggregationContributionModal'];
-  const panelEls=()=>panelIds.map($).filter(Boolean);
-  const closeOtherPanels=keep=>panelEls().forEach(p=>{if(p!==keep)p.classList.add('hidden');});
-
-  /* Any mobile navigation action closes the currently open panel first. */
-  document.addEventListener('click',function(e){
-    const b=e.target.closest('#mobileBottomNav [data-mobile-nav]');
-    if(!b)return;
-    closeOtherPanels(null);
-    document.body.classList.remove('lunduyan-panel-open');
-  },true);
-
-  /* Hide the old duplicate contacts X and keep the chat-header control as the only one. */
-  function cleanMessageHeader(){
-    const m=$('chatModal'); if(!m)return;
-    m.querySelectorAll('.chat-contacts-close').forEach(x=>x.remove());
-    const b=m.querySelector('.chat-header > .close');
-    if(!b)return;
-    b.style.display='flex';
-    const selected=m.classList.contains('chat-has-selection');
-    b.textContent=selected?'—':'×';
-    b.title=selected?'Back to conversations':'Close Messages';
-    b.setAttribute('aria-label',b.title);
+  if(window.__LUNDUYAN_INTELLIGENT_AI__)return;
+  window.__LUNDUYAN_INTELLIGENT_AI__=true;
+  const history=[];
+  const MAX_HISTORY=8;
+  function esc(s){
+    if(typeof escapeHtml==='function')return escapeHtml(String(s));
+    return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
   }
-  cleanMessageHeader();
-  document.addEventListener('DOMContentLoaded',cleanMessageHeader);
-  setTimeout(cleanMessageHeader,250);
-  setTimeout(cleanMessageHeader,800);
-
-  /* Keep panel state mutually exclusive even for dynamically-created buttons. */
-  document.addEventListener('click',function(e){
-    const b=e.target.closest('button,[role="button"]'); if(!b)return;
-    const a=String(b.getAttribute('onclick')||'').replace(/\s/g,'');
-    let target=null;
-    if(a.includes('toggleNotifications('))target=$('notificationPanel');
-    else if(a.includes('toggleAgriBot('))target=$('botWindow');
-    else if(a.includes('openChat('))target=$('chatModal');
-    else if(a.includes('openMyProfile('))target=$('myProfileModal');
-    else if(a.includes('openBlockedAccounts('))target=$('blockedAccountsModal');
-    else if(a.includes('openAddProduct('))target=$('addProductModal');
-    else if(a.includes('openAggregationRequest('))target=$('aggregationRequestModal');
-    if(target){closeOtherPanels(target);document.body.classList.add('lunduyan-panel-open');}
-  },true);
-
-  /* FAST LUNDUYAN AI: one request at a time; no artificial delay; uses the Edge Function. */
-  let aiBusy=false;
-  let aiHistory=[];
-  const maxHistory=8;
-  function esc(v){
-    if(typeof escapeHtml==='function')return escapeHtml(String(v??''));
-    return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  function box(){return document.getElementById('botMessages')}
+  function scroll(){const b=box();if(b)b.scrollTop=b.scrollHeight}
+  function addUser(text){const b=box();if(!b)return;b.insertAdjacentHTML('beforeend',`<div class="bot-msg user">${esc(text)}</div>`);scroll()}
+  function addBot(text,annotations){
+    const b=box();if(!b)return;
+    let html=esc(text).replace(/\n/g,'<br>');
+    html=html.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+    let sources='';
+    const anns=Array.isArray(annotations)?annotations:[];
+    const urls=[];for(const a of anns){const u=a?.url_citation?.url||a?.url;const title=a?.url_citation?.title||a?.title||u;if(u&&!urls.some(x=>x.url===u))urls.push({url:u,title});}
+    if(urls.length)sources='<div class="bot-sources"><strong>Sources</strong>'+urls.slice(0,5).map(x=>`<a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${esc(x.title||x.url)}</a>`).join('')+'</div>';
+    b.insertAdjacentHTML('beforeend',`<div class="bot-msg bot">${html}${sources}</div>`);scroll()
   }
-  function botBox(){return $('botMessages');}
-  function addUser(text){const b=botBox();if(!b)return;b.insertAdjacentHTML('beforeend',`<div class="bot-msg user">${esc(text)}</div>`);b.scrollTop=b.scrollHeight;}
-  function addBot(text){const b=botBox();if(!b)return;b.insertAdjacentHTML('beforeend',`<div class="bot-msg bot">${esc(text).replace(/\n/g,'<br>')}</div>`);b.scrollTop=b.scrollHeight;}
-  function typing(){const b=botBox();if(!b)return null;const id='lundy-ai-typing-'+Date.now();b.insertAdjacentHTML('beforeend',`<div class="bot-msg bot bot-typing" id="${id}"><i></i><i></i><i></i></div>`);b.scrollTop=b.scrollHeight;return id;}
-  function removeTyping(id){$(id)?.remove();}
-  function setBusy(v){
-    aiBusy=v;
-    const f=$('botForm'),i=$('botInput'),send=f?.querySelector('button[type="submit"]');
-    if(f)f.classList.toggle('lunduyan-ai-busy',v);
-    if(i)i.disabled=v;
-    if(send){send.disabled=v;send.textContent=v?'Thinking…':'Send';}
-    document.querySelectorAll('.bot-suggestions button').forEach(b=>b.disabled=v);
-  }
-  function openAI(){
-    const w=$('botWindow');if(!w)return;
-    closeOtherPanels(w);w.classList.remove('hidden');document.body.classList.add('lunduyan-panel-open');
-    const b=botBox();
+  function typing(){const b=box();if(!b)return null;const id='botTyping-'+Date.now();b.insertAdjacentHTML('beforeend',`<div class="bot-msg bot bot-typing" id="${id}"><i></i><i></i><i></i></div>`);scroll();return id}
+  function removeTyping(id){document.getElementById(id)?.remove()}
+  function setStatus(t){const h=document.querySelector('#botWindow .bot-header small');if(h)h.textContent=t||'Your LUNDUYAN AI companion'}
+  function open(){
+    const w=document.getElementById('botWindow');if(!w)return;
+    w.classList.remove('hidden');
+    const b=box();
     if(b&&!b.children.length){
       const name=window.currentProfile?.full_name||'there';
-      addBot(`Hi ${name}! 🌱 I’m LUNDUYAN AI. Ask me about LUNDUYAN, agriculture, Community Aggregations, buying, selling, orders, business, market prices, or translations.`);
+      addBot(`Hi ${name}! 🌱 I’m LUNDUYAN AI. I can answer questions about the LUNDUYAN proposal and business, agriculture, Community Aggregations, marketplace features, and current market information. Ask me anything.`);
     }
+    setStatus('Connected to LUNDUYAN AI');
   }
-  window.toggleAgriBot=function(){
-    const w=$('botWindow');if(!w)return;
-    if(w.classList.contains('hidden'))openAI();
-    else{w.classList.add('hidden');document.body.classList.remove('lunduyan-panel-open');}
-  };
-  window.openAgriBotWelcome=openAI;
-
-  window.askAgriBot=async function(text){
-    text=String(text||'').trim();
-    if(!text||aiBusy)return;
-    openAI();addUser(text);
-    aiHistory.push({role:'user',content:text});
-    if(aiHistory.length>maxHistory)aiHistory=aiHistory.slice(-maxHistory);
-    const typingId=typing();setBusy(true);
+  window.openLUNDUYANAIWelcome=open;
+  window.toggleLUNDUYANAI=function(){const w=document.getElementById('botWindow');if(!w)return;const opening=w.classList.contains('hidden');w.classList.toggle('hidden',!opening);if(opening)open()};
+  window.askLUNDUYANAI=async function(text){
+    if(window.__lunduAIbusy)return;
+    text=String(text||'').trim();if(!text)return;
+    window.__lunduAIbusy=true;
+    window.__setLunduAIbusy?.(true);
+    open();addUser(text);
+    history.push({role:'user',content:text});if(history.length>MAX_HISTORY)history.splice(0,history.length-MAX_HISTORY);
+    const typingId=typing();setStatus('Thinking…');
     try{
-      if(!window.supabaseClient?.functions?.invoke)throw new Error('LUNDUYAN AI connection is not ready.');
-      const result=await window.supabaseClient.functions.invoke('lunduyan-ai',{body:{message:text,history:aiHistory}});
-      if(result.error){
-        let detail=result.error.message||'Edge Function returned an error.';
-        if(result.data?.error)detail=result.data.error;
-        throw new Error(detail);
-      }
-      const answer=String(result.data?.answer||'I could not generate an answer right now. Please try again.');
-      removeTyping(typingId);addBot(answer);
-      aiHistory.push({role:'assistant',content:answer});
-      if(aiHistory.length>maxHistory)aiHistory=aiHistory.slice(-maxHistory);
+      if(!window.supabaseClient?.functions?.invoke)throw new Error('LUNDUYAN AI connection is not ready. Please make sure Supabase is configured.');
+      const {data,error}=await window.supabaseClient.functions.invoke('lunduyan-ai',{body:{message:text,history}});
+      if(error)throw error;
+      const answer=data?.answer||'I could not generate an answer right now. Please try again.';
+      removeTyping(typingId);addBot(answer,data?.annotations||[]);
+      history.push({role:'assistant',content:answer});if(history.length>MAX_HISTORY)history.splice(0,history.length-MAX_HISTORY);
+      setStatus('Connected to LUNDUYAN AI');
+      window.__lunduAIbusy=false;
+      window.__setLunduAIbusy?.(false);
     }catch(err){
       removeTyping(typingId);
-      addBot(`I couldn’t connect to LUNDUYAN AI right now. ${err?.message||'Please try again.'}`);
-    }finally{setBusy(false);}
-  };
-
-  /* Replace the old local-helper form handler with exactly one submit listener. */
-  function wireAIForm(){
-    const f=$('botForm');if(!f||f.dataset.lundyFastAi==='1')return;
-    f.dataset.lundyFastAi='1';
-    f.addEventListener('submit',e=>{
-      e.preventDefault();e.stopImmediatePropagation();
-      const i=$('botInput');const t=i?.value.trim();if(!t||aiBusy)return;
-      i.value='';window.askAgriBot(t);
-    },true);
-  }
-  wireAIForm();
-  document.addEventListener('DOMContentLoaded',wireAIForm);
-  setTimeout(wireAIForm,200);
-
-  /* Message header state: list=X, opened chat=—. */
-  document.addEventListener('click',e=>{
-    const item=e.target.closest('#chatModal .conversation-item');
-    if(item)setTimeout(cleanMessageHeader,80);
-  },true);
-  document.addEventListener('click',e=>{
-    const b=e.target.closest('#chatModal .chat-header > .close');
-    if(!b)return;
-    const m=$('chatModal');if(!m)return;
-    if(m.classList.contains('chat-has-selection')){
-      setTimeout(cleanMessageHeader,50);
-    }else{
-      m.classList.add('hidden');document.body.classList.remove('lunduyan-panel-open');
+      const msg=err?.message||'Something went wrong while contacting LUNDUYAN AI.';
+      addBot(`I couldn’t connect to the AI service right now. ${msg}`);
+      setStatus('AI connection needs attention');
+      console.error('LUNDUYAN AI:',err);
+      window.__lunduAIbusy=false;
+      window.__setLunduAIbusy?.(false);
     }
-  },true);
-
-  /* Logout: close every panel immediately, then perform sign-out. */
-  window.__lunduyanFastLogout=async function(){
-    closeOtherPanels(null);document.body.classList.remove('lunduyan-panel-open');
-    const nav=$('mobileBottomNav');if(nav)nav.style.display='none';
-    try{if(typeof logout==='function')await logout();else await window.supabaseClient.auth.signOut();}
-    catch(e){console.error(e);alert(e?.message||'Logout failed.');}
   };
+  window.botReply=function(text){return window.askLUNDUYANAI(text)};
+  window.botSay=function(text){addBot(String(text||''))};
+  function replaceSuggestions(){
+    const s=document.querySelector('.bot-suggestions');if(!s)return;
+    s.innerHTML=`
+      <button type="button" onclick="askLUNDUYANAI('What is LUNDUYAN and what problem does it solve?')">🌱 What is LUNDUYAN?</button>
+      <button type="button" onclick="askLUNDUYANAI('How does Community Aggregation work?')">🤝 Aggregation</button>
+      <button type="button" onclick="askLUNDUYANAI('What is the business model of LUNDUYAN?')">💼 Business model</button>
+      <button type="button" onclick="askLUNDUYANAI('What are the current agricultural market prices?')">📈 Current prices</button>`;
+  }
+  function boot(){
+    replaceSuggestions();
+    const form=document.getElementById('botForm');
+    if(form&&!form.dataset.lunduAiBound){
+      form.dataset.lunduAiBound='1';
+      form.addEventListener('submit',e=>{e.preventDefault();const i=document.getElementById('botInput');const t=i?.value.trim();if(!t)return;i.value='';window.askLUNDUYANAI(t)},true);
+    }
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,200));else setTimeout(boot,200);
 })();
 </script>
+
+
+<style id="LUNDUYAN-final-phone-actions">
+@media(max-width:700px){
+  /* Keep the five phone buttons visible and above everything else. */
+  #mobileBottomNav{display:grid!important;visibility:visible!important;opacity:1!important;z-index:2147483647!important;}
+  #mobileBottomNav .mobile-nav-item{display:flex!important;visibility:visible!important;opacity:1!important;}
+  #roleHomeActions{display:grid!important;grid-template-columns:1fr!important;gap:8px!important;}
+  #roleHomeActions button{display:block!important;width:100%!important;min-height:48px!important;}
+  #aggregationSection{scroll-margin-top:82px!important;}
+}
+</style>
+<script id="LUNDUYAN-final-phone-actions-js">
+(function(){
+  'use strict';
+  function farmer(){return String(window.currentProfile?.role||'').toUpperCase()==='FARMER';}
+  function fixPhoneNav(){
+    if(window.innerWidth>700)return;
+    const nav=document.getElementById('mobileBottomNav');
+    if(!nav||!window.currentProfile)return;
+    nav.style.setProperty('display','grid','important');
+    nav.style.setProperty('visibility','visible','important');
+    const label=document.getElementById('mobileMarketLabel')||document.getElementById('lunduyanMobileMarketLabel');
+    const icon=document.getElementById('mobileMarketIcon')||document.getElementById('lunduyanMobileMarketIcon');
+    if(label)label.textContent=farmer()?'My Products':'Marketplace';
+    if(icon)icon.textContent=farmer()?'🌾':'🛒';
+  }
+  function run(){fixPhoneNav();}
+  run();
+  setTimeout(run,100);setTimeout(run,400);setTimeout(run,1000);
+  if(window.supabaseClient?.auth?.onAuthStateChange)window.supabaseClient.auth.onAuthStateChange(()=>setTimeout(run,100));
+})();
+</script>
+
+<!-- LUNDUYAN FINAL CLEAN FIX: farmer aggregation CTA + one-AI-chat-at-a-time -->
+<style id="LUNDUYAN_FINAL_CLEAN_FIX_CSS">
+#aggregationSection #createAggregationBtn{display:inline-flex!important;visibility:visible!important;opacity:1!important}
+#aggregationSection .aggregation-head{display:flex!important;justify-content:space-between!important;gap:18px!important;align-items:center!important}
+@media(max-width:700px){#aggregationSection .aggregation-head{flex-direction:column!important;align-items:stretch!important}#aggregationSection #createAggregationBtn{width:100%!important;min-height:48px!important;justify-content:center!important}}
+#botForm.ai-busy #botInput{opacity:.65}
+</style>
+<script id="LUNDUYAN_FINAL_CLEAN_FIX_JS">
+(function(){
+'use strict';
+if(window.__LUNDUYAN_FINAL_CLEAN_FIX__)return;
+window.__LUNDUYAN_FINAL_CLEAN_FIX__=true;
+function farmer(){return String(window.currentProfile?.role||'').trim().toUpperCase()==='FARMER'}
+function fixAggregationButton(){
+ const section=document.getElementById('aggregationSection'),btn=document.getElementById('createAggregationBtn');
+ if(!section||!btn)return;
+ section.style.setProperty('display','block','important');section.style.setProperty('visibility','visible','important');
+ if(farmer()){btn.hidden=false;btn.disabled=false;btn.textContent='＋ Create Farmer Pool';btn.style.setProperty('display','inline-flex','important');btn.style.setProperty('visibility','visible','important');btn.style.setProperty('opacity','1','important');btn.onclick=function(e){e.preventDefault();if(typeof window.openAggregationRequest==='function')window.openAggregationRequest()}}
+ else{btn.hidden=true;btn.style.setProperty('display','none','important')}
+}
+function removeDuplicateAggregationButtons(){
+ const section=document.getElementById('aggregationSection');if(!section)return;
+ const primary=document.getElementById('createAggregationBtn');
+ [...section.querySelectorAll('button')].filter(b=>b!==primary&&/create (farmer )?(community )?pool|create aggregation/i.test(b.textContent||'')).forEach(b=>b.remove());
+}
+function boot(){removeDuplicateAggregationButtons();fixAggregationButton()}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+setTimeout(boot,150);setTimeout(boot,500);setTimeout(boot,1200);setInterval(boot,2000);
+
+/* AI: one request at a time. The Send button and quick prompts stay disabled until the answer returns. */
+window.__setLunduAIbusy=function(v){
+ const form=document.getElementById('botForm'),input=document.getElementById('botInput');
+ if(form)form.classList.toggle('ai-busy',!!v);
+ if(input)input.disabled=!!v;
+ if(form){const b=form.querySelector('button[type="submit"]');if(b){b.disabled=!!v;b.textContent=v?'Thinking…':'Send'}}
+ document.querySelectorAll('.bot-suggestions button').forEach(b=>b.disabled=!!v);
+};
+})();
+</script>
+
 </body>
 </html>
