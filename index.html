@@ -11310,7 +11310,7 @@ window.__setLunduAIbusy=function(v){
     #chatModal .modal-card{z-index:2147483647!important;}
     #chatModal .chat-input{position:sticky!important;bottom:0!important;z-index:20!important;background:#fff!important;}
     #chatModal .chat-messages{padding-bottom:10px!important;}
-    #mobileBottomNav.nav-locked{pointer-events:none!important;opacity:.96!important;}
+    #mobileBottomNav.nav-locked{pointer-events:auto!important;opacity:1!important;}
   }
 </style>
 <script id="LUNDUYAN_V2_EXCLUSIVE_NAV_JS">
@@ -11361,7 +11361,7 @@ window.__setLunduAIbusy=function(v){
     if(modal){
       modal.classList.remove('hidden');
       modal.setAttribute('aria-hidden','false');
-      $('mobileBottomNav')?.classList.add('nav-locked');
+      $('mobileBottomNav')?.classList.remove('nav-locked');
     }
     if(typeof window.loadConversations==='function'){
       try{await window.loadConversations();}catch(_){ }
@@ -11453,7 +11453,7 @@ window.__setLunduAIbusy=function(v){
   function syncChatLock(){
     const modal=$('chatModal'),nav=$(NAV_ID);
     if(!modal||!nav)return;
-    nav.classList.toggle('nav-locked',!modal.classList.contains('hidden'));
+    nav.classList.remove('nav-locked');
   }
 
   /* Ensure Messages always has a visible chat area and composer when a conversation is selected. */
