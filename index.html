@@ -11301,5 +11301,194 @@ window.__setLunduAIbusy=function(v){
   syncMessages();
 })();
 </script>
+
+<!-- LUNDUYAN V2: EXCLUSIVE NAVIGATION + WORKING MESSAGES -->
+<style id="LUNDUYAN_V2_EXCLUSIVE_NAV_CSS">
+  /* Never allow the mobile nav to cover an open Messages composer. */
+  @media(max-width:700px){
+    #chatModal{z-index:2147483647!important;}
+    #chatModal .modal-card{z-index:2147483647!important;}
+    #chatModal .chat-input{position:sticky!important;bottom:0!important;z-index:20!important;background:#fff!important;}
+    #chatModal .chat-messages{padding-bottom:10px!important;}
+    #mobileBottomNav.nav-locked{pointer-events:none!important;opacity:.96!important;}
+  }
+</style>
+<script id="LUNDUYAN_V2_EXCLUSIVE_NAV_JS">
+(function(){
+  'use strict';
+  if(window.__LUNDUYAN_V2_EXCLUSIVE_NAV__)return;
+  window.__LUNDUYAN_V2_EXCLUSIVE_NAV__=true;
+
+  const NAV_ID='mobileBottomNav';
+  const NAV_ACTIONS=['home','market','chat','notifications','profile'];
+  const PANEL_IDS=[
+    'notificationPanel','botWindow','chatModal','profileModal','myProfileModal',
+    'blockedAccountsModal','buyModal','orderDetailsModal','addProductModal',
+    'reviewModal','reviewModalOverlay','aggregationRequestModal','farmerProfileModal'
+  ];
+
+  const $=id=>document.getElementById(id);
+  const openEl=el=>!!el && !el.classList.contains('hidden');
+
+  function allPanels(){
+    const known=PANEL_IDS.map($).filter(Boolean);
+    document.querySelectorAll('.modal:not(.hidden), #notificationPanel:not(.hidden), #botWindow:not(.hidden)')
+      .forEach(el=>{if(!known.includes(el))known.push(el)});
+    return known;
+  }
+
+  function closeEverything(except){
+    allPanels().forEach(el=>{
+      if(el!==except)el.classList.add('hidden');
+    });
+    try{$('mobileBottomNav')?.classList.remove('nav-locked')}catch(_){ }
+  }
+
+  function setActive(action){
+    const nav=$(NAV_ID); if(!nav)return;
+    nav.querySelectorAll('[data-mobile-nav]').forEach(b=>b.classList.toggle('active',b.dataset.mobileNav===action));
+  }
+
+  async function openMessages(){
+    closeEverything($('chatModal'));
+    const fn=window.openChat;
+    if(typeof fn==='function'){
+      try{await fn();}catch(err){console.error('LUNDUYAN Messages:',err);}
+    }else{
+      $('chatModal')?.classList.remove('hidden');
+    }
+    const modal=$('chatModal');
+    if(modal){
+      modal.classList.remove('hidden');
+      modal.setAttribute('aria-hidden','false');
+      $('mobileBottomNav')?.classList.add('nav-locked');
+    }
+    if(typeof window.loadConversations==='function'){
+      try{await window.loadConversations();}catch(_){ }
+    }
+    try{window.ensureLunduChatUI?.();}catch(_){ }
+  }
+
+  async function openAction(action){
+    if(!NAV_ACTIONS.includes(action))return;
+    const nav=$(NAV_ID);
+    if(nav)nav.querySelectorAll('[data-mobile-nav]').forEach(b=>b.classList.remove('active'));
+    const btn=nav?.querySelector('[data-mobile-nav="'+action+'"]');
+    btn?.classList.add('active');
+
+    if(action==='home'){
+      closeEverything(null);
+      window.scrollTo({top:0,behavior:'smooth'});
+      return;
+    }
+    if(action==='market'){
+      closeEverything(null);
+      const target=$('products');
+      target?.scrollIntoView({behavior:'smooth',block:'start'});
+      if(typeof window.loadProducts==='function')Promise.resolve().then(()=>window.loadProducts()).catch(()=>{});
+      return;
+    }
+    if(action==='chat'){await openMessages();return;}
+    if(action==='notifications'){
+      const target=$('notificationPanel');
+      closeEverything(target);
+      if(typeof window.toggleNotifications==='function')window.toggleNotifications();
+      else target?.classList.remove('hidden');
+      return;
+    }
+    if(action==='profile'){
+      const target=$('myProfileModal');
+      closeEverything(target);
+      if(typeof window.openMyProfile==='function')await window.openMyProfile();
+      else target?.classList.remove('hidden');
+    }
+  }
+
+  /* Replace the existing mobile-nav node so all earlier competing listeners are removed. */
+  function installCleanNav(){
+    const old=$(NAV_ID);
+    if(!old)return;
+    if(old.dataset.lunduyanV2Installed==='1')return;
+
+    const nav=old.cloneNode(true);
+    nav.dataset.lunduyanV2Installed='1';
+    nav.removeAttribute('data-bound');
+    nav.removeAttribute('data-finalBound');
+    nav.removeAttribute('data-v2Market');
+    nav.removeAttribute('data-lunduyan-stable-bound');
+    old.replaceWith(nav);
+
+    nav.addEventListener('click',async e=>{
+      const b=e.target.closest('[data-mobile-nav]');
+      if(!b || !nav.contains(b))return;
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      await openAction(b.dataset.mobileNav);
+    },true);
+
+    nav.querySelectorAll('[data-mobile-nav]').forEach(b=>b.type='button');
+  }
+
+  /* Desktop and normal buttons: close every other panel BEFORE opening the clicked one. */
+  function installExclusiveButtonGuard(){
+    document.addEventListener('click',function(e){
+      const btn=e.target.closest('button,[role="button"],a');
+      if(!btn || btn.closest('#'+NAV_ID))return;
+      const action=(btn.getAttribute('onclick')||'').replace(/\s/g,'');
+      let target=null;
+      if(action.includes('openChat(') || btn.classList.contains('nav-chat-btn'))target=$('chatModal');
+      else if(action.includes('toggleNotifications('))target=$('notificationPanel');
+      else if(action.includes('toggleLUNDUYANAI('))target=$('botWindow');
+      else if(action.includes('openMyProfile('))target=$('myProfileModal');
+      else if(action.includes('openBlockedAccounts('))target=$('blockedAccountsModal');
+      else if(action.includes('openBuyModal('))target=$('buyModal');
+      else if(action.includes('openAddProduct('))target=$('addProductModal');
+      else if(action.includes('openAggregationRequest('))target=$('aggregationRequestModal');
+      if(target)closeEverything(target);
+    },true);
+  }
+
+  /* If Messages is closed, restore nav interaction. */
+  function syncChatLock(){
+    const modal=$('chatModal'),nav=$(NAV_ID);
+    if(!modal||!nav)return;
+    nav.classList.toggle('nav-locked',!modal.classList.contains('hidden'));
+  }
+
+  /* Ensure Messages always has a visible chat area and composer when a conversation is selected. */
+  function ensureChatUI(){
+    const modal=$('chatModal'); if(!modal)return;
+    const win=$('chatWindow'); if(!win)return;
+    let form=$('chatForm');
+    if(!form){
+      form=document.createElement('form');form.id='chatForm';form.className='chat-input';
+      form.innerHTML='<input id="chatInput" autocomplete="off" placeholder="Type a message..."><button type="submit">Send</button>';
+      win.appendChild(form);
+      if(typeof window.sendMessage==='function')form.addEventListener('submit',e=>{e.preventDefault();window.sendMessage();});
+    }
+    const input=$('chatInput'),send=form.querySelector('button[type="submit"]');
+    if(input){input.style.setProperty('display','block','important');input.style.setProperty('visibility','visible','important');}
+    if(send){send.style.setProperty('display','block','important');send.style.setProperty('visibility','visible','important');}
+  }
+  window.ensureLunduChatUI=ensureChatUI;
+
+  function boot(){
+    installCleanNav();
+    installExclusiveButtonGuard();
+    ensureChatUI();
+    syncChatLock();
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,250));
+  else setTimeout(boot,250);
+  setTimeout(boot,800);
+  setTimeout(boot,1800);
+
+  /* Re-install only if another legacy script actually replaces the nav. */
+  new MutationObserver(()=>{if($(NAV_ID) && $(NAV_ID).dataset.lunduyanV2Installed!=='1')installCleanNav();syncChatLock();})
+    .observe(document.body,{childList:true,subtree:true});
+})();
+</script>
+
 </body>
 </html>
