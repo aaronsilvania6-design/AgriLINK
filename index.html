@@ -11490,5 +11490,39 @@ window.__setLunduAIbusy=function(v){
 })();
 </script>
 
+
+<!-- LUNDUYAN V4 CHAT COMPOSER VISIBILITY FIX -->
+<style id="LUNDUYAN_V4_CHAT_FIX_CSS">
+@media(max-width:700px){
+  #chatModal .modal-card{height:100dvh!important;max-height:100dvh!important;min-height:0!important;}
+  #chatModal .chat-layout{height:100dvh!important;min-height:0!important;display:flex!important;flex-direction:column!important;}
+  #chatModal .chat-window{min-height:0!important;flex:1 1 auto!important;display:flex!important;flex-direction:column!important;}
+  #chatModal .chat-messages{min-height:0!important;flex:1 1 auto!important;overflow-y:auto!important;padding-bottom:90px!important;}
+  #chatModal .chat-input{display:flex!important;flex:0 0 auto!important;position:relative!important;bottom:auto!important;z-index:2147483647!important;padding:12px!important;background:#fff!important;border-top:1px solid var(--border)!important;visibility:visible!important;opacity:1!important;}
+  #chatModal .chat-input input{display:block!important;visibility:visible!important;opacity:1!important;min-width:0!important;height:46px!important;flex:1 1 auto!important;}
+  #chatModal .chat-input button{display:block!important;visibility:visible!important;opacity:1!important;min-width:72px!important;height:46px!important;flex:0 0 auto!important;}
+  #mobileBottomNav{z-index:1000!important;pointer-events:auto!important;}
+  #chatModal{z-index:2147483647!important;pointer-events:auto!important;}
+  #chatModal .modal-card,#chatModal .chat-layout,#chatModal .chat-window,#chatModal .chat-input{pointer-events:auto!important;}
+}
+</style>
+<script id="LUNDUYAN_V4_CHAT_FIX_JS">
+(function(){
+ 'use strict';
+ function fix(){
+  var m=document.getElementById('chatModal'); if(!m)return;
+  var card=m.querySelector('.modal-card'), layout=m.querySelector('.chat-layout'), win=m.querySelector('.chat-window'), input=m.querySelector('.chat-input');
+  if(card) card.style.cssText += ';height:100dvh!important;max-height:100dvh!important;';
+  if(layout) layout.style.cssText += ';height:100dvh!important;min-height:0!important;display:flex!important;flex-direction:column!important;';
+  if(win) win.style.cssText += ';min-height:0!important;flex:1 1 auto!important;display:flex!important;flex-direction:column!important;';
+  if(input){ input.style.cssText += ';display:flex!important;position:relative!important;z-index:2147483647!important;visibility:visible!important;opacity:1!important;';
+    var inp=input.querySelector('input'); if(inp){inp.disabled=false;inp.style.cssText+=';display:block!important;visibility:visible!important;opacity:1!important;';}
+    var btn=input.querySelector('button'); if(btn){btn.style.cssText+=';display:block!important;visibility:visible!important;opacity:1!important;';}
+  }
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fix);else fix();
+ setInterval(fix,500);
+})();
+</script>
 </body>
 </html>
