@@ -2236,6 +2236,31 @@ body.modal-is-open{overscroll-behavior:none}
 })();
 </script>
 
+
+<style id="LUNDUYAN_V6_REMOVE_EMPTY_CHAT_HEADER">
+/* V6: remove the empty "Select a conversation" green header in BOTH
+   phone and desktop. Keep the real header when a conversation is selected. */
+#chatModal:not(.chat-has-selection) .chat-window > .chat-header{
+  display:none !important;
+}
+#chatModal:not(.chat-has-selection) .chat-window{
+  min-height:0 !important;
+}
+#chatModal:not(.chat-has-selection) .chat-messages{
+  min-height:120px !important;
+}
+@media (max-width:900px){
+  #chatModal:not(.chat-has-selection) .chat-window{
+    flex:1 1 auto !important;
+    display:flex !important;
+    flex-direction:column !important;
+  }
+  #chatModal:not(.chat-has-selection) .chat-messages{
+    flex:1 1 auto !important;
+  }
+}
+</style>
+
 </head>
 <body>
 <!-- =======================================================
