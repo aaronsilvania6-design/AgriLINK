@@ -9214,7 +9214,21 @@ setTimeout(run,600);
   gap:8px!important;
 }
 #chatModal .chat-contacts-close{
-  display:none!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  flex:0 0 auto!important;
+  width:44px!important;
+  height:44px!important;
+  padding:0!important;
+  margin-left:auto!important;
+  border-radius:50%!important;
+  cursor:pointer!important;
+  font-size:26px!important;
+  line-height:1!important;
+  color:#fff!important;
+  background:rgba(255,255,255,.16)!important;
+  border:1px solid rgba(255,255,255,.20)!important;
 }
 #chatModal .chat-contacts-close:hover{
   background:rgba(255,255,255,.24)!important;
@@ -11808,6 +11822,31 @@ window.__setLunduAIbusy=function(v){
 })();
 </script>
 
+
+<!-- LUNDUYAN V8: RESTORE ONE CLOSE BUTTON ON CONVERSATIONS LIST -->
+<style id="LUNDUYAN_V8_MESSAGES_CLOSE_FIX">
+#chatModal .conversation-list .chat-list-header .chat-contacts-close{display:flex!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;}
+#chatModal .conversation-list .chat-list-header{display:flex!important;align-items:center!important;justify-content:space-between!important;}
+</style>
+<script id="LUNDUYAN_V8_MESSAGES_CLOSE_FIX_JS">
+(function(){
+  function restoreMessagesClose(){
+    var modal=document.getElementById('chatModal');
+    if(!modal)return;
+    var btn=modal.querySelector('.conversation-list .chat-contacts-close');
+    if(btn){
+      btn.style.setProperty('display','flex','important');
+      btn.style.setProperty('visibility','visible','important');
+      btn.style.setProperty('opacity','1','important');
+      btn.style.setProperty('pointer-events','auto','important');
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',restoreMessagesClose);
+  else restoreMessagesClose();
+  setTimeout(restoreMessagesClose,100);
+  setTimeout(restoreMessagesClose,500);
+})();
+</script>
 
 <!-- LUNDUYAN V7: FORCE REMOVE EMPTY "SELECT A CONVERSATION" HEADER -->
 <style id="LUNDUYAN_V7_REMOVE_EMPTY_HEADER_FORCE">
