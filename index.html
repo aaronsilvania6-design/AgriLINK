@@ -11524,5 +11524,264 @@ window.__setLunduAIbusy=function(v){
  setInterval(fix,500);
 })();
 </script>
+
+
+<!-- LUNDUYAN V5: REAL MOBILE CHAT COMPOSER / TYPE AREA -->
+<style id="LUNDUYAN_V5_REAL_CHAT_COMPOSER_CSS">
+/* The Messages screen must behave like a real chat app:
+   message history above, typing composer at the bottom, mobile nav still usable. */
+#chatModal .chat-layout,
+#chatModal .chat-window{
+  min-height:0!important;
+}
+#chatModal .chat-window{
+  display:flex!important;
+  flex-direction:column!important;
+}
+#chatModal .chat-messages{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+#chatModal .chat-input{
+  display:flex!important;
+  flex:0 0 auto!important;
+  width:100%!important;
+  box-sizing:border-box!important;
+  align-items:center!important;
+  gap:8px!important;
+  padding:10px!important;
+  background:#fff!important;
+  border-top:1px solid var(--border)!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+#chatModal .chat-input input,
+#chatModal #chatInput{
+  display:block!important;
+  flex:1 1 auto!important;
+  width:0!important;
+  min-width:0!important;
+  height:46px!important;
+  min-height:46px!important;
+  box-sizing:border-box!important;
+  padding:0 14px!important;
+  border:1px solid #cfded5!important;
+  border-radius:14px!important;
+  background:#fff!important;
+  color:#173b27!important;
+  font-size:16px!important;
+  line-height:46px!important;
+  outline:none!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+#chatModal #chatInput:focus{
+  border-color:#199A48!important;
+  box-shadow:0 0 0 3px rgba(25,154,72,.12)!important;
+}
+#chatModal .chat-input button[type="submit"]{
+  display:flex!important;
+  flex:0 0 auto!important;
+  width:auto!important;
+  min-width:74px!important;
+  height:46px!important;
+  min-height:46px!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:0 16px!important;
+  border:0!important;
+  border-radius:14px!important;
+  background:#199A48!important;
+  color:#fff!important;
+  font-weight:900!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+
+@media(max-width:700px){
+  /* Keep the fixed bottom navigation clickable. The chat screen ends ABOVE it. */
+  #mobileBottomNav,
+  nav#mobileBottomNav{
+    z-index:2147483647!important;
+    pointer-events:auto!important;
+  }
+
+  #chatModal{
+    position:fixed!important;
+    left:0!important;
+    right:0!important;
+    top:0!important;
+    bottom:calc(72px + env(safe-area-inset-bottom))!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    padding:0!important;
+    margin:0!important;
+    align-items:stretch!important;
+    justify-content:stretch!important;
+    z-index:2147483000!important;
+    pointer-events:auto!important;
+  }
+  #chatModal .modal-card{
+    width:100%!important;
+    max-width:none!important;
+    height:100%!important;
+    max-height:none!important;
+    min-height:0!important;
+    margin:0!important;
+    border-radius:0!important;
+    overflow:hidden!important;
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  #chatModal .chat-layout{
+    width:100%!important;
+    height:100%!important;
+    min-height:0!important;
+    flex:1 1 auto!important;
+    display:flex!important;
+    flex-direction:column!important;
+    overflow:hidden!important;
+  }
+
+  /* Contacts screen */
+  #chatModal:not(.chat-has-selection) .conversation-list{
+    display:block!important;
+    width:100%!important;
+    height:100%!important;
+    max-height:none!important;
+    min-height:0!important;
+    flex:1 1 auto!important;
+    border:0!important;
+    overflow-y:auto!important;
+  }
+  #chatModal:not(.chat-has-selection) .chat-window{display:none!important;}
+
+  /* Selected conversation screen */
+  #chatModal.chat-has-selection .conversation-list{display:none!important;}
+  #chatModal.chat-has-selection .chat-window{
+    display:flex!important;
+    width:100%!important;
+    height:100%!important;
+    min-height:0!important;
+    flex:1 1 auto!important;
+    overflow:hidden!important;
+  }
+  #chatModal.chat-has-selection .chat-header{
+    flex:0 0 auto!important;
+    min-height:62px!important;
+    padding:9px 12px!important;
+    background:#199A48!important;
+    color:#fff!important;
+  }
+  #chatModal.chat-has-selection .chat-header .chat-user,
+  #chatModal.chat-has-selection .chat-header .online{
+    color:#fff!important;
+  }
+  #chatModal.chat-has-selection .chat-header .close{
+    color:#fff!important;
+    background:rgba(255,255,255,.14)!important;
+    border-radius:50%!important;
+  }
+  #chatModal.chat-has-selection .chat-messages{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    height:auto!important;
+    overflow-y:auto!important;
+    padding:12px!important;
+    padding-bottom:12px!important;
+    background:#f7faf8!important;
+  }
+  #chatModal.chat-has-selection .chat-input{
+    position:relative!important;
+    left:auto!important;
+    right:auto!important;
+    bottom:auto!important;
+    z-index:50!important;
+    flex:0 0 auto!important;
+    min-height:66px!important;
+    padding:9px 10px calc(9px + env(safe-area-inset-bottom))!important;
+    background:#fff!important;
+    border-top:1px solid #dfe9e3!important;
+  }
+  #chatModal.chat-has-selection .chat-input input,
+  #chatModal.chat-has-selection #chatInput{
+    height:46px!important;
+    min-height:46px!important;
+    font-size:16px!important;
+    line-height:46px!important;
+  }
+  #chatModal.chat-has-selection .chat-input button[type="submit"]{
+    height:46px!important;
+    min-height:46px!important;
+    min-width:70px!important;
+    font-size:14px!important;
+  }
+}
+
+@media(min-width:701px){
+  #chatModal .chat-input{min-height:62px!important;}
+}
+</style>
+<script id="LUNDUYAN_V5_REAL_CHAT_COMPOSER_JS">
+(function(){
+  'use strict';
+  function $(id){return document.getElementById(id);}
+
+  function ensureRealComposer(){
+    var modal=$('chatModal');
+    if(!modal)return;
+    var win=modal.querySelector('.chat-window');
+    if(!win)return;
+
+    var form=$('chatForm');
+    if(!form){
+      form=document.createElement('form');
+      form.id='chatForm';
+      form.className='chat-input';
+      form.innerHTML='<input id="chatInput" autocomplete="off" placeholder="Type a message..."><button type="submit">Send</button>';
+      win.appendChild(form);
+    }else if(form.parentElement!==win){
+      win.appendChild(form);
+    }
+
+    var input=$('chatInput');
+    var button=form.querySelector('button[type="submit"]');
+    if(input){
+      input.disabled=false;
+      input.removeAttribute('disabled');
+      input.setAttribute('autocomplete','off');
+      input.setAttribute('enterkeyhint','send');
+    }
+    if(button){button.disabled=false;button.removeAttribute('disabled');}
+  }
+
+  function sync(){
+    ensureRealComposer();
+    var modal=$('chatModal');
+    if(!modal)return;
+    var selected=modal.classList.contains('chat-has-selection');
+    if(selected){
+      var input=$('chatInput');
+      if(input && document.activeElement!==input){
+        /* Do not auto-focus: it would pop the phone keyboard unexpectedly. */
+      }
+      var box=$('chatMessages');
+      if(box)box.style.scrollPaddingBottom='12px';
+    }
+  }
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',sync);
+  else sync();
+  [100,300,700,1200,2000].forEach(function(ms){setTimeout(sync,ms);});
+
+  /* If a legacy renderer recreates the form, restore the composer without
+     adding duplicate submit handlers. Existing LUNDUYAN send handler stays intact. */
+  new MutationObserver(function(){ensureRealComposer();}).observe(document.body,{childList:true,subtree:true});
+})();
+</script>
+
 </body>
 </html>
