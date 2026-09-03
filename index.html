@@ -11808,5 +11808,72 @@ window.__setLunduAIbusy=function(v){
 })();
 </script>
 
+
+<!-- LUNDUYAN V7: FORCE REMOVE EMPTY "SELECT A CONVERSATION" HEADER -->
+<style id="LUNDUYAN_V7_REMOVE_EMPTY_HEADER_FORCE">
+/* The empty green header must NEVER appear when no conversation is selected.
+   Content-based rule is intentional because older scripts can incorrectly
+   leave chat-has-selection on the modal. */
+#chatModal .chat-window > .chat-header:has(#chatUserName:is(:only-child, *)) { }
+#chatModal.lunduyan-no-chat-selected .chat-window > .chat-header,
+#chatModal.lunduyan-no-chat-selected .chat-header,
+#chatModal:not(.chat-has-selection) .chat-window > .chat-header {
+  display:none!important;
+  visibility:hidden!important;
+  height:0!important;
+  min-height:0!important;
+  max-height:0!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  overflow:hidden!important;
+}
+</style>
+<script id="LUNDUYAN_V7_REMOVE_EMPTY_HEADER_FORCE_JS">
+(function(){
+  'use strict';
+  function syncEmptyHeader(){
+    var modal=document.getElementById('chatModal');
+    if(!modal)return;
+    var name=document.getElementById('chatUserName');
+    var header=modal.querySelector('.chat-window > .chat-header');
+    if(!header)return;
+    var text=(name?.textContent||'').replace(/\\s+/g,' ').trim().toLowerCase();
+    var empty=!text || text==='select a conversation';
+    /* If the displayed title is still the placeholder, this is the contacts
+       state even if another legacy script accidentally added the selection class. */
+    modal.classList.toggle('lunduyan-no-chat-selected',empty);
+    if(empty){
+      header.style.setProperty('display','none','important');
+      header.style.setProperty('visibility','hidden','important');
+      header.style.setProperty('height','0','important');
+      header.style.setProperty('min-height','0','important');
+      header.style.setProperty('max-height','0','important');
+      header.style.setProperty('padding','0','important');
+      header.style.setProperty('margin','0','important');
+      header.style.setProperty('border','0','important');
+      header.style.setProperty('overflow','hidden','important');
+    }else{
+      header.style.removeProperty('display');
+      header.style.removeProperty('visibility');
+      header.style.removeProperty('height');
+      header.style.removeProperty('min-height');
+      header.style.removeProperty('max-height');
+      header.style.removeProperty('padding');
+      header.style.removeProperty('margin');
+      header.style.removeProperty('border');
+      header.style.removeProperty('overflow');
+    }
+  }
+  function boot(){
+    syncEmptyHeader();
+    [50,150,300,600,1000,2000].forEach(function(ms){setTimeout(syncEmptyHeader,ms);});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+  document.addEventListener('click',function(){setTimeout(syncEmptyHeader,0);setTimeout(syncEmptyHeader,100);},true);
+  new MutationObserver(function(){syncEmptyHeader();}).observe(document.body,{childList:true,subtree:true,characterData:true});
+})();
+</script>
+
 </body>
 </html>
